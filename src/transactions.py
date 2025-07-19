@@ -1,3 +1,11 @@
+import datetime
+
+# Convert a date string from 'YYYY-MM-DD' format to 'DD/MM/YYYY' format.
+def norm_today():
+    date = str(datetime.date.today())
+    return f'{date[8:10]}/{date[5:7]}/{date[:4]}'
+
+
 class Transactions:
     def __init__(self, db_conn):
         self.conn = db_conn
@@ -15,7 +23,19 @@ class Transactions:
 
         self.conn.commit()
 
-    def add_transaction(self, date : str, amount : int, tag : str, description : str):
+    def add_transaction(self, date = None, amount = None, tag = None, description = None):
+        if date is None:
+            date = norm_today()  # default dinamico per la data
+
+        if amount is None:
+            amount = 0
+    
+        if tag is None:
+            tag = "None"
+            
+        if description is None:
+            description = ""
+
         self.cursor.execute("INSERT INTO transactions (Date, Amount, Tag, Description) VALUES (?,?,?,?)",(date, amount, tag, description))
         self.conn.commit()
 
