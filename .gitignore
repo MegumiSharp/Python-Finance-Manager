@@ -1,0 +1,11 @@
+# Ignore all __pycache__ folders anywhere in the project
+**/__pycache__/
+
+# Ignore the transactions.db file (relative to root)
+src/database/transactions.db
+
+# Ignore the examples folder inside gui
+src/gui/examples/
+
+# Ignore the Simulation.txt file at the root
+Simulation.txt
