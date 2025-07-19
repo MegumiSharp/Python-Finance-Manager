@@ -19,8 +19,10 @@ class Transactions:
         self.cursor.execute("INSERT INTO transactions (Date, Amount, Tag, Description) VALUES (?,?,?,?)",(date, amount, tag, description))
         self.conn.commit()
 
-    def remove_transaction(self):
-        pass
+    def remove_transaction(self, id : int):
+        self.cursor.execute("DELETE FROM transactions WHERE ID = ?",(id,))
+        self.conn.commit()
+        
 
     def ord_trans_by_date(self):
         pass
