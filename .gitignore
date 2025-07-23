@@ -7,5 +7,8 @@ src/database/transactions.db
 # Ignore the examples folder inside gui
 src/gui/examples/
 
+src/gui/gui2.py
+
 # Ignore the Simulation.txt file at the root
 Simulation.txt
+
