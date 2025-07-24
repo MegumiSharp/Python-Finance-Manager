@@ -3,7 +3,7 @@ import os
 from PIL import Image
 from CTkTable import *
 
-
+# Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -33,8 +33,7 @@ class App(customtkinter.CTk):
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(4, weight=1)
 
-        #The content of the sidebar
-
+        '''The content of the sidebar'''
         ## Name of the App and the logo
         self.navigation_frame_label = customtkinter.CTkLabel(self.navigation_frame, text="  Expensia", image=self.logo_image,
                                                              compound="left", font=customtkinter.CTkFont(size=15, weight="bold"))
@@ -52,7 +51,7 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-        # Sample data for the table
+        # (TEMP) Sample data for the table
         self.data = [
             ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
             ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
@@ -73,18 +72,18 @@ class App(customtkinter.CTk):
     # The home frame should hold the table of transactions a search bar and add transaztion also a method to modify the order
     def home_frame(self):
         self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.home_frame.grid_columnconfigure(0, weight=1)  # Make the frame expand
-        self.home_frame.grid_rowconfigure(2, weight=1)  # Make the table row expandable
+        self.home_frame.grid_columnconfigure(0, weight=1)                              # Make the frame expand
+        self.home_frame.grid_rowconfigure(2, weight=1)                                 # Make the table row expandable
 
-        self.search_bar_frame(self.home_frame)           # Add a search bar in the top of the frame
-        self.ordering_frame(self.home_frame)             # Add buttons to order the list for every category
+        self.search_bar_frame(self.home_frame)                                         # Add a search bar in the top of the frame
+        self.ordering_frame(self.home_frame)                                           # Add buttons to order the list for every category
         self.table_frame(self.home_frame)           
-        self.add_transaction_frame(self.home_frame)      # Add at the bottom of the frame a transaction frame to add
+        self.add_transaction_frame(self.home_frame)                                    # Add at the bottom of the frame a transaction frame to add
 
 
     # Create a search bar in a frame
     def search_bar_frame(self, home_frame):
-        # Top section with search only
+        # Create the frame of the search  on the top of the home frame
         search_frame = customtkinter.CTkFrame(home_frame, fg_color="transparent", height=60)
         search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
         search_frame.grid_propagate(False)
@@ -123,7 +122,7 @@ class App(customtkinter.CTk):
         search_text = self.search_var.get()
         print(f"Searching for: {search_text}")  # For testing
        
-
+    # The frame witch contains the buttons to order the tabe (The buttons are yet to be implemented)
     def ordering_frame(self, main_frame):
         # Create ordering buttons frame
         ordering_frame = customtkinter.CTkFrame(main_frame, fg_color="transparent", height=50)
@@ -177,13 +176,11 @@ class App(customtkinter.CTk):
 
     def order_by_category(self):
         print("Order by category clicked")
-
+    
     def order_by_description(self):
         print("Order by description clicked")
 
-    def add_transaction_frame(self, main_frame):
-        pass
-
+    # The table frame
     def table_frame(self, main_frame):
         # Table container - this is the main expandable section
         table_container = customtkinter.CTkFrame(main_frame, fg_color="transparent")
@@ -219,6 +216,7 @@ class App(customtkinter.CTk):
         # Create table rows
         self.create_table_rows()
 
+    # The table is implemented raw for better handling custom design choice and gui choises
     def create_table_rows(self):
         # Create rows for each data entry
         for i, row_data in enumerate(self.data):
@@ -260,11 +258,75 @@ class App(customtkinter.CTk):
             )
             delete_btn.grid(row=0, column=4, padx=10, pady=15, sticky="e")
 
+    # To implement
     def delete_transaction(self, index):
         # Placeholder function for deleting transaction
         print(f"Delete transaction at index {index}")
         print(f"Transaction to delete: {self.data[index]}")
      
+    # The transaction frame
+    def add_transaction_frame(self, main_frame):
+        # Create add transaction frame at the bottom
+        add_frame = customtkinter.CTkFrame(main_frame, height=120)
+        add_frame.grid(row=3, column=0, sticky="ew", padx=30, pady=(10, 20))
+        add_frame.grid_propagate(False)
+        add_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+        
+        # Add transaction label
+        add_label = customtkinter.CTkLabel(
+            add_frame, 
+            text="Add New Transaction", 
+            font=customtkinter.CTkFont(size=16, weight="bold")
+        )
+        add_label.grid(row=0, column=0, columnspan=4, pady=(10, 5))
+        
+        # Input fields
+        self.date_entry = customtkinter.CTkEntry(
+            add_frame, 
+            placeholder_text="Date (YYYY-MM-DD)", 
+            height=30
+        )
+        self.date_entry.grid(row=1, column=0, sticky="ew", padx=(10, 5), pady=5)
+        
+        self.amount_entry = customtkinter.CTkEntry(
+            add_frame, 
+            placeholder_text="Amount", 
+            height=30
+        )
+        self.amount_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
+        
+        self.category_entry = customtkinter.CTkEntry(
+            add_frame, 
+            placeholder_text="Category", 
+            height=30
+        )
+        self.category_entry.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
+        
+        self.description_entry = customtkinter.CTkEntry(
+            add_frame, 
+            placeholder_text="Description", 
+            height=30
+        )
+        self.description_entry.grid(row=1, column=3, sticky="ew", padx=(5, 10), pady=5)
+        
+        # Add button
+        self.add_btn = customtkinter.CTkButton(
+            add_frame, 
+            text="Add Transaction", 
+            height=30,
+            command=self.add_transaction
+        )
+        self.add_btn.grid(row=2, column=0, columnspan=4, pady=(5, 10), padx=10, sticky="ew")
+
+    def add_transaction(self):
+        # Placeholder function for adding transaction
+        print("Add transaction clicked")
+        print(f"Date: {self.date_entry.get()}")
+        print(f"Amount: {self.amount_entry.get()}")
+        print(f"Category: {self.category_entry.get()}")
+        print(f"Description: {self.description_entry.get()}")
+
+
     # The budget frame should hold the budget of the user divided by the rule 50/30/20
     def budget_frame(self):
         self.budget_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -294,6 +356,7 @@ class App(customtkinter.CTk):
         self.select_frame_by_name("budget")
 
 
+# Inizialize the application window, if some error is finded is writed in the CLI
 if __name__ == "__main__":
     try:
         app = App()
