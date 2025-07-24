@@ -5,8 +5,9 @@ from CTkTable import *
 
 # Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, obj):
         super().__init__()
+        self.data = obj.local_db
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode("dark")
@@ -51,15 +52,6 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-        # (TEMP) Sample data for the table
-        self.data = [
-            ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
-            ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
-            ["2024-01-17", "-25.99", "Transport", "Gas station"],
-            ["2024-01-18", "-120.00", "Shopping", "Groceries"],
-            ["2024-01-19", "100.00", "Gift", "Birthday money"],
-            ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
-        ]
 
         # Create all the frame
         self.home_frame()

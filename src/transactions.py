@@ -10,6 +10,8 @@ class Transactions:
     def __init__(self, db_conn):
         self.conn = db_conn
         self.cursor = self.conn.cursor()
+        self.local_db = []                                      # Altering the db is expensive, better to pass it on a list and save it on the database every now and than
+        self.__update_local(self.local_db)                      # At the start of the bject, the databse is copied in a list of list
 
         self.cursor.execute(
             '''CREATE TABLE IF NOT EXISTS transactions (
@@ -20,9 +22,17 @@ class Transactions:
                 Description TEXT
             )'''
         )
-
         self.conn.commit()
 
+    # Update the list with all database entries
+    def __update_local(self, list):
+        self.cursor.execute('''SELECT * FROM transactions''')
+        for t in self.cursor.fetchall():
+            list.append([t[1], t[2], t[3], t[4]])
+            
+    def local_db(self):
+        return self.local_db
+    
     def add_transaction(self, date = None, amount = None, tag = None, description = None):
         if date is None:
             date = norm_today()  # default dinamico per la data
@@ -53,10 +63,8 @@ class Transactions:
     def ord_trans_by_expences(self):
         pass
     
-
+    
     def print_trans(self):
-        self.cursor.execute('''SELECT * FROM transactions''')
-        for t in self.cursor.fetchall():
-            print(t)
+        print(self.local_db)
 
 
