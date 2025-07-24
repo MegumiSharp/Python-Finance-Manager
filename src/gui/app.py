@@ -355,13 +355,3 @@ class App(customtkinter.CTk):
     def budget_button_event(self):
         self.select_frame_by_name("budget")
 
-
-# Inizialize the application window, if some error is finded is writed in the CLI
-if __name__ == "__main__":
-    try:
-        app = App()
-        app.mainloop()
-    except Exception as e:
-        print(f"Error running application: {e}")
-        import traceback
-        traceback.print_exc()
