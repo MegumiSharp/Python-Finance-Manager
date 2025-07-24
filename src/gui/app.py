@@ -53,7 +53,6 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-
         # Create all the frame
         self.home_frame()
         self.budget_frame()
@@ -61,6 +60,15 @@ class App(customtkinter.CTk):
         # select default frame
         self.select_frame_by_name("home")
 
+
+    def _on_mousewheel(self, event):
+        if event.num == 4:  # Linux scroll up
+            self.table_scroll._parent_canvas.yview_scroll(-1, "units")
+        elif event.num == 5:  # Linux scroll down
+            self.table_scroll._parent_canvas.yview_scroll(1, "units")
+        else:  # Windows/macOS
+            direction = -1 if event.delta > 0 else 1
+            self.table_scroll._parent_canvas.yview_scroll(direction, "units")
 
     # The home frame should hold the table of transactions a search bar and add transaztion also a method to modify the order
     def home_frame(self):
@@ -175,6 +183,11 @@ class App(customtkinter.CTk):
         self.table_scroll = customtkinter.CTkScrollableFrame(table_container, fg_color="#1a1a1a")
         self.table_scroll.grid(row=0, column=0, sticky="nsew")
         self.table_scroll.grid_columnconfigure(0, weight=1)
+
+        # Enable mouse scroll on the table scrollable frame
+        self.table_scroll.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows/macOS
+        self.table_scroll.bind_all("<Button-4>", self._on_mousewheel)    # Linux scroll up
+        self.table_scroll.bind_all("<Button-5>", self._on_mousewheel)    # Linux scroll down
 
         for widget in self.table_scroll.winfo_children():
             widget.destroy()
