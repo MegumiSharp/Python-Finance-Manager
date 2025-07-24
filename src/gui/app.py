@@ -26,25 +26,34 @@ class App(customtkinter.CTk):
 
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
+        # Add background 
         self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.width, self.height))
         self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
         self.bg_image_label.grid(row=0, column=0)
 
-        # create login frame
+        # Create the change theme frame
         self.welcome_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.welcome_frame.grid(row=0, column=0, sticky="ns")
         self.welcome_label = customtkinter.CTkLabel(self.welcome_frame, text="Welcome! \n Choose a theme:",
                                                   font=customtkinter.CTkFont(size=20, weight="bold"))
         self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
 
+        optionmenu_var = customtkinter.StringVar(value="NightTrain")  # Current theme
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame, 
                                                                        values=["Default", "NightTrain", "Orange", "SweetKind"],
-                                                                       command=self.change_appearance_mode_event)
+                                                                       command=self.change_appearance_mode_event,
+                                                                       variable= optionmenu_var)
+        
         self.appearance_mode_optionemenu.grid(row=1, column=0, padx=30, pady=(150, 15))
 
+        self.test_button = customtkinter.CTkButton(self.welcome_frame, text="Continue", command=self.continue_event)
+        self.test_button.grid(row=2, column=0, padx=20, pady=10)
     
-    
+    def continue_event(self):
+         self.create_frames()
+
     def change_appearance_mode_event(self, new_appearance_mode: str):
+        print(new_appearance_mode)
         diction = {
             "NightTrain" : "NightTrain.json",
             "Default" : "blue",
@@ -54,6 +63,7 @@ class App(customtkinter.CTk):
         
         asset_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "themes")
         customtkinter.set_default_color_theme(os.path.join(asset_path, diction[str(new_appearance_mode)]))
+        
         self.create_frames()
 
 
@@ -104,6 +114,8 @@ class App(customtkinter.CTk):
                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
+
+
 
    
 
