@@ -6,34 +6,86 @@ import tkinter.messagebox as messagebox
 
 # Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
+    width = 1280
+    height = 720
+
     def __init__(self, obj):
         super().__init__()
         self.data = obj.local_db
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode("dark")
-        customtkinter.set_default_color_theme("blue")
+
         self.title("Expensia")
-        self.geometry("1280x720")
+        self.geometry(f"{self.width}x{self.height}")
         self.resizable(False, False)  # Not resizable
 
         # Set a Grid Layout for placing the frames, this is 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # The the image path of the os and than add the assets folder (so you do not need to write everytim assets/)
-        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
+        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.width, self.height))
+        self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
+        self.bg_image_label.grid(row=0, column=0)
+
+        # create login frame
+        self.welcome_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        self.welcome_frame.grid(row=0, column=0, sticky="ns")
+        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame, text="Welcome! \n Choose a theme:",
+                                                  font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
+
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame, 
+                                                                       values=["Default", "NightTrain", "Orange", "SweetKind"],
+                                                                       command=self.change_appearance_mode_event)
+        self.appearance_mode_optionemenu.grid(row=1, column=0, padx=30, pady=(150, 15))
+
+    
+    
+    def change_appearance_mode_event(self, new_appearance_mode: str):
+        diction = {
+            "NightTrain" : "NightTrain.json",
+            "Default" : "blue",
+            "Orange" : "Orange.json",
+            "SweetKind" : "Sweetkind.json",
+        }
+        
+        asset_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "themes")
+        customtkinter.set_default_color_theme(os.path.join(asset_path, diction[str(new_appearance_mode)]))
+        self.create_frames()
+
+
+    def create_frames(self):
+        # Remove the welcome frame and background
+        self.welcome_frame.destroy()
+        self.bg_image_label.destroy()
+        
+        # Reconfigure the grid layout for the main application
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)  # Column 1 for main content
+        
+        self.navigation_frame()
+        self.home_frame()
+        self.budget_frame()
+
+        # select default frame
+        self.select_frame_by_name("home")
+
+
+    def navigation_frame(self):
         # Assign every image used in the windows to a variables (only dark mode is supported)
-        self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Expensia Logo.png")), size=(32, 32))      # Logo fo the app
-        self.home_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "home_light.png")), size=(20, 20))         # Icon Home white
-        self.chat_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "chat_light.png")), size=(20, 20))         # Icon Chat white
-        self.lens_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "search.png")), size=(24, 24))             # Icon for search bar
+        self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "Expensia Logo.png")), size=(32, 32))      # Logo fo the app
+        self.home_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "home_light.png")), size=(20, 20))         # Icon Home white
+        self.chat_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "chat_light.png")), size=(20, 20))         # Icon Chat white
+        self.lens_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "search.png")), size=(24, 24))             # Icon for search bar
  
         # Create the sidebar on the left, the navigation frame
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(4, weight=1)
+        self.navigation_frame.grid_rowconfigure(7, weight=1)  # Bottom spacer
 
         '''The content of the sidebar'''
         ## Name of the App and the logo
@@ -53,12 +105,7 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-        # Create all the frame
-        self.home_frame()
-        self.budget_frame()
-
-        # select default frame
-        self.select_frame_by_name("home")
+   
 
 
     def _on_mousewheel(self, event):

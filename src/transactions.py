@@ -29,9 +29,6 @@ class Transactions:
         self.cursor.execute('''SELECT * FROM transactions''')
         for t in self.cursor.fetchall():
             list.append([t[1], t[2], t[3], t[4]])
-            
-    def local_db(self):
-        return self.local_db
     
     def add_transaction(self, date = None, amount = None, tag = None, description = None):
         if date is None:

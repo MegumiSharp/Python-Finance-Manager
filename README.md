@@ -115,7 +115,8 @@ python3 src/gui.py
 
 ---
 
-
+themes are from https://github.com/a13xe/CTkThemesPack?tab=readme-ov-file
+and from customtkinter theme builder by...
 
 
 ## Scelte Progettuali

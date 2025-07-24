@@ -25,6 +25,7 @@ def main():
     # Create the Object Transaction
     ts = transactions.Transactions(conn)
 
+
     try:
         app = App(ts)
         app.mainloop()
