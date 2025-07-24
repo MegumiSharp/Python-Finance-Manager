@@ -26,7 +26,8 @@ class App(customtkinter.CTk):
         self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "Expensia Logo.png")), size=(32, 32))      # Logo fo the app
         self.home_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "home_light.png")), size=(20, 20))         # Icon Home white
         self.chat_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "chat_light.png")), size=(20, 20))         # Icon Chat white
-
+        self.lens_image = customtkinter.CTkImage(Image.open(os.path.join(image_path, "search.png")), size=(24, 24))             # Icon for search bar
+ 
         # Create the sidebar on the left, the navigation frame
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
@@ -60,11 +61,14 @@ class App(customtkinter.CTk):
         self.select_frame_by_name("home")
 
 
-
-    # The home frame should hold the table of transactions
+    # The home frame should hold the table of transactions a search bar and add transaztion also a method to modify the order
     def home_frame(self):
         self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        
+        self.home_frame.grid_columnconfigure(0, weight=1)  # Make the frame expand
+
+        # On the top of the frame a search bar for the table is placed
+        self.search_bar_frame(self.home_frame)
+
         self.data = [
             ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
             ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
@@ -74,8 +78,49 @@ class App(customtkinter.CTk):
             ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
         ]
 
-        table = CTkTable(master=self.home_frame, values=self.data)
-        table.pack(expand=False, fill="both", padx=20, pady=20)
+    # Create a search bar in a frame
+    def search_bar_frame(self, home_frame):
+        # Top section with search only
+        search_frame = customtkinter.CTkFrame(home_frame, fg_color="transparent", height=60)
+        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 20))
+        search_frame.grid_propagate(False)
+        search_frame.grid_columnconfigure(0, weight=1)  # Make search frame expand
+        
+        # Create a container for the search entry and lens icon
+        search_container = customtkinter.CTkFrame(search_frame, height=40)
+        search_container.grid(row=0, column=0, sticky="ew", pady=10)
+        search_container.grid_propagate(False)
+        search_container.grid_columnconfigure(0, weight=1)
+        
+        # Search entry
+        self.search_var = customtkinter.StringVar()
+        self.search_var.trace_add("write", self.on_search)
+        self.search_entry = customtkinter.CTkEntry(
+            search_container, 
+            placeholder_text="Search...", 
+            textvariable=self.search_var,
+            height=40,
+            font=customtkinter.CTkFont(size=14)
+        )
+        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))  # Right padding for lens icon
+        
+        # Lens icon positioned at the end (inside the search bar area)
+        lens_icon = customtkinter.CTkLabel(
+            search_container, 
+            text="", 
+            image=self.lens_image,
+            width=20,
+            height=20
+        )
+        lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
+
+    # A function that use the search entry to search in the table, not yet implemented
+    def on_search(self, var_name, index, operation):
+        search_text = self.search_var.get()
+        print(f"Searching for: {search_text}")  # For testing
+       
+     
+     
 
 
     # The budget frame should hold the budget of the user divided by the rule 50/30/20
