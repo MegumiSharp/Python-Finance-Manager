@@ -3,21 +3,33 @@ import os
 from PIL import Image
 from CTkTable import *
 import tkinter.messagebox as messagebox
+import json
 
 # Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
-    width = 1280
-    height = 720
+    WIDTH = 1280
+    HEIGHT = 720
 
+    THEMES_TYPE = {
+        "NightTrain" : "NightTrain.json",
+        "Default" : "Default.json",
+        "Orange" : "Orange.json",
+        "SweetKind" : "Sweetkind.json",
+    }
+        
+    THEMES_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "themes")
+
+    
     def __init__(self, obj):
         super().__init__()
         self.data = obj.local_db
+        self.user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../usersettings/user_settings.json")
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode("dark")
 
         self.title("Expensia")
-        self.geometry(f"{self.width}x{self.height}")
+        self.geometry(f"{self.WIDTH}x{self.HEIGHT}")
         self.resizable(False, False)  # Not resizable
 
         # Set a Grid Layout for placing the frames, this is 1x2
@@ -27,7 +39,7 @@ class App(customtkinter.CTk):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
         # Add background 
-        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.width, self.height))
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
         self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
         self.bg_image_label.grid(row=0, column=0)
 
@@ -38,7 +50,7 @@ class App(customtkinter.CTk):
                                                   font=customtkinter.CTkFont(size=20, weight="bold"))
         self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
 
-        optionmenu_var = customtkinter.StringVar(value="NightTrain")  # Current theme
+        optionmenu_var = customtkinter.StringVar(value= self.read_user_theme())  # Current theme 
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame, 
                                                                        values=["Default", "NightTrain", "Orange", "SweetKind"],
                                                                        command=self.change_appearance_mode_event,
@@ -50,20 +62,12 @@ class App(customtkinter.CTk):
         self.test_button.grid(row=2, column=0, padx=20, pady=10)
     
     def continue_event(self):
-         self.create_frames()
+        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[self.read_user_theme()]))
+        self.create_frames()
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
-        print(new_appearance_mode)
-        diction = {
-            "NightTrain" : "NightTrain.json",
-            "Default" : "blue",
-            "Orange" : "Orange.json",
-            "SweetKind" : "Sweetkind.json",
-        }
-        
-        asset_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "themes")
-        customtkinter.set_default_color_theme(os.path.join(asset_path, diction[str(new_appearance_mode)]))
-        
+        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[str(new_appearance_mode)]))
+        self.write_user_theme(str(new_appearance_mode))
         self.create_frames()
 
 
@@ -82,6 +86,29 @@ class App(customtkinter.CTk):
 
         # select default frame
         self.select_frame_by_name("home")
+
+
+    
+    def read_user_theme(self):
+        with open(self.user_settings_path, "r") as f:
+            data = json.load(f)
+        
+        return str(data["theme"])
+    
+    def write_user_theme(self, theme: str):
+        # Load existing settings or initialize empty dict if file is empty
+        try:
+            with open(self.user_settings_path, "r") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = {}
+
+        # Update the theme
+        data["theme"] = theme
+
+        # Save the updated settings
+        with open(self.user_settings_path, "w") as f:
+            json.dump(data, f, indent=4)
 
 
     def navigation_frame(self):
