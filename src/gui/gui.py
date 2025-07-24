@@ -52,7 +52,16 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-       
+        # Sample data for the table
+        self.data = [
+            ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
+            ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
+            ["2024-01-17", "-25.99", "Transport", "Gas station"],
+            ["2024-01-18", "-120.00", "Shopping", "Groceries"],
+            ["2024-01-19", "100.00", "Gift", "Birthday money"],
+            ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
+        ]
+
         # Create all the frame
         self.home_frame()
         self.budget_frame()
@@ -65,24 +74,19 @@ class App(customtkinter.CTk):
     def home_frame(self):
         self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)  # Make the frame expand
+        self.home_frame.grid_rowconfigure(2, weight=1)  # Make the table row expandable
 
-        # On the top of the frame a search bar for the table is placed
-        self.search_bar_frame(self.home_frame)
+        self.search_bar_frame(self.home_frame)           # Add a search bar in the top of the frame
+        self.ordering_frame(self.home_frame)             # Add buttons to order the list for every category
+        self.table_frame(self.home_frame)           
+        self.add_transaction_frame(self.home_frame)      # Add at the bottom of the frame a transaction frame to add
 
-        self.data = [
-            ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
-            ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
-            ["2024-01-17", "-25.99", "Transport", "Gas station"],
-            ["2024-01-18", "-120.00", "Shopping", "Groceries"],
-            ["2024-01-19", "100.00", "Gift", "Birthday money"],
-            ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
-        ]
 
     # Create a search bar in a frame
     def search_bar_frame(self, home_frame):
         # Top section with search only
         search_frame = customtkinter.CTkFrame(home_frame, fg_color="transparent", height=60)
-        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 20))
+        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
         search_frame.grid_propagate(False)
         search_frame.grid_columnconfigure(0, weight=1)  # Make search frame expand
         
@@ -119,7 +123,87 @@ class App(customtkinter.CTk):
         search_text = self.search_var.get()
         print(f"Searching for: {search_text}")  # For testing
        
-     
+
+    def ordering_frame(self, main_frame):
+        # Create ordering buttons frame
+        ordering_frame = customtkinter.CTkFrame(main_frame, fg_color="transparent", height=50)
+        ordering_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
+        ordering_frame.grid_propagate(False)
+        ordering_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # Equal width for all columns
+        
+        # Ordering buttons for each column
+        self.date_order_btn = customtkinter.CTkButton(
+            ordering_frame, 
+            text="Date ↕", 
+            height=35,
+            font=customtkinter.CTkFont(size=12),
+            command=self.order_by_date
+        )
+        self.date_order_btn.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        
+        self.amount_order_btn = customtkinter.CTkButton(
+            ordering_frame, 
+            text="Amount ↕", 
+            height=35,
+            font=customtkinter.CTkFont(size=12),
+            command=self.order_by_amount
+        )
+        self.amount_order_btn.grid(row=0, column=1, sticky="ew", padx=5)
+        
+        self.category_order_btn = customtkinter.CTkButton(
+            ordering_frame, 
+            text="Category ↕", 
+            height=35,
+            font=customtkinter.CTkFont(size=12),
+            command=self.order_by_category
+        )
+        self.category_order_btn.grid(row=0, column=2, sticky="ew", padx=5)
+        
+        self.description_order_btn = customtkinter.CTkButton(
+            ordering_frame, 
+            text="Description ↕", 
+            height=35,
+            font=customtkinter.CTkFont(size=12),
+            command=self.order_by_description
+        )
+        self.description_order_btn.grid(row=0, column=3, sticky="ew", padx=(5, 0))
+
+    # Placeholder ordering functions (no functionality yet)
+    def order_by_date(self):
+        print("Order by date clicked")
+
+    def order_by_amount(self):
+        print("Order by amount clicked")
+
+    def order_by_category(self):
+        print("Order by category clicked")
+
+    def order_by_description(self):
+        print("Order by description clicked")
+
+    def add_transaction_frame(self, main_frame):
+        pass
+
+    def table_frame(self, main_frame):
+        # Table container
+        table_container = customtkinter.CTkFrame(main_frame, fg_color="transparent")
+        table_container.grid(row=12, column=0, sticky="nsew", padx=30)
+        table_container.grid_columnconfigure(0, weight=1)
+        table_container.grid_rowconfigure(0, weight=1)
+        
+        # Create scrollable frame for table
+        self.table_scroll = customtkinter.CTkScrollableFrame(table_container, fg_color="#1a1a1a")
+        self.table_scroll.grid(row=0, column=0, sticky="nsew")
+        
+
+        self.data = [
+            ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
+            ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
+            ["2024-01-17", "-25.99", "Transport", "Gas station"],
+            ["2024-01-18", "-120.00", "Shopping", "Groceries"],
+            ["2024-01-19", "100.00", "Gift", "Birthday money"],
+            ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
+        ]
      
 
 
