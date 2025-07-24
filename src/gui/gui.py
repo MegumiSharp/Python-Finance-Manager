@@ -185,31 +185,90 @@ class App(customtkinter.CTk):
         pass
 
     def table_frame(self, main_frame):
-        # Table container
+        # Table container - this is the main expandable section
         table_container = customtkinter.CTkFrame(main_frame, fg_color="transparent")
-        table_container.grid(row=12, column=0, sticky="nsew", padx=30)
+        table_container.grid(row=2, column=0, sticky="nsew", padx=30, pady=5)
         table_container.grid_columnconfigure(0, weight=1)
         table_container.grid_rowconfigure(0, weight=1)
         
         # Create scrollable frame for table
         self.table_scroll = customtkinter.CTkScrollableFrame(table_container, fg_color="#1a1a1a")
         self.table_scroll.grid(row=0, column=0, sticky="nsew")
+        self.table_scroll.grid_columnconfigure(0, weight=1)
         
+        # Table header
+        header_frame = customtkinter.CTkFrame(self.table_scroll, fg_color="#2b2b2b", height=40)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
+        header_frame.grid_propagate(False)
+        header_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+        header_frame.grid_columnconfigure(4, weight=0)  # Delete column doesn't expand
+        
+        # Header labels
+        headers = ["Date", "Amount", "Category", "Description", "Action"]
+        for i, header in enumerate(headers):
+            label = customtkinter.CTkLabel(
+                header_frame, 
+                text=header, 
+                font=customtkinter.CTkFont(size=14, weight="bold")
+            )
+            if i == 4:  # Action column
+                label.grid(row=0, column=i, padx=10, pady=10, sticky="e")
+            else:
+                label.grid(row=0, column=i, padx=10, pady=10, sticky="ew")
+        
+        # Create table rows
+        self.create_table_rows()
 
-        self.data = [
-            ["2024-01-15", "-50.00", "Food", "Lunch at restaurant"],
-            ["2024-01-16", "2500.00", "Salary", "Monthly salary"],
-            ["2024-01-17", "-25.99", "Transport", "Gas station"],
-            ["2024-01-18", "-120.00", "Shopping", "Groceries"],
-            ["2024-01-19", "100.00", "Gift", "Birthday money"],
-            ["2024-01-20", "-75.50", "Food", "Dinner with friends"],
-        ]
+    def create_table_rows(self):
+        # Create rows for each data entry
+        for i, row_data in enumerate(self.data):
+            row_frame = customtkinter.CTkFrame(self.table_scroll, fg_color="#2d2d2d", height=50)
+            row_frame.grid(row=i+1, column=0, sticky="ew", padx=10, pady=2)
+            row_frame.grid_propagate(False)
+            row_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+            row_frame.grid_columnconfigure(4, weight=0)  # Delete column doesn't expand
+            
+            # Add data to each column
+            for j, data in enumerate(row_data):
+                # Color amount based on positive/negative
+                if j == 1:  # Amount column
+                    color = "green" if float(data) > 0 else "red"
+                    label = customtkinter.CTkLabel(
+                        row_frame, 
+                        text=f"${data}", 
+                        font=customtkinter.CTkFont(size=12),
+                        text_color=color
+                    )
+                else:
+                    label = customtkinter.CTkLabel(
+                        row_frame, 
+                        text=data, 
+                        font=customtkinter.CTkFont(size=12)
+                    )
+                label.grid(row=0, column=j, padx=10, pady=15, sticky="ew")
+            
+            # Add delete button
+            delete_btn = customtkinter.CTkButton(
+                row_frame, 
+                text="Delete", 
+                width=60,
+                height=25,
+                font=customtkinter.CTkFont(size=10),
+                fg_color="#d32f2f",
+                hover_color="#f44336",
+                command=lambda idx=i: self.delete_transaction(idx)
+            )
+            delete_btn.grid(row=0, column=4, padx=10, pady=15, sticky="e")
+
+    def delete_transaction(self, index):
+        # Placeholder function for deleting transaction
+        print(f"Delete transaction at index {index}")
+        print(f"Transaction to delete: {self.data[index]}")
      
-
-
     # The budget frame should hold the budget of the user divided by the rule 50/30/20
     def budget_frame(self):
         self.budget_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+
 
     # Select the frame
     def select_frame_by_name(self, name):
