@@ -2,6 +2,7 @@ import customtkinter
 import os
 from PIL import Image
 from CTkTable import *
+import tkinter.messagebox as messagebox
 
 # Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
@@ -116,48 +117,38 @@ class App(customtkinter.CTk):
        
     # The frame witch contains the buttons to order the tabe (The buttons are yet to be implemented)
     def ordering_frame(self, main_frame):
-        # Create ordering buttons frame
-        ordering_frame = customtkinter.CTkFrame(main_frame, fg_color="transparent", height=50)
-        ordering_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
-        ordering_frame.grid_propagate(False)
-        ordering_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)  # Equal width for all columns
+         # Table header with sort buttons
+        header_frame = customtkinter.CTkFrame(main_frame, fg_color="#1a1a1a", height=50)
+        header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
+        header_frame.grid_propagate(False)
         
-        # Ordering buttons for each column
-        self.date_order_btn = customtkinter.CTkButton(
-            ordering_frame, 
-            text="Date ↕", 
-            height=35,
-            font=customtkinter.CTkFont(size=12),
-            command=self.order_by_date
-        )
-        self.date_order_btn.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+        headers = ["Date", "Amount", "Tag", "Description", "Actions"]
+        column_weights = [2, 2, 2, 4, 1]
         
-        self.amount_order_btn = customtkinter.CTkButton(
-            ordering_frame, 
-            text="Amount ↕", 
-            height=35,
-            font=customtkinter.CTkFont(size=12),
-            command=self.order_by_amount
-        )
-        self.amount_order_btn.grid(row=0, column=1, sticky="ew", padx=5)
-        
-        self.category_order_btn = customtkinter.CTkButton(
-            ordering_frame, 
-            text="Category ↕", 
-            height=35,
-            font=customtkinter.CTkFont(size=12),
-            command=self.order_by_category
-        )
-        self.category_order_btn.grid(row=0, column=2, sticky="ew", padx=5)
-        
-        self.description_order_btn = customtkinter.CTkButton(
-            ordering_frame, 
-            text="Description ↕", 
-            height=35,
-            font=customtkinter.CTkFont(size=12),
-            command=self.order_by_description
-        )
-        self.description_order_btn.grid(row=0, column=3, sticky="ew", padx=(5, 0))
+        for i, (header, weight) in enumerate(zip(headers, column_weights)):
+            header_frame.grid_columnconfigure(i, weight=weight)
+            
+            if header in ["Date", "Amount", "Tag"]:
+                btn_frame = customtkinter.CTkFrame(header_frame, fg_color="transparent")
+                btn_frame.grid(row=0, column=i, sticky="ew", padx=5, pady=8)
+                btn_frame.grid_columnconfigure(0, weight=1)
+                
+                sort_btn = customtkinter.CTkButton(
+                    btn_frame,
+                    text=f"{header} ↕",
+                    command=lambda col=i: self.sort_table(col),
+                    height=35,
+                    font=customtkinter.CTkFont(size=14, weight="bold")
+                )
+                sort_btn.grid(row=0, column=0, sticky="ew")
+            else:
+                label = customtkinter.CTkLabel(
+                    header_frame, 
+                    text=header, 
+                    font=customtkinter.CTkFont(size=14, weight="bold")
+                )
+                label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
+
 
     # Placeholder ordering functions (no functionality yet)
     def order_by_date(self):
@@ -179,76 +170,47 @@ class App(customtkinter.CTk):
         table_container.grid(row=2, column=0, sticky="nsew", padx=30, pady=5)
         table_container.grid_columnconfigure(0, weight=1)
         table_container.grid_rowconfigure(0, weight=1)
-        
+
         # Create scrollable frame for table
         self.table_scroll = customtkinter.CTkScrollableFrame(table_container, fg_color="#1a1a1a")
         self.table_scroll.grid(row=0, column=0, sticky="nsew")
         self.table_scroll.grid_columnconfigure(0, weight=1)
-        
-        # Table header
-        header_frame = customtkinter.CTkFrame(self.table_scroll, fg_color="#2b2b2b", height=40)
-        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
-        header_frame.grid_propagate(False)
-        header_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
-        header_frame.grid_columnconfigure(4, weight=0)  # Delete column doesn't expand
-        
-        # Header labels
-        headers = ["Date", "Amount", "Category", "Description", "Action"]
-        for i, header in enumerate(headers):
-            label = customtkinter.CTkLabel(
-                header_frame, 
-                text=header, 
-                font=customtkinter.CTkFont(size=14, weight="bold")
-            )
-            if i == 4:  # Action column
-                label.grid(row=0, column=i, padx=10, pady=10, sticky="e")
-            else:
-                label.grid(row=0, column=i, padx=10, pady=10, sticky="ew")
-        
-        # Create table rows
-        self.create_table_rows()
 
-    # The table is implemented raw for better handling custom design choice and gui choises
-    def create_table_rows(self):
-        # Create rows for each data entry
-        for i, row_data in enumerate(self.data):
-            row_frame = customtkinter.CTkFrame(self.table_scroll, fg_color="#2d2d2d", height=50)
-            row_frame.grid(row=i+1, column=0, sticky="ew", padx=10, pady=2)
-            row_frame.grid_propagate(False)
-            row_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
-            row_frame.grid_columnconfigure(4, weight=0)  # Delete column doesn't expand
-            
-            # Add data to each column
-            for j, data in enumerate(row_data):
-                # Color amount based on positive/negative
-                if j == 1:  # Amount column
-                    color = "green" if float(data) > 0 else "red"
-                    label = customtkinter.CTkLabel(
-                        row_frame, 
-                        text=f"${data}", 
-                        font=customtkinter.CTkFont(size=12),
-                        text_color=color
-                    )
-                else:
-                    label = customtkinter.CTkLabel(
-                        row_frame, 
-                        text=data, 
-                        font=customtkinter.CTkFont(size=12)
-                    )
-                label.grid(row=0, column=j, padx=10, pady=15, sticky="ew")
-            
-            # Add delete button
-            delete_btn = customtkinter.CTkButton(
-                row_frame, 
-                text="Delete", 
-                width=60,
-                height=25,
-                font=customtkinter.CTkFont(size=10),
-                fg_color="#d32f2f",
-                hover_color="#f44336",
-                command=lambda idx=i: self.delete_transaction(idx)
-            )
-            delete_btn.grid(row=0, column=4, padx=10, pady=15, sticky="e")
+        for widget in self.table_scroll.winfo_children():
+            widget.destroy()
+
+        for i in range(5):
+            self.table_scroll.grid_columnconfigure(i, weight=1)
+
+        for idx, row in enumerate(self.data):
+            self.create_table_row(idx, row)
+
+
+    def create_table_row(self, row_idx, row_data):
+        date = row_data[0]
+        amount = float(row_data[1])
+        tag = row_data[2]
+        desc = row_data[3]
+
+        amount_color = "#ff6b6b" if amount < 0 else "#51cf66"
+        amount_text = f"${abs(amount):.2f}" if amount >= 0 else f"-${abs(amount):.2f}"
+
+        customtkinter.CTkLabel(self.table_scroll, text=date).grid(row=row_idx, column=0, sticky="w", padx=10, pady=6)
+        customtkinter.CTkLabel(self.table_scroll, text=amount_text, text_color=amount_color).grid(row=row_idx, column=1, sticky="w", padx=10)
+        customtkinter.CTkLabel(self.table_scroll, text=tag).grid(row=row_idx, column=2, sticky="w", padx=10)
+        customtkinter.CTkLabel(self.table_scroll, text=desc).grid(row=row_idx, column=3, sticky="w", padx=10)
+
+        del_btn = customtkinter.CTkButton(
+            self.table_scroll,
+            text="Delete",
+            width=60,
+            height=28,
+            fg_color="#ff6b6b",
+            hover_color="#ff5252",
+            font=customtkinter.CTkFont(size=12),
+            command=lambda idx=row_idx: self.confirm_delete(idx)
+        )
+        del_btn.grid(row=row_idx, column=4, padx=10, pady=6)
 
     # To implement
     def delete_transaction(self, index):
