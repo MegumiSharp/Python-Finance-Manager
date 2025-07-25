@@ -7,7 +7,9 @@ import json
 
 DEFAULT_USER_DATA = {
     "theme": "Default",
-    "first_time" : "true"
+    "first_time" : "true",
+    "currency_sign" :  "",
+    "nickname" : ""
 }
 
 def is_valid_date(date : str):

@@ -32,9 +32,9 @@ class App(customtkinter.CTk):
         self.geometry(f"{self.WIDTH}x{self.HEIGHT}")
         self.resizable(False, False)  # Not resizable
 
-        # Set a Grid Layout for placing the frames, this is 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
+
 
         # Decide what frame to show to the user, if first time user show configuration frame
         if self.read_json_value("first_time") == "true":
@@ -42,28 +42,67 @@ class App(customtkinter.CTk):
         else:
             self.welcome_frame()
 
+    def clear_widgets(self):
+        for widget in self.winfo_children():
+              widget.destroy()
 
-        
-
-
+    #In this frame, some information are displayed
     def configuration_frame(self):
+
+        welcome_text = (
+            "Your smart companion for tracking transactions and managing your finances.\n\n"
+            "In this setup panel, you can:\n"
+            "- Customize your currency symbol\n"
+            "- Set your account name\n"
+            "- Adjust your budget rule values to match your financial goals\n\n"
+            "Take a moment to configure everything just the way you like.\n\n"
+            "When you're ready, click Continue to get started!"
+        )
+
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(10, weight=1)
+
+        # Welcome text
+        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Welcome in Expensia!", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+        # Textbox
+        self.textbox = customtkinter.CTkTextbox(self.sidebar_frame, width=250, height=260)
+        self.textbox.grid(row=1, column=0, padx=20, pady=10, sticky="n")
+        self.textbox.insert("0.0", welcome_text)
+        self.textbox.configure(state="disabled")
+
+        # Nickname label and entry
+        self.nickname_label = customtkinter.CTkLabel(self.sidebar_frame, text="Nickname :", anchor="w")
+        self.nickname_label.grid(row=2, column=0, padx=20, pady=(10, 0), sticky="w")
+
+        self.nickname_entry = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Enter your nickname")
+        self.nickname_entry.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="w")
+
+        # Currency selector
+        self.monetary_symbol_label = customtkinter.CTkLabel(self.sidebar_frame, text="Currency Sign :", anchor="w")
+        self.monetary_symbol_label.grid(row=4, column=0, padx=20, pady=(10, 0), sticky="w")
+
+        self.monetary_symbol_optionmenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["€", "$", "£"])
+        self.monetary_symbol_optionmenu.grid(row=5, column=0, padx=20, pady=(0, 20), sticky="w")
+
+        # Continue button
+        self.test_button = customtkinter.CTkButton(self.sidebar_frame, text="Continue", command=self.continue_button_from_configuration_frame)
+        self.test_button.grid(row=6, column=0, padx=20, pady=30, sticky="ew")
+
         
-        '''
-        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
-
-        # Add background 
-        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
-        self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
-        self.bg_image_label.grid(row=0, column=0)
-
-        # Create the change theme frame
-        self.welcome_frame = customtkinter.CTkFrame(self, corner_radius=0)
-        self.welcome_frame.grid(row=0, column=0, sticky="ns")
         
-        '''
-        # After the configuration the configuration frame should not be appear again
-        self.change_json_value("first_time", "false")
 
+    def continue_button_from_configuration_frame(self):
+        nickname = self.nickname_entry.get()
+        currency_sign = self.monetary_symbol_optionmenu.get()
+  
+        self.change_json_value("currency_sign", currency_sign);
+        self.change_json_value("nickname", nickname);
+        
+        self.welcome_frame()
+        #self.change_json_value("first_time", "false")
 
     def welcome_frame(self):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
@@ -73,22 +112,22 @@ class App(customtkinter.CTk):
         self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
         self.bg_image_label.grid(row=0, column=0)
 
-        # Create the change theme frame
-        self.welcome_frame = customtkinter.CTkFrame(self, corner_radius=0)
-        self.welcome_frame.grid(row=0, column=0, sticky="ns")
-        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame, text="Welcome! \n Choose a theme:",
-                                                  font=customtkinter.CTkFont(size=20, weight="bold"))
+        # Create the change theme frame - CHANGE THE VARIABLE NAME
+        self.welcome_frame_widget = customtkinter.CTkFrame(self, corner_radius=0)  # Changed name
+        self.welcome_frame_widget.grid(row=0, column=0, sticky="ns")
+        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame_widget, text=f'Welcome {self.read_json_value("nickname")}! \n Choose a theme:',
+                                                font=customtkinter.CTkFont(size=20, weight="bold"))
         self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
 
         optionmenu_var = customtkinter.StringVar(value= self.read_json_value("theme"))  # Current theme 
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame, 
-                                                                       values=["Default", "NightTrain", "Orange", "SweetKind"],
-                                                                       command=self.change_appearance_mode_event,
-                                                                       variable= optionmenu_var)
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame_widget, 
+                                                                    values=["Default", "NightTrain", "Orange", "SweetKind"],
+                                                                    command=self.change_appearance_mode_event,
+                                                                    variable= optionmenu_var)
         
         self.appearance_mode_optionemenu.grid(row=1, column=0, padx=30, pady=(150, 15))
 
-        self.test_button = customtkinter.CTkButton(self.welcome_frame, text="Continue", command=self.continue_button)
+        self.test_button = customtkinter.CTkButton(self.welcome_frame_widget, text="Continue", command=self.continue_button)
         self.test_button.grid(row=2, column=0, padx=20, pady=10)
 
 
@@ -103,13 +142,7 @@ class App(customtkinter.CTk):
 
 
     def create_frames(self):
-        # Remove the welcome frame and background
-        self.welcome_frame.destroy()
-        self.bg_image_label.destroy()
-        
-        # Reconfigure the grid layout for the main application
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)  # Column 1 for main content
+        self.clear_widgets()
         
         self.navigation_frame()
         self.home_frame()
