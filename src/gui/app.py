@@ -4,6 +4,7 @@ from PIL import Image
 from CTkTable import *
 import tkinter.messagebox as messagebox
 import json
+import re
 
 # Main application GUI, implemented as a class 
 class App(customtkinter.CTk):
@@ -46,7 +47,6 @@ class App(customtkinter.CTk):
         for widget in self.winfo_children():
               widget.destroy()
 
-    #In this frame, some information are displayed
     def configuration_frame(self):
 
         welcome_text = (
@@ -58,6 +58,37 @@ class App(customtkinter.CTk):
             "Take a moment to configure everything just the way you like.\n\n"
             "When you're ready, click Continue to get started!"
         )
+
+        budget_rule_info = """
+        A smart way to help you track your expenses — Budget Rule
+
+        What is a Budget Rule? A Budget Rule helps you organize your spending by dividing your transactions into 3 simple labels:
+
+        1. Needs – Essentials like rent, food, and bills
+        2. Wants – Non-essentials like eating out or games
+        3. Savings – Money you set aside for the future or to pay off debt (calculated automatically)
+
+        You choose how much of your total income goes into each label. 50% for Needs, 30% for Wants, 20% for Savings
+
+        This is how it works:
+
+        • In the tag menu you can choose which tags are considered Wants and which are Needs. The Savings label is calculated by default based on what's left. 
+        • When you use the special built-in tag "Income", the app will divide that amount using your chosen percentages and apply it to your Budget Rule.
+        • By clicking Budget Rule in the sidebar, a dedicated tab opens where you can see how much you've spent in each label and when.
+
+        The app compares your spending with your rules and alerts you if you're going over in any area. 
+        You can stick to the classic 50/30/20 split or adjust the percentages to match your lifestyle.
+        """
+
+        input_guide_text = """
+        Before clicking continue, write a nickname to use in the welcome page, and chose your currency sign for the amount. 
+        
+        If  no value are insered inside the needs wants saving field,  default value will be used, 50/30/20.
+        
+        Valid Input Examples:
+        • Enter whole numbers only (1-99)
+        • Do not include the % symbol
+        • All three values must add up to 100"""
 
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
@@ -78,31 +109,137 @@ class App(customtkinter.CTk):
         self.nickname_label.grid(row=2, column=0, padx=20, pady=(10, 0), sticky="w")
 
         self.nickname_entry = customtkinter.CTkEntry(self.sidebar_frame, placeholder_text="Enter your nickname")
-        self.nickname_entry.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="w")
+        self.nickname_entry.grid(row=3, column=0, padx=20, pady=(0, 10), sticky="ew")
 
         # Currency selector
         self.monetary_symbol_label = customtkinter.CTkLabel(self.sidebar_frame, text="Currency Sign :", anchor="w")
         self.monetary_symbol_label.grid(row=4, column=0, padx=20, pady=(10, 0), sticky="w")
 
         self.monetary_symbol_optionmenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["€", "$", "£"])
-        self.monetary_symbol_optionmenu.grid(row=5, column=0, padx=20, pady=(0, 20), sticky="w")
+        self.monetary_symbol_optionmenu.grid(row=5, column=0, padx=20, pady=(0, 20), sticky="ew")
 
         # Continue button
         self.test_button = customtkinter.CTkButton(self.sidebar_frame, text="Continue", command=self.continue_button_from_configuration_frame)
         self.test_button.grid(row=6, column=0, padx=20, pady=30, sticky="ew")
 
+        # Error label placeholder
+        self.error_label = customtkinter.CTkLabel(self.sidebar_frame, text="", text_color="#D61A3C", anchor="w", font=("Arial", 12, "bold"))
+        self.error_label.grid(row=7, column=0, padx=20, pady=(10, 0), sticky="nw")
+
+        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
+        self.bg_image_label = customtkinter.CTkLabel(self, text="",image=self.bg_image)
+        self.bg_image_label.grid(row=0, column=1)
+
         
+        self.textbox = customtkinter.CTkTextbox(self, width=250, height=360)
+        self.textbox.grid(row=0, column=1, padx=20, pady=10, sticky="new")
+        self.textbox.insert("0.0", budget_rule_info)
+        self.textbox.configure(state="disabled")
+
+        self.budget_rule_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.budget_rule_frame.grid(row=0, column=1, rowspan=4, padx=20, pady=(350, 0), sticky="ew")
+        self.budget_rule_frame.grid_rowconfigure(10, weight=1)
+        self.budget_rule_frame.grid_columnconfigure(0, weight=0)
+        self.budget_rule_frame.grid_columnconfigure(1, weight=1)
+
+        # Budget rule entries - left side
+        self.needs_label = customtkinter.CTkLabel(self.budget_rule_frame, text="Needs :", anchor="w")
+        self.needs_label.grid(row=0, column=0, padx=(20, 10), pady=(10, 0), sticky="w")
+
+        self.needs_entry = customtkinter.CTkEntry(self.budget_rule_frame, placeholder_text="50%", width=100)
+        self.needs_entry.grid(row=1, column=0, padx=(20, 10), pady=(0, 10), sticky="w")
+
+        self.wants_label = customtkinter.CTkLabel(self.budget_rule_frame, text="Wants :", anchor="w")
+        self.wants_label.grid(row=2, column=0, padx=(20, 10), pady=(10, 0), sticky="w")
+
+        self.wants_entry = customtkinter.CTkEntry(self.budget_rule_frame, placeholder_text="30%", width=100)
+        self.wants_entry.grid(row=3, column=0, padx=(20, 10), pady=(0, 10), sticky="w")
+
+        self.saving_label = customtkinter.CTkLabel(self.budget_rule_frame, text="Saving :", anchor="w")
+        self.saving_label.grid(row=4, column=0, padx=(20, 10), pady=(10, 0), sticky="w")
+
+        self.saving_entry = customtkinter.CTkEntry(self.budget_rule_frame, placeholder_text="20%", width=100)
+        self.saving_entry.grid(row=5, column=0, padx=(20, 10), pady=(0, 10), sticky="w")
+
+        # Input guide frame - right side
+        self.input_guide_frame = customtkinter.CTkFrame(self.budget_rule_frame, corner_radius=10)
+        self.input_guide_frame.grid(row=0, column=1, rowspan=6, padx=(10, 20), pady=10, sticky="nsew")
         
+        self.input_guide_label = customtkinter.CTkLabel(self.input_guide_frame, text="Input Guidelines", 
+                                                       font=customtkinter.CTkFont(size=16, weight="bold"))
+        self.input_guide_label.grid(row=0, column=0, padx=15, pady=(15, 10), sticky="ew")
+
+        self.input_guide_textbox = customtkinter.CTkTextbox(self.input_guide_frame, height=200)
+        self.input_guide_textbox.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="nsew")
+        self.input_guide_textbox.insert("0.0", input_guide_text)
+        self.input_guide_textbox.configure(state="disabled")
+        
+        # Configure the input guide frame grid
+        self.input_guide_frame.grid_rowconfigure(1, weight=1)
+        self.input_guide_frame.grid_columnconfigure(0, weight=1)
+
+    
+    def check_budgetrule_percentage(self):
+        saving = self.saving_entry.get().strip()
+        needs = self.needs_entry.get().strip()
+        wants = self.wants_entry.get().strip()
+        error_text = ""
+        
+        # Check if all fields are filled
+        if not saving or not needs or not wants:
+            self.needs_entry.insert(0, 50)
+            self.wants_entry.insert(0, 30)
+            self.saving_entry.insert(0, 20)
+            return True
+        else:
+            try:
+                # Try to convert to integers
+                saving_val = int(saving)
+                needs_val = int(needs)
+                wants_val = int(wants)
+                
+                # Check if values are within valid range
+                if not (1 <= saving_val <= 99) or not (1 <= needs_val <= 99) or not (1 <= wants_val <= 99):
+                    error_text = "Values must be between 1 and 99"
+                # Check if values add up to 100
+                elif (saving_val + needs_val + wants_val) != 100:
+                    error_text = f"Values must add up to 100% (currently: {saving_val + needs_val + wants_val}%)"
+                    
+            except ValueError:
+                error_text = "Values must be whole numbers only"
+
+        # Update error label
+        self.error_label.configure(text=error_text)
+        
+        # Return True if no errors
+        return error_text == ""
 
     def continue_button_from_configuration_frame(self):
         nickname = self.nickname_entry.get()
         currency_sign = self.monetary_symbol_optionmenu.get()
-  
-        self.change_json_value("currency_sign", currency_sign);
-        self.change_json_value("nickname", nickname);
-        
-        self.welcome_frame()
-        #self.change_json_value("first_time", "false")
+
+        # Only proceed if budget rule validation passes
+        if self.check_budgetrule_percentage():
+            self.change_json_value("currency_sign", currency_sign)
+
+            if not self.nickname_entry.get():
+                nickname = "User"
+            
+            self.change_json_value("nickname", nickname)
+            
+            # Save budget rule values
+            saving = int(self.saving_entry.get().strip())
+            needs = int(self.needs_entry.get().strip())
+            wants = int(self.wants_entry.get().strip())
+            
+            self.change_json_value("budget_rule_saving", saving)
+            self.change_json_value("budget_rule_needs", needs)
+            self.change_json_value("budget_rule_wants", wants)
+            
+            # Proceed to next frame
+            self.welcome_frame()
+            self.change_json_value("first_time", "false")
 
     def welcome_frame(self):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
@@ -206,9 +343,6 @@ class App(customtkinter.CTk):
                                                       image=self.chat_image, anchor="w", command=self.budget_button_event)
         self.budget_button.grid(row=2, column=0, sticky="ew")
 
-
-
-   
 
 
     def _on_mousewheel(self, event):

@@ -9,7 +9,10 @@ DEFAULT_USER_DATA = {
     "theme": "Default",
     "first_time" : "true",
     "currency_sign" :  "",
-    "nickname" : ""
+    "nickname" : "User",
+    "budget_rule_needs" : 50,
+    "budget_rule_wants" : 30,
+    "budget_rule_saving" : 20,
 }
 
 def is_valid_date(date : str):
