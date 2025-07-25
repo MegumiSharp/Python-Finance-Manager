@@ -36,8 +36,14 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
+        # Decide what frame to show to the user, if first time user show configuration frame
+        if self.read_json_value("first_time") == "true":
+            self.configuration_frame()
+        else:
+            self.welcome_frame()
 
-        self.welcome_frame()
+
+        
 
 
     def configuration_frame(self):
