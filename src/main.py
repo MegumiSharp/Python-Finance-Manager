@@ -41,7 +41,7 @@ def main():
     # Create the Object Transaction
     ts = transactions.Transactions(conn)
 
-    try:
+    try: 
         app = App(ts)
         app.mainloop()
     except Exception as e:

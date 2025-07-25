@@ -36,6 +36,10 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
+        self.welcome_frame()
+
+    
+    def welcome_frame(self):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
         # Add background 
@@ -58,10 +62,11 @@ class App(customtkinter.CTk):
         
         self.appearance_mode_optionemenu.grid(row=1, column=0, padx=30, pady=(150, 15))
 
-        self.test_button = customtkinter.CTkButton(self.welcome_frame, text="Continue", command=self.continue_event)
+        self.test_button = customtkinter.CTkButton(self.welcome_frame, text="Continue", command=self.continue_button)
         self.test_button.grid(row=2, column=0, padx=20, pady=10)
-    
-    def continue_event(self):
+
+
+    def continue_button(self):
         customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[self.read_user_theme()]))
         self.create_frames()
 
