@@ -5,6 +5,11 @@ import os
 from gui.app import App
 import json
 
+DEFAULT_USER_DATA = {
+    "theme": "Default",
+    "first_time" : "true"
+}
+
 def is_valid_date(date : str):
     try:
         date_str = date.strip()
@@ -15,15 +20,11 @@ def is_valid_date(date : str):
 
 # Check if the user_settings.json exist, if not it create one
 def create_user_settings_json():
-    user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../usersettings/user_settings.json")
+    user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "usersettings/user_settings.json")
 
-    deafult_data = {
-        "theme" : "Default"
-    }
-
-    if not os.path.exists(user_settings_path):
+    if not os.path.exists(user_settings_path) or os.path.getsize(user_settings_path) == 0:
         with open(user_settings_path, "w") as f:
-            json.dump(deafult_data, f, indent=4)
+            json.dump(DEFAULT_USER_DATA, f, indent=4)
 
 
 # Inizialize the application window, if some error is finded is writed in the CLI

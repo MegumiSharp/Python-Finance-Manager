@@ -23,7 +23,7 @@ class App(customtkinter.CTk):
     def __init__(self, obj):
         super().__init__()
         self.data = obj.local_db
-        self.user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../usersettings/user_settings.json")
+        self.user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../usersettings/user_settings.json")
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode("dark")
@@ -38,7 +38,26 @@ class App(customtkinter.CTk):
 
         self.welcome_frame()
 
-    
+
+    def configuration_frame(self):
+        
+        '''
+        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
+
+        # Add background 
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
+        self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
+        self.bg_image_label.grid(row=0, column=0)
+
+        # Create the change theme frame
+        self.welcome_frame = customtkinter.CTkFrame(self, corner_radius=0)
+        self.welcome_frame.grid(row=0, column=0, sticky="ns")
+        
+        '''
+        # After the configuration the configuration frame should not be appear again
+        self.change_json_value("first_time", "false")
+
+
     def welcome_frame(self):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
@@ -72,7 +91,7 @@ class App(customtkinter.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[str(new_appearance_mode)]))
-        self.write_user_theme(str(new_appearance_mode))
+        self.change_json_value("theme", str(new_appearance_mode))
         self.create_frames()
 
 
@@ -100,7 +119,7 @@ class App(customtkinter.CTk):
         
         return str(data["theme"])
     
-    def write_user_theme(self, theme: str):
+    def change_json_value(self, key: str, value:str):
         # Load existing settings or initialize empty dict if file is empty
         try:
             with open(self.user_settings_path, "r") as f:
@@ -108,8 +127,8 @@ class App(customtkinter.CTk):
         except (FileNotFoundError, json.JSONDecodeError):
             data = {}
 
-        # Update the theme
-        data["theme"] = theme
+        #update the key in json
+        data[key] = value
 
         # Save the updated settings
         with open(self.user_settings_path, "w") as f:

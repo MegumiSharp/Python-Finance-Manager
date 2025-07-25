@@ -5,7 +5,7 @@
 src/database/transactions.db
 
 # Ignore the user_settings file, this file is allways created at the start and store the user setting, so it does not need to be included
-**/user_settings.json
+src/usersettings/user_settings.json
 
 
 # Ignore the examples folder inside gui
