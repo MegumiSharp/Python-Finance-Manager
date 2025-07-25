@@ -36,6 +36,7 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
+
         self.welcome_frame()
 
 
@@ -73,7 +74,7 @@ class App(customtkinter.CTk):
                                                   font=customtkinter.CTkFont(size=20, weight="bold"))
         self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
 
-        optionmenu_var = customtkinter.StringVar(value= self.read_user_theme())  # Current theme 
+        optionmenu_var = customtkinter.StringVar(value= self.read_json_value("theme"))  # Current theme 
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame, 
                                                                        values=["Default", "NightTrain", "Orange", "SweetKind"],
                                                                        command=self.change_appearance_mode_event,
@@ -86,7 +87,7 @@ class App(customtkinter.CTk):
 
 
     def continue_button(self):
-        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[self.read_user_theme()]))
+        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[self.read_json_value("theme")]))
         self.create_frames()
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -113,11 +114,11 @@ class App(customtkinter.CTk):
 
 
     
-    def read_user_theme(self):
+    def read_json_value(self, key: str):
         with open(self.user_settings_path, "r") as f:
             data = json.load(f)
         
-        return str(data["theme"])
+        return str(data[key])
     
     def change_json_value(self, key: str, value:str):
         # Load existing settings or initialize empty dict if file is empty
