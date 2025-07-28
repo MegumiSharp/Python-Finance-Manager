@@ -17,7 +17,7 @@ THEMES_PATH = CONFIG_ROOT / "themes"
 BACKGROUND_PATH = ASSETS_ROOT / "images" / "backgrounds"
 ICONS_PATH = ASSETS_ROOT / "images" / "icons"
 DATABASE_PATH = DATA_ROOT / "database" / "transactions.db"
-USER_SETTINGS_PATH = DATA_ROOT / "usersettings" / "user_settings.json"
+USER_SETTINGS_PATH = DATA_ROOT / "user_settings" / "user_settings.json"
 
 
 # ============================================================================
@@ -130,20 +130,5 @@ DEFAULT_USER_SETTINGS = {
     "budget_rule_wants": DEFAULT_BUDGET_WANTS,
     "budget_rule_saving": DEFAULT_BUDGET_SAVINGS,
 }
-
 # ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-AUTO_BACKUP_ENABLED = True  # Enable or disable automatic backups
-
-def ensure_directories():
-    """Create necessary directories if they don't exist."""
-    directories = [
-        DATA_ROOT / "database",
-        DATA_ROOT / "user_settings", 
-        DATA_ROOT / "logs",
-        DATA_ROOT / "backups"
-    ]
-    
-    for directory in directories:
-        directory.mkdir(parents=True, exist_ok=True)
+# END OF SETTINGS

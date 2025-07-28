@@ -6,7 +6,7 @@ def norm_today():
     return f'{date[8:10]}/{date[5:7]}/{date[:4]}'
 
 
-class Transactions:
+class DatabaseManager:
     def __init__(self, db_conn):
         self.conn = db_conn
         self.cursor = self.conn.cursor()

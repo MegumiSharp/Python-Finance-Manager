@@ -1,5 +1,5 @@
 import datetime
-from src import transactions
+from src.models import database
 import sqlite3
 import os
 import json
@@ -10,7 +10,7 @@ Entry point for the application
 """
 from config.settings import (USER_SETTINGS_PATH, DATABASE_PATH, DEFAULT_USER_SETTINGS)
 
-from src.core.app import App
+from src.controllers.app_controller import App
 
 
 
@@ -39,7 +39,7 @@ def main():
     conn = sqlite3.connect(DATABASE_PATH)
 
     # Create the Object Transaction
-    ts = transactions.Transactions(conn)
+    ts = database.DatabaseManager(conn)
 
     try: 
         app = App(ts)
