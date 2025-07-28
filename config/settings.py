@@ -1,0 +1,149 @@
+"""Expensia Application Settings - Centralized configuration"""
+from pathlib import Path
+
+# ============================================================================
+# PATHS AND DIRECTORIES
+# ============================================================================
+
+# Get the project root directory
+PROJECT_ROOT = Path(__file__).parent.parent
+SRC_ROOT = PROJECT_ROOT / "src"
+CONFIG_ROOT = PROJECT_ROOT / "config"
+ASSETS_ROOT = PROJECT_ROOT / "assets"
+DATA_ROOT = PROJECT_ROOT / "data"
+
+# Specific paths
+THEMES_PATH = CONFIG_ROOT / "themes"
+BACKGROUND_PATH = ASSETS_ROOT / "images" / "backgrounds"
+ICONS_PATH = ASSETS_ROOT / "images" / "icons"
+DATABASE_PATH = DATA_ROOT / "database" / "transactions.db"
+USER_SETTINGS_PATH = DATA_ROOT / "usersettings" / "user_settings.json"
+
+
+# ============================================================================
+# APPLICATION SETTINGS
+# ============================================================================
+
+APP_NAME = "Expensia"
+APP_VERSION = "0.0.1"
+APP_DESCRIPTION = "Personal Finance Tracker with Budget Rules"
+
+# Window settings
+WINDOW_WIDTH = 1280
+WINDOW_HEIGHT = 720
+MIN_WINDOW_WIDTH = 800
+MIN_WINDOW_HEIGHT = 600
+
+# ============================================================================
+# THEME SETTINGS
+# ============================================================================
+
+THEMES_TYPE = {
+    "NightTrain" : "NightTrain.json",
+    "Default" : "Default.json",
+    "Orange" : "Orange.json",
+    "SweetKind" : "Sweetkind.json",
+}
+
+DEFAULT_THEME = "Default"
+DEFAULT_APPEARANCE_MODE = "dark"
+    
+
+# Default budget rule percentages (50/30/20 rule)
+DEFAULT_BUDGET_NEEDS = 50
+DEFAULT_BUDGET_WANTS = 30  
+DEFAULT_BUDGET_SAVINGS = 20
+
+# Validation ranges for budget percentages
+BUDGET_PERCENTAGE_MIN = 1
+BUDGET_PERCENTAGE_MAX = 99
+
+# ============================================================================
+# CURRENCY SETTINGS
+# ============================================================================
+
+AVAILABLE_CURRENCIES = ["€", "$", "£"]
+DEFAULT_CURRENCY = "€"
+
+# ============================================================================
+# DATABASE SETTINGS
+# ============================================================================
+
+# SQLite database configuration
+DB_TIMEOUT = 30.0  # seconds
+DB_CHECK_SAME_THREAD = False
+
+# Table names
+TRANSACTIONS_TABLE = "transactions"
+BUDGET_RULES_TABLE = "budget_rules"
+SETTINGS_TABLE = "user_settings"
+
+# ============================================================================
+# UI SETTINGS
+# ============================================================================
+
+# Colors
+COLOR_EXPENSE = "#ff6b6b"  # Red for expenses
+COLOR_INCOME = "#51cf66"   # Green for income
+COLOR_ERROR = "#D61A3C"    # Error messages
+
+# Fonts
+DEFAULT_FONT_SIZE = 14
+HEADER_FONT_SIZE = 16
+TITLE_FONT_SIZE = 20
+
+# Table settings
+DEFAULT_ROWS_PER_PAGE = 30
+MAX_DESCRIPTION_LENGTH = 100
+
+# ============================================================================
+# VALIDATION SETTINGS
+# ============================================================================
+
+# Transaction validation
+MAX_AMOUNT = 999999.99
+MIN_AMOUNT = -999999.99
+MAX_DESCRIPTION_LENGTH = 100  # Maximum length for transaction descriptions
+MAX_TAG_LENGTH = 15           # Maximum length for tags
+
+# Date format
+DATE_FORMAT = "%d-%m-%Y" # Example: 31-12-2025
+
+# ============================================================================
+# FILE SETTINGS
+# ============================================================================
+
+# Allowed file extensions for imports
+ALLOWED_CSV_EXTENSIONS = ['.csv']
+ALLOWED_JSON_EXTENSIONS = ['.json']
+
+# ============================================================================
+# DEFAULT USER SETTINGS
+# ============================================================================
+
+DEFAULT_USER_SETTINGS = {
+    "first_time": "true",
+    "nickname": "User",
+    "currency_sign": DEFAULT_CURRENCY,
+    "theme": DEFAULT_THEME,
+    "budget_rule_needs": DEFAULT_BUDGET_NEEDS,
+    "budget_rule_wants": DEFAULT_BUDGET_WANTS,
+    "budget_rule_saving": DEFAULT_BUDGET_SAVINGS,
+}
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+AUTO_BACKUP_ENABLED = True  # Enable or disable automatic backups
+
+def ensure_directories():
+    """Create necessary directories if they don't exist."""
+    directories = [
+        DATA_ROOT / "database",
+        DATA_ROOT / "user_settings", 
+        DATA_ROOT / "logs",
+        DATA_ROOT / "backups"
+    ]
+    
+    for directory in directories:
+        directory.mkdir(parents=True, exist_ok=True)

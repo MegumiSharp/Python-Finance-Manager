@@ -1,36 +1,36 @@
+# Import the necessary costants and settings used in the application
+from config.settings import (
+    WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME,
+    DEFAULT_THEME, DEFAULT_APPEARANCE_MODE,
+    USER_SETTINGS_PATH, BACKGROUND_PATH, ICONS_PATH, THEMES_PATH,
+    THEMES_TYPE
+)
+
+# Import the Text used in the Welcome Frame and the Budget Rule Frame
+from config.textbox import (
+    WELCOME_HEADER_TEXT, WELCOME_TEXT, BUDGET_RULE_INFO_TEXT, INPUT_GUIDE_TEXT
+)
+
+# Importing the necessary libraries
 import customtkinter
 import os
 from PIL import Image
 from CTkTable import *
 import tkinter.messagebox as messagebox
 import json
-import re
 
-# Main application GUI, implemented as a class 
+
+# Main application GUI, implemented as a class
 class App(customtkinter.CTk):
-    WIDTH = 1280
-    HEIGHT = 720
-
-    THEMES_TYPE = {
-        "NightTrain" : "NightTrain.json",
-        "Default" : "Default.json",
-        "Orange" : "Orange.json",
-        "SweetKind" : "Sweetkind.json",
-    }
-        
-    THEMES_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "themes")
-
-    
     def __init__(self, obj):
         super().__init__()
         self.data = obj.local_db
-        self.user_settings_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../usersettings/user_settings.json")
 
         # Set Windows Settings like appearance and color theme or size and name
-        customtkinter.set_appearance_mode("dark")
+        customtkinter.set_appearance_mode(DEFAULT_APPEARANCE_MODE)
 
-        self.title("Expensia")
-        self.geometry(f"{self.WIDTH}x{self.HEIGHT}")
+        self.title(APP_NAME)
+        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.resizable(False, False)  # Not resizable
 
         self.grid_rowconfigure(0, weight=1)
@@ -48,60 +48,18 @@ class App(customtkinter.CTk):
               widget.destroy()
 
     def configuration_frame(self):
-
-        welcome_text = (
-            "Your smart companion for tracking transactions and managing your finances.\n\n"
-            "In this setup panel, you can:\n"
-            "- Customize your currency symbol\n"
-            "- Set your account name\n"
-            "- Adjust your budget rule values to match your financial goals\n\n"
-            "Take a moment to configure everything just the way you like.\n\n"
-            "When you're ready, click Continue to get started!"
-        )
-
-        budget_rule_info = """
-        A smart way to help you track your expenses — Budget Rule
-
-        What is a Budget Rule? A Budget Rule helps you organize your spending by dividing your transactions into 3 simple labels:
-
-        1. Needs – Essentials like rent, food, and bills
-        2. Wants – Non-essentials like eating out or games
-        3. Savings – Money you set aside for the future or to pay off debt (calculated automatically)
-
-        You choose how much of your total income goes into each label. 50% for Needs, 30% for Wants, 20% for Savings
-
-        This is how it works:
-
-        • In the tag menu you can choose which tags are considered Wants and which are Needs. The Savings label is calculated by default based on what's left. 
-        • When you use the special built-in tag "Income", the app will divide that amount using your chosen percentages and apply it to your Budget Rule.
-        • By clicking Budget Rule in the sidebar, a dedicated tab opens where you can see how much you've spent in each label and when.
-
-        The app compares your spending with your rules and alerts you if you're going over in any area. 
-        You can stick to the classic 50/30/20 split or adjust the percentages to match your lifestyle.
-        """
-
-        input_guide_text = """
-        Before clicking continue, write a nickname to use in the welcome page, and chose your currency sign for the amount. 
-        
-        If  no value are insered inside the needs wants saving field,  default value will be used, 50/30/20.
-        
-        Valid Input Examples:
-        • Enter whole numbers only (1-99)
-        • Do not include the % symbol
-        • All three values must add up to 100"""
-
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(10, weight=1)
 
         # Welcome text
-        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Welcome in Expensia!", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text=WELCOME_HEADER_TEXT, font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
         # Textbox
         self.textbox = customtkinter.CTkTextbox(self.sidebar_frame, width=250, height=260)
         self.textbox.grid(row=1, column=0, padx=20, pady=10, sticky="n")
-        self.textbox.insert("0.0", welcome_text)
+        self.textbox.insert("0.0", WELCOME_TEXT)
         self.textbox.configure(state="disabled")
 
         # Nickname label and entry
@@ -126,15 +84,15 @@ class App(customtkinter.CTk):
         self.error_label = customtkinter.CTkLabel(self.sidebar_frame, text="", text_color="#D61A3C", anchor="w", font=("Arial", 12, "bold"))
         self.error_label.grid(row=7, column=0, padx=20, pady=(10, 0), sticky="nw")
 
-        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
-        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
+
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(BACKGROUND_PATH, "background.jpg")), size=(WINDOW_WIDTH, WINDOW_HEIGHT))
         self.bg_image_label = customtkinter.CTkLabel(self, text="",image=self.bg_image)
         self.bg_image_label.grid(row=0, column=1)
 
         
         self.textbox = customtkinter.CTkTextbox(self, width=250, height=360)
         self.textbox.grid(row=0, column=1, padx=20, pady=10, sticky="new")
-        self.textbox.insert("0.0", budget_rule_info)
+        self.textbox.insert("0.0", BUDGET_RULE_INFO_TEXT)
         self.textbox.configure(state="disabled")
 
         self.budget_rule_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
@@ -172,7 +130,7 @@ class App(customtkinter.CTk):
 
         self.input_guide_textbox = customtkinter.CTkTextbox(self.input_guide_frame, height=200)
         self.input_guide_textbox.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="nsew")
-        self.input_guide_textbox.insert("0.0", input_guide_text)
+        self.input_guide_textbox.insert("0.0", INPUT_GUIDE_TEXT)
         self.input_guide_textbox.configure(state="disabled")
         
         # Configure the input guide frame grid
@@ -245,7 +203,7 @@ class App(customtkinter.CTk):
         self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
 
         # Add background 
-        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "background.jpg")), size=(self.WIDTH, self.HEIGHT))
+        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(BACKGROUND_PATH, "background.jpg")), size=(WINDOW_WIDTH, WINDOW_HEIGHT))
         self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
         self.bg_image_label.grid(row=0, column=0)
 
@@ -269,11 +227,11 @@ class App(customtkinter.CTk):
 
 
     def continue_button(self):
-        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[self.read_json_value("theme")]))
+        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[self.read_json_value("theme")]))
         self.create_frames()
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_default_color_theme(os.path.join(self.THEMES_PATH, self.THEMES_TYPE[str(new_appearance_mode)]))
+        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[str(new_appearance_mode)]))
         self.change_json_value("theme", str(new_appearance_mode))
         self.create_frames()
 
@@ -281,7 +239,7 @@ class App(customtkinter.CTk):
     def create_frames(self):
         self.clear_widgets()
         
-        self.navigation_frame()
+        self.create_navigation_frame()
         self.home_frame()
         self.budget_frame()
 
@@ -291,7 +249,7 @@ class App(customtkinter.CTk):
 
     
     def read_json_value(self, key: str):
-        with open(self.user_settings_path, "r") as f:
+        with open(USER_SETTINGS_PATH, "r") as f:
             data = json.load(f)
         
         return str(data[key])
@@ -299,7 +257,7 @@ class App(customtkinter.CTk):
     def change_json_value(self, key: str, value:str):
         # Load existing settings or initialize empty dict if file is empty
         try:
-            with open(self.user_settings_path, "r") as f:
+            with open(USER_SETTINGS_PATH, "r") as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             data = {}
@@ -308,16 +266,16 @@ class App(customtkinter.CTk):
         data[key] = value
 
         # Save the updated settings
-        with open(self.user_settings_path, "w") as f:
+        with open(USER_SETTINGS_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
 
-    def navigation_frame(self):
+    def create_navigation_frame(self):
         # Assign every image used in the windows to a variables (only dark mode is supported)
-        self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "Expensia Logo.png")), size=(32, 32))      # Logo fo the app
-        self.home_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "home_light.png")), size=(20, 20))         # Icon Home white
-        self.chat_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "chat_light.png")), size=(20, 20))         # Icon Chat white
-        self.lens_image = customtkinter.CTkImage(Image.open(os.path.join(self.image_path, "search.png")), size=(24, 24))             # Icon for search bar
+        self.logo_image = customtkinter.CTkImage(Image.open(os.path.join(ICONS_PATH, "Expensia Logo.png")), size=(32, 32))      # Logo fo the app
+        self.home_image = customtkinter.CTkImage(Image.open(os.path.join(ICONS_PATH, "home_light.png")), size=(20, 20))         # Icon Home white
+        self.chat_image = customtkinter.CTkImage(Image.open(os.path.join(ICONS_PATH, "chat_light.png")), size=(20, 20))         # Icon Chat white
+        self.lens_image = customtkinter.CTkImage(Image.open(os.path.join(ICONS_PATH, "search.png")), size=(24, 24))             # Icon for search bar
  
         # Create the sidebar on the left, the navigation frame
         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
