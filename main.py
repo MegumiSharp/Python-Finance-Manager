@@ -41,6 +41,11 @@ def main():
     # Create the Object Transaction
     ts = database.DatabaseManager(conn)
 
+    ts.add_transaction("18/07/2023", amount = 100.0, tag = "Food", description = "Lunch at restaurant")
+    ts.add_transaction("19/07/2023", amount = 50.0, tag = "Transport", description = "Bus ticket")
+    ts.add_transaction("20/07/2023", amount = 200.0, tag = "Shopping", description = "New shoes")
+    ts.add_transaction("21/07/2023", amount = 75.0, tag = "Entertainment", description = "Movie night") 
+
     try: 
         app = App(ts)
         app.mainloop()

@@ -8,4 +8,4 @@ data/database/transactions.db
 data/user_settings/user_settings.json
 
 # Ignore the vscode workspace file
-.vscode/workspace.code-workspace
+.vscode/settings.json

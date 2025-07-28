@@ -11,7 +11,6 @@ class DatabaseManager:
         self.conn = db_conn
         self.cursor = self.conn.cursor()
         self.local_db = []                                      # Altering the db is expensive, better to pass it on a list and save it on the database every now and than
-        self.__update_local(self.local_db)                      # At the start of the bject, the databse is copied in a list of list
 
         self.cursor.execute(
             '''CREATE TABLE IF NOT EXISTS transactions (
@@ -23,6 +22,9 @@ class DatabaseManager:
             )'''
         )
         self.conn.commit()
+        
+        self.__update_local(self.local_db)                      # At the start of the bject, the databse is copied in a list of list
+
 
     # Update the list with all database entries
     def __update_local(self, list):
