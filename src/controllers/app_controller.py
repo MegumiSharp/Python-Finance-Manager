@@ -20,6 +20,7 @@ import json
 
 
 from src.views.setup_view import SetupView
+from src.views.welcome_view import WelcomeView
 
 # Main application GUI, implemented as a class
 class App(customtkinter.CTk):
@@ -44,12 +45,15 @@ class App(customtkinter.CTk):
 
         self.user = UserSettings()  # Initialize user settings
 
+        # Create the frames for the application
+        self.setup_view = SetupView(self, controller=self, user=self.user)
+        self.welcome_view = WelcomeView(self, controller=self, user=self.user)
+
         self.__startup()
 
     def __startup(self):
         # Decide what frame to show to the user, if first time user show setup frame
         if self.user.read_json_value(KEY_IS_FIRST_TIME) == VALUE_TRUE:
-            self.setup_view = SetupView(self, controller=self)
             self.setup_view.show()
         else:
            self.switch_frame(WELCOME_FRAME)
@@ -57,54 +61,18 @@ class App(customtkinter.CTk):
         
     def switch_frame(self, frame_name):
         if frame_name == WELCOME_FRAME:
-            self.__show_welcome_view()
+            self.welcome_view.show()
         else:
             raise ValueError(f"Unknown frame name: {frame_name}")
 
-    def __show_welcome_view(self):
-        self.welcome_frame()
+
 
     def clear_widgets(self):
         for widget in self.winfo_children():
               widget.destroy()
 
     
-    def welcome_frame(self):
-        self.image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets")
-
-        # Add background 
-        self.bg_image = customtkinter.CTkImage(Image.open(os.path.join(BACKGROUND_PATH, "background.jpg")), size=(WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.bg_image_label = customtkinter.CTkLabel(self, image=self.bg_image)
-        self.bg_image_label.grid(row=0, column=0)
-
-        # Create the change theme frame - CHANGE THE VARIABLE NAME
-        self.welcome_frame_widget = customtkinter.CTkFrame(self, corner_radius=0)  # Changed name
-        self.welcome_frame_widget.grid(row=0, column=0, sticky="ns")
-        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame_widget, text=f'Welcome {self.user.read_json_value("nickname")}! \n Choose a theme:',
-                                                font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
-
-        optionmenu_var = customtkinter.StringVar(value= self.user.read_json_value("theme"))  # Current theme
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame_widget,
-                                                                    values=["Default", "NightTrain", "Orange", "SweetKind"],
-                                                                    command=self.change_appearance_mode_event,
-                                                                    variable= optionmenu_var)
-        
-        self.appearance_mode_optionemenu.grid(row=1, column=0, padx=30, pady=(150, 15))
-
-        self.test_button = customtkinter.CTkButton(self.welcome_frame_widget, text="Continue", command=self.continue_button)
-        self.test_button.grid(row=2, column=0, padx=20, pady=10)
-
-
-    def continue_button(self):
-        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[self.user.read_json_value("theme")]))
-        self.create_frames()
-
-    def change_appearance_mode_event(self, new_appearance_mode: str):
-        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[str(new_appearance_mode)]))
-        self.user.change_json_value("theme", str(new_appearance_mode))
-        #self.create_frames()
-
+    
 
     def create_frames(self):
         self.clear_widgets()

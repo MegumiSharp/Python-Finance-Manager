@@ -20,6 +20,10 @@ DATABASE_PATH = DATA_ROOT / "database" / "transactions.db"
 USER_SETTINGS_PATH = DATA_ROOT / "user_settings" / "user_settings.json"
 
 
+# Files Names
+BACKGROUND_FILE_NAME = "background.jpg"
+
+
 # ============================================================================
 # APPLICATION SETTINGS
 # ============================================================================
@@ -151,8 +155,6 @@ DEFAULT_USER_SETTINGS = {
 # ============================================================================
 
 WELCOME_FRAME = "welcome_frame"
-
-
 
 # ============================================================================
 # END OF SETTINGS

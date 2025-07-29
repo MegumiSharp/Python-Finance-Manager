@@ -1,13 +1,21 @@
 from abc import ABC, abstractmethod
-from turtle import width
 import customtkinter as ctk
 
-
+'''
+Base class for all views in the application
+It provides a common interface and basic functionality for all views
+Each view should inherit from this class and implement the setup_ui method
+This class also provides methods to show and hide the view
+It uses customtkinter for the UI components
+and is designed to be used with a controller for navigation between views
+The user parameter is used to access user settings and preferences 
+'''       
 
 class BaseView(ctk.CTkFrame, ABC):
-    def __init__(self, parent, controller=None):
+    def __init__(self, parent, controller=None, user=None):
         super().__init__(parent)
         self.controller = controller
+        self.user = user
         self.setup_ui()
 
     @abstractmethod
