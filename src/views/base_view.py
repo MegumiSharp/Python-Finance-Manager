@@ -10,7 +10,6 @@ It uses customtkinter for the UI components
 and is designed to be used with a controller for navigation between views
 The user parameter is used to access user settings and preferences 
 '''       
-
 class BaseView(ctk.CTkFrame, ABC):
     def __init__(self, parent, controller=None, user=None):
         super().__init__(parent)

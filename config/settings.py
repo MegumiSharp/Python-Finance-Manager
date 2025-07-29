@@ -155,6 +155,8 @@ DEFAULT_USER_SETTINGS = {
 # ============================================================================
 
 WELCOME_FRAME = "welcome_frame"
+NAVIGATION_FRAME = "navigation_frame"
+DASHBOARD_FRAME = "dashboard_frame"
 
 # ============================================================================
 # END OF SETTINGS

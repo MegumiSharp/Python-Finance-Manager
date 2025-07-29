@@ -3,7 +3,7 @@ import os
 from PIL import Image
 from src.views.base_view import BaseView
 
-from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_PATH, THEMES_PATH, THEMES_TYPE, BACKGROUND_PATH, BACKGROUND_FILE_NAME, KEY_NICKNAME, KEY_THEME)
+from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND_PATH, THEMES_PATH, THEMES_TYPE, BACKGROUND_PATH, BACKGROUND_FILE_NAME, KEY_NICKNAME, KEY_THEME, DASHBOARD_FRAME)
 
 # This is the welcome view, where the user can choose a theme and continue to the application (Default view when the application is started)
 class WelcomeView(BaseView):
@@ -51,11 +51,11 @@ class WelcomeView(BaseView):
     def __continue_btn(self):
         ctk.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[self.user.read_json_value(KEY_THEME)]))
         self.destroy()
-        # pass to home view
+        self.controller.switch_frame(DASHBOARD_FRAME)
 
     # This function is called when the theme is changed, it sets the theme and updates the user settings
     def __switch_theme_event(self, theme: str):
         ctk.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[str(theme)]))
         self.user.change_json_value(KEY_THEME, str(theme))
         self.destroy()
-        # pass to home view
+        self.controller.switch_frame(DASHBOARD_FRAME)

@@ -8,9 +8,9 @@ import json
 Expensia - Personal Finance Tracker
 Entry point for the application
 """
-from config.settings import (USER_SETTINGS_PATH, DATABASE_PATH, DEFAULT_USER_SETTINGS, WINDOW_HEIGHT, WINDOW_WIDTH)
+from config.settings import (USER_SETTINGS_PATH, DATABASE_PATH, DEFAULT_USER_SETTINGS, WINDOW_HEIGHT, WINDOW_WIDTH, ICONS_PATH)
 
-from src.controllers.app_controller import App
+from src.controllers.app_controller import AppController
 
 
 
@@ -34,20 +34,14 @@ def main():
     # Initialize json file
     create_user_settings_json()
     
-
     # Connessione al Database
     conn = sqlite3.connect(DATABASE_PATH)
 
     # Create the Object Transaction
     ts = database.DatabaseManager(conn)
 
-    ts.add_transaction("18/07/2023", amount = 100.0, tag = "Food", description = "Lunch at restaurant")
-    ts.add_transaction("19/07/2023", amount = 50.0, tag = "Transport", description = "Bus ticket")
-    ts.add_transaction("20/07/2023", amount = 200.0, tag = "Shopping", description = "New shoes")
-    ts.add_transaction("21/07/2023", amount = 75.0, tag = "Entertainment", description = "Movie night") 
-
     try: 
-        app = App(ts)
+        app = AppController(ts)
         app.mainloop()
     except Exception as e:
         print(f"Error running application: {e}")
