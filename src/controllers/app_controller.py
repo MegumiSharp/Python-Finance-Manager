@@ -3,7 +3,8 @@ from config.settings import (
     WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME,
     DEFAULT_THEME, DEFAULT_APPEARANCE_MODE,
     USER_SETTINGS_PATH, BACKGROUND_PATH, ICONS_PATH, THEMES_PATH,
-    THEMES_TYPE
+    THEMES_TYPE,
+    KEY_IS_FIRST_TIME, VALUE_TRUE
 )
 
 # Import the Text used in the Welcome Frame and the Budget Rule Frame
@@ -50,11 +51,12 @@ class App(customtkinter.CTk):
         self.setup_view = SetupView(self, controller=self)
 
         # Decide what frame to show to the user, if first time user show configuration frame
-        if self.user.read_json_value("first_time") == "true":
-                self.setup_view.show()
+        if self.user.read_json_value(KEY_IS_FIRST_TIME) == VALUE_TRUE:
+            self.setup_view.show()
         else:
            #self.welcome_view.create_welcome_frame()
            print("Welcome back!")
+
 
     def clear_widgets(self):
         for widget in self.winfo_children():
@@ -95,7 +97,7 @@ class App(customtkinter.CTk):
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[str(new_appearance_mode)]))
         self.user.change_json_value("theme", str(new_appearance_mode))
-        self.create_frames()
+        #self.create_frames()
 
 
     def create_frames(self):

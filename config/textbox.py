@@ -1,5 +1,7 @@
 WELCOME_HEADER_TEXT = "Welcome in Expensia!"
 
+INPUT_GUIDELINE_TEXT = "Input Guidelines"
+
 WELCOME_TEXT = (
             "Your smart companion for tracking transactions and managing your finances.\n\n"
             "In this setup panel, you can:\n"
@@ -40,3 +42,7 @@ Valid Input Examples:
 • Enter whole numbers only (1-99)
 • Do not include the % symbol
 • All three values must add up to 100"""
+
+ERROR_VAL_RANGE_TEXT = "Values must be between 1 and 99"
+ERROR_VAL_SUM_INCORRECT_TEXT = "Values must add up to 100% \n (currently:"
+ERROR_VAL_WHOLE_TEXT = "Values must be whole numbers only"

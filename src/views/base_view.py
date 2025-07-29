@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from turtle import width
 import customtkinter as ctk
 
-from config.settings import WINDOW_HEIGHT, WINDOW_WIDTH
+
 
 class BaseView(ctk.CTkFrame, ABC):
     def __init__(self, parent, controller=None):

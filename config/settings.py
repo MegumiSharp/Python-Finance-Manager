@@ -63,7 +63,6 @@ BUDGET_PERCENTAGE_MAX = 99
 # ============================================================================
 
 AVAILABLE_CURRENCIES = ["€", "$", "£"]
-DEFAULT_CURRENCY = "€"
 
 # ============================================================================
 # DATABASE SETTINGS
@@ -121,14 +120,31 @@ ALLOWED_JSON_EXTENSIONS = ['.json']
 # DEFAULT USER SETTINGS
 # ============================================================================
 
+# Writing keys as a costants prevents typos and makes it easier to manage
+KEY_IS_FIRST_TIME = "is_first_time"
+KEY_NICKNAME = "nickname"
+KEY_CURRENCY_SIGN = "currency_sign"
+KEY_THEME = "theme"
+KEY_BUDGET_NEEDS = "budget_rule_needs"
+KEY_BUDGET_WANTS = "budget_rule_wants"
+KEY_BUDGET_SAVING = "budget_rule_saving"
+
+VALUE_TRUE = "true"
+VALUE_FALSE = "false"
+
+DEFAULT_NICKNAME = "User"
+DEFAULT_CURRENCY = "€"
+
+# Default user settings
 DEFAULT_USER_SETTINGS = {
-    "first_time": "true",
-    "nickname": "User",
-    "currency_sign": DEFAULT_CURRENCY,
-    "theme": DEFAULT_THEME,
-    "budget_rule_needs": DEFAULT_BUDGET_NEEDS,
-    "budget_rule_wants": DEFAULT_BUDGET_WANTS,
-    "budget_rule_saving": DEFAULT_BUDGET_SAVINGS,
+    KEY_IS_FIRST_TIME: VALUE_TRUE,
+    KEY_NICKNAME: DEFAULT_NICKNAME,
+    KEY_CURRENCY_SIGN: DEFAULT_CURRENCY,
+    KEY_THEME: DEFAULT_THEME,
+    KEY_BUDGET_NEEDS: DEFAULT_BUDGET_NEEDS,
+    KEY_BUDGET_WANTS: DEFAULT_BUDGET_WANTS,
+    KEY_BUDGET_SAVING: DEFAULT_BUDGET_SAVINGS,
 }
+
 # ============================================================================
 # END OF SETTINGS
