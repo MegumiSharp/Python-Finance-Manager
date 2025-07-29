@@ -5,13 +5,12 @@ from config.settings import (KEY_IS_FIRST_TIME, KEY_NICKNAME, KEY_CURRENCY_SIGN,
                              KEY_BUDGET_NEEDS, KEY_BUDGET_WANTS, KEY_BUDGET_SAVING,
                              VALUE_FALSE, DEFAULT_NICKNAME,
                              WINDOW_WIDTH, WINDOW_HEIGHT,
-                             BACKGROUND_PATH)       
-
-
+                             BACKGROUND_PATH,
+                             WELCOME_FRAME)       
 
 from config.textbox import (WELCOME_HEADER_TEXT, WELCOME_TEXT, 
                             BUDGET_RULE_INFO_TEXT, INPUT_GUIDE_TEXT, INPUT_GUIDELINE_TEXT,
-                            ERROR_VAL_RANGE_TEXT, ERROR_VAL_SUM_INCORRECT_TEXT, ERROR_VAL_WHOLE_TEXT)           # Import the text for the setup view
+                            ERROR_VAL_RANGE_TEXT, ERROR_VAL_SUM_INCORRECT_TEXT, ERROR_VAL_WHOLE_TEXT)                                     # Import the text for the setup view
 from src.views.base_view import BaseView       
 from src.models.user_settings import UserSettings                                                                                         # Import the BaseView class
 
@@ -62,7 +61,7 @@ class SetupView(BaseView):
         self.monetary_symbol_optionmenu.grid(row=5, column=0, padx=20, pady=(0, 20), sticky="ew")
 
         # Continue button (to save settings and proceed)
-        self.continue_btn = customtkinter.CTkButton(self.sidebar_frame, text="Continue", command=self.continue_button_from_configuration_frame)
+        self.continue_btn = customtkinter.CTkButton(self.sidebar_frame, text="Continue", command=self.__continue_button_from_configuration_frame)
         self.continue_btn.grid(row=6, column=0, padx=20, pady=30, sticky="ew")
 
         # Error text label (to show validation errors)
@@ -167,7 +166,7 @@ class SetupView(BaseView):
         # Return True if no errors
         return error_text == ""
 
-    def continue_button_from_configuration_frame(self):
+    def __continue_button_from_configuration_frame(self):
         nickname = self.nickname_entry.get()
         currency_sign = self.monetary_symbol_optionmenu.get()
 
@@ -175,26 +174,25 @@ class SetupView(BaseView):
         if self.__check_budgetrule_percentage():
             # Update the user settings JSON with budget rule values
             self.user = UserSettings()
-            self.user.change_json_value(KEY_CURRENCY_SIGN, currency_sign)
-
+            
             if not self.nickname_entry.get():
                 nickname = DEFAULT_NICKNAME
-            
-            self.user.change_json_value(KEY_NICKNAME, nickname)
             
             # Save budget rule values
             saving = self.saving_entry.get().strip()
             needs = self.needs_entry.get().strip()
             wants = self.wants_entry.get().strip()
 
-
+            # Update user settings
             self.user.change_json_value(KEY_BUDGET_SAVING, saving)
             self.user.change_json_value(KEY_BUDGET_NEEDS, needs)
             self.user.change_json_value(KEY_BUDGET_WANTS, wants)
+            self.user.change_json_value(KEY_NICKNAME, nickname)
+            self.user.change_json_value(KEY_CURRENCY_SIGN, currency_sign)
 
-
-            print(saving)
+            # Mark as not first time
             self.user.change_json_value(KEY_IS_FIRST_TIME, VALUE_FALSE)
 
-            self.hide()
-   
+            # Clear the current view and show the welcome view (Is called from the controller)
+            self.destroy()
+            self.controller.switch_frame(WELCOME_FRAME) 

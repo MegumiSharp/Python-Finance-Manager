@@ -1,15 +1,11 @@
 # Import the necessary costants and settings used in the application
 from config.settings import (
     WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME,
-    DEFAULT_THEME, DEFAULT_APPEARANCE_MODE,
-    USER_SETTINGS_PATH, BACKGROUND_PATH, ICONS_PATH, THEMES_PATH,
+    DEFAULT_APPEARANCE_MODE,
+    BACKGROUND_PATH, ICONS_PATH, THEMES_PATH,
     THEMES_TYPE,
-    KEY_IS_FIRST_TIME, VALUE_TRUE
-)
-
-# Import the Text used in the Welcome Frame and the Budget Rule Frame
-from config.textbox import (
-    WELCOME_HEADER_TEXT, WELCOME_TEXT, BUDGET_RULE_INFO_TEXT, INPUT_GUIDE_TEXT
+    KEY_IS_FIRST_TIME, VALUE_TRUE,
+    WELCOME_FRAME
 )
 
 from src.models.user_settings import UserSettings
@@ -37,26 +33,36 @@ class App(customtkinter.CTk):
         self.title(APP_NAME)
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         
-
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-
+        # Block the resizing of the window
+        self.grid_propagate(False)
         self.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.maxsize(0, 0)
         self.resizable(width=False, height=False)
 
         self.user = UserSettings()  # Initialize user settings
 
-        self.setup_view = SetupView(self, controller=self)
+        self.__startup()
 
-        # Decide what frame to show to the user, if first time user show configuration frame
+    def __startup(self):
+        # Decide what frame to show to the user, if first time user show setup frame
         if self.user.read_json_value(KEY_IS_FIRST_TIME) == VALUE_TRUE:
+            self.setup_view = SetupView(self, controller=self)
             self.setup_view.show()
         else:
-           #self.welcome_view.create_welcome_frame()
-           print("Welcome back!")
+           self.switch_frame(WELCOME_FRAME)
 
+        
+    def switch_frame(self, frame_name):
+        if frame_name == WELCOME_FRAME:
+            self.__show_welcome_view()
+        else:
+            raise ValueError(f"Unknown frame name: {frame_name}")
+
+    def __show_welcome_view(self):
+        self.welcome_frame()
 
     def clear_widgets(self):
         for widget in self.winfo_children():
