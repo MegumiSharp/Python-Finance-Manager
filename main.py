@@ -8,7 +8,7 @@ import json
 Expensia - Personal Finance Tracker
 Entry point for the application
 """
-from config.settings import (USER_SETTINGS_PATH, DATABASE_PATH, DEFAULT_USER_SETTINGS)
+from config.settings import (USER_SETTINGS_PATH, DATABASE_PATH, DEFAULT_USER_SETTINGS, WINDOW_HEIGHT, WINDOW_WIDTH)
 
 from src.controllers.app_controller import App
 
