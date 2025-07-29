@@ -64,6 +64,8 @@ class SetupView(BaseView):
         )
         self.test_button.grid(row=6, column=0, padx=20, pady=30, sticky="ew")
 
+     
+
         # Error label
         self.error_label = customtkinter.CTkLabel(
             self.sidebar_frame, 
@@ -143,12 +145,10 @@ class SetupView(BaseView):
         self.input_guide_frame.grid_rowconfigure(1, weight=1)
         self.input_guide_frame.grid_columnconfigure(0, weight=1)
 
+
         
 
 
-   
-
-    
     def check_budgetrule_percentage(self):
         saving = self.saving_entry.get().strip()
         needs = self.needs_entry.get().strip()

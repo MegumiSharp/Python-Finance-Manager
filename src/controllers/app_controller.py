@@ -11,6 +11,8 @@ from config.textbox import (
     WELCOME_HEADER_TEXT, WELCOME_TEXT, BUDGET_RULE_INFO_TEXT, INPUT_GUIDE_TEXT
 )
 
+from src.models.user_settings import UserSettings
+
 # Importing the necessary libraries
 import customtkinter
 import os
@@ -43,16 +45,17 @@ class App(customtkinter.CTk):
         self.maxsize(0, 0)
         self.resizable(width=False, height=False)
 
+        self.user = UserSettings()  # Initialize user settings
+
         self.setup_view = SetupView(self, controller=self)
-        self.setup_view.show()
-        
-        '''
+
         # Decide what frame to show to the user, if first time user show configuration frame
-        if self.read_json_value("first_time") == "true":
-            self.setup_view.create_configuration_frame()
+        if self.user.read_json_value("first_time") == "true":
+                self.setup_view.show()
         else:
-            self.welcome_view.create_welcome_frame()
-'''
+           #self.welcome_view.create_welcome_frame()
+           print("Welcome back!")
+
     def clear_widgets(self):
         for widget in self.winfo_children():
               widget.destroy()
@@ -69,12 +72,12 @@ class App(customtkinter.CTk):
         # Create the change theme frame - CHANGE THE VARIABLE NAME
         self.welcome_frame_widget = customtkinter.CTkFrame(self, corner_radius=0)  # Changed name
         self.welcome_frame_widget.grid(row=0, column=0, sticky="ns")
-        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame_widget, text=f'Welcome {self.read_json_value("nickname")}! \n Choose a theme:',
+        self.welcome_label = customtkinter.CTkLabel(self.welcome_frame_widget, text=f'Welcome {self.user.read_json_value("nickname")}! \n Choose a theme:',
                                                 font=customtkinter.CTkFont(size=20, weight="bold"))
         self.welcome_label.grid(row=0, column=0, padx=30, pady=(150, 15))
 
-        optionmenu_var = customtkinter.StringVar(value= self.read_json_value("theme"))  # Current theme 
-        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame_widget, 
+        optionmenu_var = customtkinter.StringVar(value= self.user.read_json_value("theme"))  # Current theme
+        self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.welcome_frame_widget,
                                                                     values=["Default", "NightTrain", "Orange", "SweetKind"],
                                                                     command=self.change_appearance_mode_event,
                                                                     variable= optionmenu_var)
@@ -86,12 +89,12 @@ class App(customtkinter.CTk):
 
 
     def continue_button(self):
-        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[self.read_json_value("theme")]))
+        customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[self.user.read_json_value("theme")]))
         self.create_frames()
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_default_color_theme(os.path.join(THEMES_PATH, THEMES_TYPE[str(new_appearance_mode)]))
-        self.change_json_value("theme", str(new_appearance_mode))
+        self.user.change_json_value("theme", str(new_appearance_mode))
         self.create_frames()
 
 
@@ -106,28 +109,7 @@ class App(customtkinter.CTk):
         self.select_frame_by_name("home")
 
 
-    
-    def read_json_value(self, key: str):
-        with open(USER_SETTINGS_PATH, "r") as f:
-            data = json.load(f)
-        
-        return str(data[key])
-    
-    def change_json_value(self, key: str, value:str):
-        # Load existing settings or initialize empty dict if file is empty
-        try:
-            with open(USER_SETTINGS_PATH, "r") as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            data = {}
-
-        #update the key in json
-        data[key] = value
-
-        # Save the updated settings
-        with open(USER_SETTINGS_PATH, "w") as f:
-            json.dump(data, f, indent=4)
-
+ 
 
     def create_navigation_frame(self):
         # Assign every image used in the windows to a variables (only dark mode is supported)
