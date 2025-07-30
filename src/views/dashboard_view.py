@@ -7,6 +7,7 @@ from config.settings import (ICONS_PATH)
 
 from src.views.base_view import BaseView
 from src.views.home_view import HomeView
+from src.views.budget_view import BudgetView
 from src.models.database import DatabaseManager
 
 # Dashboard with sidebar and menu selection with different frame to show
@@ -97,7 +98,9 @@ class DashboardView(BaseView):
         """Show the home view"""
         self.selected_button = self.home_button
         self.update_button_selection()
-        self.clear_main_content()
+
+        if self.current_view:
+            self.current_view.hide()
         
         self.current_view = HomeView(self.main_content, self.controller, self.user, self.data)
 
@@ -113,5 +116,8 @@ class DashboardView(BaseView):
     def show_budget_view(self):
         self.selected_button = self.budget_button
         self.update_button_selection()
-        self.clear_main_content()
+        self.current_view.hide()
+
+        self.current_view = BudgetView(self.main_content, self.controller, self.user)
+        self.current_view.show()
 

@@ -11,12 +11,13 @@ class HomeView(BaseView):
         super().__init__(parent)
         self.controller = controller
         self.user = user
-        self.data = database
+        self.db = database
+        self.data = self.db.local_db
 
         # Configure HomeView grid to expand
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
-
+    
         self.setup_ui()
 
 
@@ -28,17 +29,6 @@ class HomeView(BaseView):
 
     # The table frame
     def table_frame(self, main_frame):
-
-        
-        
-        self.data = [
-            ["2024-01-15", "250.00", "Food", "Grocery shopping"],
-            ["2024-01-14", "-50.00", "Transport", "Gas station"],
-            ["2024-01-13", "-25.00", "Entertainment", "Movie tickets"],
-            ["2024-01-12", "1500.00", "Income", "Salary"],
-            ["2024-01-11", "-100.00", "Utilities", "Electric bill"],
-        ]
-
         # Table container - this is the main expandable section
         table_container = ctk.CTkFrame(main_frame, fg_color="transparent")
         table_container.grid(row=2, column=0, sticky="nsew", padx=30, pady=5)
@@ -63,6 +53,7 @@ class HomeView(BaseView):
 
         for idx, row in enumerate(self.data):
             self.create_table_row(idx, row)
+
 
 
     def create_table_row(self, row_idx, row_data):
