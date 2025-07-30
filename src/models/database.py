@@ -1,4 +1,7 @@
 import datetime
+import sqlite3
+
+from config.settings import DATABASE_PATH
 
 # Convert a date string from 'YYYY-MM-DD' format to 'DD/MM/YYYY' format.
 def norm_today():
@@ -7,11 +10,12 @@ def norm_today():
 
 
 class DatabaseManager:
-    def __init__(self, db_conn):
-        self.conn = db_conn
+    def __init__(self):
+        # Connessione al Database
+        self.conn = sqlite3.connect(DATABASE_PATH)
         self.cursor = self.conn.cursor()
         self.local_db = []                                      # Altering the db is expensive, better to pass it on a list and save it on the database every now and than
-
+  
         self.cursor.execute(
             '''CREATE TABLE IF NOT EXISTS transactions (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,

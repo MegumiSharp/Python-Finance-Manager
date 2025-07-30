@@ -3,6 +3,7 @@ import customtkinter as ctk
 from PIL import Image
 import os
 from config.settings import ICONS_PATH
+from src.models.database import DatabaseManager
 
 
 class HomeView(BaseView):
@@ -11,12 +12,14 @@ class HomeView(BaseView):
         self.controller = controller
         self.user = user
 
+            # Create the Object Transaction
+        db = DatabaseManager()
+
+        print(db.local_db)
+
         # Configure HomeView grid to expand
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
-        # Sample data - in real app this would come from controller/model
-  
-        
 
     def setup_ui(self):
         self.search_bar_frame(self)                                         # Add a search bar in the top of the frame
@@ -24,110 +27,11 @@ class HomeView(BaseView):
         self.table_frame(self)           
         self.add_transaction_frame(self)                                    # Add at the bottom of the frame a transaction frame to add
 
-    
-
-    def _on_mousewheel(self, event):
-        if event.num == 4:  # Linux scroll up
-            self.table_scroll._parent_canvas.yview_scroll(-1, "units")
-        elif event.num == 5:  # Linux scroll down
-            self.table_scroll._parent_canvas.yview_scroll(1, "units")
-        else:  # Windows/macOS
-            direction = -1 if event.delta > 0 else 1
-            self.table_scroll._parent_canvas.yview_scroll(direction, "units")
-
-    # Create a search bar in a frame
-    def search_bar_frame(self, home_frame):
-        # Create the frame of the search  on the top of the home frame
-        search_frame = ctk.CTkFrame(home_frame, fg_color="transparent", height=60)
-        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
-        search_frame.grid_propagate(False)
-        search_frame.grid_columnconfigure(0, weight=1)  # Make search frame expand
-        
-        # Create a container for the search entry and lens icon
-        search_container = ctk.CTkFrame(search_frame, height=40)
-        search_container.grid(row=0, column=0, sticky="ew", pady=10)
-        search_container.grid_propagate(False)
-        search_container.grid_columnconfigure(0, weight=1)
-        
-        # Search entry
-        self.search_var = ctk.StringVar()
-        self.search_var.trace_add("write", self.on_search)
-        self.search_entry = ctk.CTkEntry(
-            search_container, 
-            placeholder_text="Search...", 
-            textvariable=self.search_var,
-            height=40,
-            font=ctk.CTkFont(size=14)
-        )
-        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))  # Right padding for lens icon
-        
-        self.lens_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "search.png")), size=(24, 24))             # Icon for search bar
-        # Lens icon positioned at the end (inside the search bar area)
-        lens_icon = ctk.CTkLabel(
-            search_container, 
-            text="", 
-            image=self.lens_image,
-            width=20,
-            height=20
-        )
-        lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
-
-    # A function that use the search entry to search in the table, not yet implemented
-    def on_search(self, var_name, index, operation):
-        search_text = self.search_var.get()
-        print(f"Searching for: {search_text}")  # For testing
-       
-    # The frame witch contains the buttons to order the tabe (The buttons are yet to be implemented)
-    def ordering_frame(self, main_frame):
-         # Table header with sort buttons
-        header_frame = ctk.CTkFrame(main_frame, fg_color="#1a1a1a", height=50)
-        header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
-        header_frame.grid_propagate(False)
-        
-        headers = ["Date", "Amount", "Tag", "Description", "Actions"]
-        column_weights = [2, 2, 2, 4, 1]
-        
-        for i, (header, weight) in enumerate(zip(headers, column_weights)):
-            header_frame.grid_columnconfigure(i, weight=weight)
-            
-            if header in ["Date", "Amount", "Tag"]:
-                btn_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
-                btn_frame.grid(row=0, column=i, sticky="ew", padx=5, pady=8)
-                btn_frame.grid_columnconfigure(0, weight=1)
-                
-                sort_btn = ctk.CTkButton(
-                    btn_frame,
-                    text=f"{header} ↕",
-                    command=lambda col=i: self.sort_table(col),
-                    height=35,
-                    font=ctk.CTkFont(size=14, weight="bold")
-                )
-                sort_btn.grid(row=0, column=0, sticky="ew")
-            else:
-                label = ctk.CTkLabel(
-                    header_frame, 
-                    text=header, 
-                    font=ctk.CTkFont(size=14, weight="bold")
-                )
-                label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
-
-
-    # Placeholder ordering functions (no functionality yet)
-    def order_by_date(self):
-        print("Order by date clicked")
-
-    def order_by_amount(self):
-        print("Order by amount clicked")
-
-    def order_by_category(self):
-        print("Order by category clicked")
-    
-    def order_by_description(self):
-        print("Order by description clicked")
-
     # The table frame
     def table_frame(self, main_frame):
 
+        
+        
         self.data = [
             ["2024-01-15", "250.00", "Food", "Grocery shopping"],
             ["2024-01-14", "-50.00", "Transport", "Gas station"],
@@ -135,6 +39,7 @@ class HomeView(BaseView):
             ["2024-01-12", "1500.00", "Income", "Salary"],
             ["2024-01-11", "-100.00", "Utilities", "Electric bill"],
         ]
+
         # Table container - this is the main expandable section
         table_container = ctk.CTkFrame(main_frame, fg_color="transparent")
         table_container.grid(row=2, column=0, sticky="nsew", padx=30, pady=5)
@@ -255,3 +160,105 @@ class HomeView(BaseView):
         print(f"Category: {self.category_entry.get()}")
         print(f"Description: {self.description_entry.get()}")
 
+
+    # Function to scroll the table
+    def _on_mousewheel(self, event):
+        if event.num == 4:  # Linux scroll up
+            self.table_scroll._parent_canvas.yview_scroll(-1, "units")
+        elif event.num == 5:  # Linux scroll down
+            self.table_scroll._parent_canvas.yview_scroll(1, "units")
+        else:  # Windows/macOS
+            direction = -1 if event.delta > 0 else 1
+            self.table_scroll._parent_canvas.yview_scroll(direction, "units")
+
+    # Create a search bar in a frame
+    def search_bar_frame(self, home_frame):
+        # Create the frame of the search  on the top of the home frame
+        search_frame = ctk.CTkFrame(home_frame, fg_color="transparent", height=60)
+        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
+        search_frame.grid_propagate(False)
+        search_frame.grid_columnconfigure(0, weight=1)  # Make search frame expand
+        
+        # Create a container for the search entry and lens icon
+        search_container = ctk.CTkFrame(search_frame, height=40)
+        search_container.grid(row=0, column=0, sticky="ew", pady=10)
+        search_container.grid_propagate(False)
+        search_container.grid_columnconfigure(0, weight=1)
+        
+        # Search entry
+        self.search_var = ctk.StringVar()
+        self.search_var.trace_add("write", self.on_search)
+        self.search_entry = ctk.CTkEntry(
+            search_container, 
+            placeholder_text="Search...", 
+            textvariable=self.search_var,
+            height=40,
+            font=ctk.CTkFont(size=14)
+        )
+        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))  # Right padding for lens icon
+        
+        self.lens_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "search.png")), size=(24, 24))             # Icon for search bar
+        # Lens icon positioned at the end (inside the search bar area)
+        lens_icon = ctk.CTkLabel(
+            search_container, 
+            text="", 
+            image=self.lens_image,
+            width=20,
+            height=20
+        )
+        lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
+
+    # A function that use the search entry to search in the table, not yet implemented
+    def on_search(self, var_name, index, operation):
+        search_text = self.search_var.get()
+        print(f"Searching for: {search_text}")  # For testing
+       
+    # The frame witch contains the buttons to order the tabe (The buttons are yet to be implemented)
+    def ordering_frame(self, main_frame):
+         # Table header with sort buttons
+        header_frame = ctk.CTkFrame(main_frame, fg_color="#1a1a1a", height=50)
+        header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
+        header_frame.grid_propagate(False)
+        
+        headers = ["Date", "Amount", "Tag", "Description", "Actions"]
+        column_weights = [2, 2, 2, 4, 1]
+        
+        for i, (header, weight) in enumerate(zip(headers, column_weights)):
+            header_frame.grid_columnconfigure(i, weight=weight)
+            
+            if header in ["Date", "Amount", "Tag"]:
+                btn_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+                btn_frame.grid(row=0, column=i, sticky="ew", padx=5, pady=8)
+                btn_frame.grid_columnconfigure(0, weight=1)
+                
+                sort_btn = ctk.CTkButton(
+                    btn_frame,
+                    text=f"{header} ↕",
+                    command=lambda col=i: self.sort_table(col),
+                    height=35,
+                    font=ctk.CTkFont(size=14, weight="bold")
+                )
+                sort_btn.grid(row=0, column=0, sticky="ew")
+            else:
+                label = ctk.CTkLabel(
+                    header_frame, 
+                    text=header, 
+                    font=ctk.CTkFont(size=14, weight="bold")
+                )
+                label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
+
+
+    # Placeholder ordering functions (no functionality yet)
+    def order_by_date(self):
+        print("Order by date clicked")
+
+    def order_by_amount(self):
+        print("Order by amount clicked")
+
+    def order_by_category(self):
+        print("Order by category clicked")
+    
+    def order_by_description(self):
+        print("Order by description clicked")
+
+    

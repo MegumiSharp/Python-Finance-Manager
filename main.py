@@ -33,22 +33,14 @@ def create_user_settings_json():
 def main():
     # Initialize json file
     create_user_settings_json()
-    
-    # Connessione al Database
-    conn = sqlite3.connect(DATABASE_PATH)
-
-    # Create the Object Transaction
-    ts = database.DatabaseManager(conn)
 
     try: 
-        app = AppController(ts)
+        app = AppController()
         app.mainloop()
     except Exception as e:
         print(f"Error running application: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        conn.close()                                            # Close the Database
 
 # Make the script executed only when directily runned
 if __name__ == "__main__":

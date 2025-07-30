@@ -17,7 +17,7 @@ class DashboardView(BaseView):
         # Initialize current_view to None
         self.current_view = None
 
-        self.setup_ui()
+        self.setup_ui()   
 
     def setup_ui(self):
         # Configure grid

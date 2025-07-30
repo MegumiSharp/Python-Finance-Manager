@@ -15,9 +15,8 @@ from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, DEFAULT_APPE
 
 # Main application GUI, implemented as a class
 class AppController(customtkinter.CTk):
-    def __init__(self, obj):
+    def __init__(self):
         super().__init__()
-        self.data = obj.local_db                                                 # Local db connection
         self.current_view = None                                                 # The current View is the frame or view showed in the windows
         self.user = UserSettings()                                               # Initialize user settings
 
@@ -31,6 +30,7 @@ class AppController(customtkinter.CTk):
         self.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.maxsize(0, 0)
         self.resizable(width=False, height=False)
+
 
         # Start showing the right frame
         self.__startup()
