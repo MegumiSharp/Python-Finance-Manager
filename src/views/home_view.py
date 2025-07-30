@@ -6,6 +6,7 @@ from config.settings import ICONS_PATH
 from src.views.table_view import Table
 
 
+
 class HomeView(BaseView):
     def __init__(self, parent, controller=None, user=None, database = None):
         super().__init__(parent)

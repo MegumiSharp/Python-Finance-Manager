@@ -1,9 +1,9 @@
 {
-    "is_first_time": "true",
-    "nickname": "User",
+    "is_first_time": "false",
+    "nickname": "Simone",
     "currency_sign": "\u20ac",
     "theme": "Default",
-    "budget_rule_needs": 50,
-    "budget_rule_wants": 30,
-    "budget_rule_saving": 20
+    "budget_rule_needs": "50",
+    "budget_rule_wants": "30",
+    "budget_rule_saving": "20"
 }
