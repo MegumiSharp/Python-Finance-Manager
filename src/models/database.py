@@ -27,14 +27,31 @@ class DatabaseManager:
         )
         self.conn.commit()
         
-        self.__update_local(self.local_db)                      # At the start of the bject, the databse is copied in a list of list
+        self.update_local()                      # At the start of the bject, the databse is copied in a list of list
+
+
+    def print_db(self):
+        self.cursor.execute("SELECT * FROM transactions")
+
+        # Fetch all rows
+        rows = self.cursor.fetchall()
+
+        # Optionally get column names
+        column_names = [description[0] for description in self.cursor.description]
+        print(" | ".join(column_names))
+        print("-" * 40)
+
+        # Print each row
+        for row in rows:
+            print(" | ".join(str(cell) for cell in row))
 
 
     # Update the list with all database entries
-    def __update_local(self, list):
+    def update_local(self):
+        self.local_db = []
         self.cursor.execute('''SELECT * FROM transactions''')
         for t in self.cursor.fetchall():
-            list.append([t[1], t[2], t[3], t[4]])
+            self.local_db.append([t[0], t[1], t[2], t[3], t[4]])
     
     def add_transaction(self, date = None, amount = None, tag = None, description = None):
         if date is None:
@@ -51,10 +68,13 @@ class DatabaseManager:
 
         self.cursor.execute("INSERT INTO transactions (Date, Amount, Tag, Description) VALUES (?,?,?,?)",(date, amount, tag, description))
         self.conn.commit()
+        self.update_local()
 
     def remove_transaction(self, id : int):
         self.cursor.execute("DELETE FROM transactions WHERE ID = ?",(id,))
+
         self.conn.commit()
+        self.update_local()
         
 
     def ord_trans_by_date(self):

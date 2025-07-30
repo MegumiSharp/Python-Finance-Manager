@@ -13,6 +13,7 @@ class HomeView(BaseView):
         self.user = user
         self.db = database
         self.data = self.db.local_db
+        self.db_transactions = []
 
         # Configure HomeView grid to expand
         self.grid_columnconfigure(0, weight=1)
@@ -20,13 +21,31 @@ class HomeView(BaseView):
     
         self.setup_ui()
 
+    def save_db_modification(self, action, row_id, date = None, amount = None, tag = None, desc = None):
+        if action == "delete":
+            self.db_transactions.append({
+                "action" : action,
+                "params" : row_id
+            })
+        else:
+            self.db_transactions.append({
+                "action" : action,
+                "params" : [date, amount, tag, desc]
+            })
+
+    def update_db(self):
+        # Tempo update db testing
+        for txn in self.db_transactions:
+            self.db.remove_transaction(txn["params"] + 1)
 
     def setup_ui(self):
+
         self.search_bar_frame(self)                                         # Add a search bar in the top of the frame
         self.ordering_frame(self)                                           # Add buttons to order the list for every category
         self.table_frame(self)           
         self.add_transaction_frame(self)                                    # Add at the bottom of the frame a transaction frame to add
 
+  
     # The table frame
     def table_frame(self, main_frame):
         # Table container - this is the main expandable section
@@ -54,21 +73,27 @@ class HomeView(BaseView):
         for idx, row in enumerate(self.data):
             self.create_table_row(idx, row)
 
-
-
     def create_table_row(self, row_idx, row_data):
-        date = row_data[0]
-        amount = float(row_data[1])
-        tag = row_data[2]
-        desc = row_data[3]
+        date = row_data[1]
+        amount = float(row_data[2])
+        tag = row_data[3]
+        desc = row_data[4]
 
         amount_color = "#ff6b6b" if amount < 0 else "#51cf66"
         amount_text = f"${abs(amount):.2f}" if amount >= 0 else f"-${abs(amount):.2f}"
 
-        ctk.CTkLabel(self.table_scroll, text=date).grid(row=row_idx, column=0, sticky="w", padx=10, pady=6)
-        ctk.CTkLabel(self.table_scroll, text=amount_text, text_color=amount_color).grid(row=row_idx, column=1, sticky="w", padx=10)
-        ctk.CTkLabel(self.table_scroll, text=tag).grid(row=row_idx, column=2, sticky="w", padx=10)
-        ctk.CTkLabel(self.table_scroll, text=desc).grid(row=row_idx, column=3, sticky="w", padx=10)
+        
+        date_lab = ctk.CTkLabel(self.table_scroll, text=date)
+        date_lab.grid(row=row_idx, column=0, sticky="w", padx=10, pady=6)
+
+        amount_lab = ctk.CTkLabel(self.table_scroll, text=amount_text, text_color=amount_color)
+        amount_lab.grid(row=row_idx, column=1, sticky="w", padx=10)
+
+        tag_lab = ctk.CTkLabel(self.table_scroll, text=tag)
+        tag_lab.grid(row=row_idx, column=2, sticky="w", padx=10)
+
+        desc_lab = ctk.CTkLabel(self.table_scroll, text=desc)
+        desc_lab.grid(row=row_idx, column=3, sticky="w", padx=10)
 
         del_btn = ctk.CTkButton(
             self.table_scroll,
@@ -78,15 +103,24 @@ class HomeView(BaseView):
             fg_color="#ff6b6b",
             hover_color="#ff5252",
             font=ctk.CTkFont(size=12),
-            command=lambda idx=row_idx: self.confirm_delete(idx)
+            command=lambda idx=row_data[0]: self.__destroy_table_row(idx, date_lab, amount_lab, tag_lab, desc_lab, del_btn)
         )
         del_btn.grid(row=row_idx, column=4, padx=10, pady=6)
 
-    # To implement
-    def delete_transaction(self, index):
-        # Placeholder function for deleting transaction
-        print(f"Delete transaction at index {index}")
-        print(f"Transaction to delete: {self.data[index]}")
+    # WHen the table row is created a reference to the widget label is stored,when the del button is pressed, this reference are deleted 
+    def __destroy_table_row(self, row_idx, date, amount, tag, desc, delbtn):
+
+        date.destroy()
+        amount.destroy()
+        tag.destroy()
+        desc.destroy()
+        delbtn.destroy()
+
+        self.db.remove_transaction(int(row_idx))
+        #self.save_db_modification("delete", row_idx)
+
+
+        
      
     # The transaction frame
     def add_transaction_frame(self, main_frame):
@@ -149,6 +183,10 @@ class HomeView(BaseView):
         print(f"Amount: {self.amount_entry.get()}")
         print(f"Category: {self.category_entry.get()}")
         print(f"Description: {self.description_entry.get()}")
+
+
+            
+
 
 
     # Function to scroll the table

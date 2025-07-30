@@ -10,6 +10,8 @@ from src.views.home_view import HomeView
 from src.views.budget_view import BudgetView
 from src.models.database import DatabaseManager
 
+from src.utils.helpers import *
+
 # Dashboard with sidebar and menu selection with different frame to show
 class DashboardView(BaseView):
     def __init__(self, parent, controller=None, user=None):
@@ -17,14 +19,7 @@ class DashboardView(BaseView):
         self.controller = controller
         self.user = user
         self.data = DatabaseManager()
-        
-        # Initialize current_view to None
-        self.current_view = None
 
-        self.setup_ui()   
-
-    def setup_ui(self):
-        # Configure grid
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
         
@@ -33,10 +28,19 @@ class DashboardView(BaseView):
         self.main_content.grid(row=0, column=1, sticky="nsew")
         self.main_content.grid_columnconfigure(0, weight=1)
         self.main_content.grid_rowconfigure(0, weight=1)
-        
+
+        # Initialize current_view to None
+        self.current_view = None
+        self.home_view = HomeView(self.main_content, self.controller, self.user, self.data)
+
+
+        self.setup_ui()   
+
+    def setup_ui(self):
+        # Configure grid
         # Create sidebar
         self.create_sidebar()
-    
+        
         # Initialize with home view
         self.show_home_view()
 
@@ -102,7 +106,7 @@ class DashboardView(BaseView):
         if self.current_view:
             self.current_view.hide()
         
-        self.current_view = HomeView(self.main_content, self.controller, self.user, self.data)
+        self.current_view = self.home_view
 
         self.current_view.grid(row=0, column=0, sticky="nsew")
         self.current_view.show()
