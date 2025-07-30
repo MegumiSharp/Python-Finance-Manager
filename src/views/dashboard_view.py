@@ -2,10 +2,12 @@ import customtkinter as ctk
 from PIL import Image
 import os
 
+
 from config.settings import (ICONS_PATH)
 
 from src.views.base_view import BaseView
 from src.views.home_view import HomeView
+from src.models.database import DatabaseManager
 
 # Dashboard with sidebar and menu selection with different frame to show
 class DashboardView(BaseView):
@@ -13,7 +15,8 @@ class DashboardView(BaseView):
         super().__init__(parent)
         self.controller = controller
         self.user = user
-
+        self.data = DatabaseManager()
+        
         # Initialize current_view to None
         self.current_view = None
 
@@ -96,7 +99,7 @@ class DashboardView(BaseView):
         self.update_button_selection()
         self.clear_main_content()
         
-        self.current_view = HomeView(self.main_content, self.controller, self.user)
+        self.current_view = HomeView(self.main_content, self.controller, self.user, self.data)
 
         self.current_view.grid(row=0, column=0, sticky="nsew")
         self.current_view.show()

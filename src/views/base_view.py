@@ -15,7 +15,6 @@ class BaseView(ctk.CTkFrame, ABC):
         super().__init__(parent)
         self.controller = controller
         self.user = user
-        self.setup_ui()
 
     @abstractmethod
     def setup_ui(self):

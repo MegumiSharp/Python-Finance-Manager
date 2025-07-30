@@ -3,23 +3,22 @@ import customtkinter as ctk
 from PIL import Image
 import os
 from config.settings import ICONS_PATH
-from src.models.database import DatabaseManager
+
 
 
 class HomeView(BaseView):
-    def __init__(self, parent, controller=None, user=None):
+    def __init__(self, parent, controller=None, user=None, database = None):
         super().__init__(parent)
         self.controller = controller
         self.user = user
-
-            # Create the Object Transaction
-        db = DatabaseManager()
-
-        print(db.local_db)
+        self.data = database
 
         # Configure HomeView grid to expand
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
+
+        self.setup_ui()
+
 
     def setup_ui(self):
         self.search_bar_frame(self)                                         # Add a search bar in the top of the frame
