@@ -16,7 +16,6 @@ class BudgetView(BaseView):
     
         self.setup_ui()
 
-
     def setup_ui(self):
         self.navigation_frame_label = ctk.CTkLabel(self, text="Budget",)
         self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)

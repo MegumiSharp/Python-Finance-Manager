@@ -9,3 +9,5 @@ data/user_settings/user_settings.json
 
 # Ignore the vscode workspace file
 .vscode/settings.json
+
+examples
