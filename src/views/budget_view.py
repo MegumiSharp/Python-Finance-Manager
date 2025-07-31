@@ -1,8 +1,6 @@
 
 import customtkinter as ctk
-
 from src.views.base_view import BaseView
-
 
 class BudgetView(BaseView):
     def __init__(self, parent, controller=None, user=None):

@@ -3,53 +3,23 @@ import customtkinter as ctk
 from PIL import Image
 import os
 from config.settings import ICONS_PATH
-from src.views.table_view import Table
-
+from src.views.virtual_table_view import VirtualTable
+from datetime import datetime, timedelta
 
 
 class HomeView(BaseView):
-    def __init__(self, parent, controller=None, user=None, database = None):
+    def __init__(self, parent, controller=None, user=None, database=None):
         super().__init__(parent)
         self.controller = controller
         self.user = user
         self.db = database
-        self.data = self.db.local_db
+        self.data = self.db.local_db.copy()  # Work with a copy
+        self.original_data = self.db.local_db.copy()  # Keep original for filtering
         self.db_transactions = []
 
-        self.current_page = 0
-        self.pages = 1
-        self.start_index = 0
-        self.end_index = 50
-        self.max_len = len(self.data)
-        self.rows_for_pages = 50
-
-        self.new_table = []
-        
-        self.page_label_var = ctk.StringVar()
-        self.page_label_var.set(str(self.current_page + 1))
-
-        # Define colors
-        self.DISABLED_COLOR = "#566BC9"   # Gray for disabled
-        self.DEFAULT_COLOR = ctk.ThemeManager.theme["CTkButton"]["fg_color"]   # Default button color
-
-        # First table
-        first_table = Table(self, self, self.data, self.start_index, self.end_index)
-        first_table.grid(row=2, column=0, sticky="nsew")
-        first_table.lower()
-        self.new_table.append(first_table)
-
-        if not (self.pages * self.rows_for_pages) > (self.max_len - (self.rows_for_pages -10 )):
-            self.start_index = self.end_index + 1
-            self.end_index = ((self.pages + 1) * self.rows_for_pages)
-
-            second_table = Table(self, self, self.data, self.start_index, self.end_index)
-            second_table.grid(row=2, column=0, sticky="nsew")
-            second_table.lower()
-            self.new_table.append(second_table)
-            self.pages +=1
-
-        # Show the first page
-        self.new_table[0].lift()
+        # Current filter state
+        self.current_filter = "all"  # all, day, month, year
+        self.current_search = ""
 
         # Configure HomeView grid to expand
         self.grid_columnconfigure(0, weight=1)
@@ -57,171 +27,98 @@ class HomeView(BaseView):
     
         self.setup_ui()
 
-
-    def event_next_page(self):
-        if self.current_page + 1 == self.pages:
-            return
-
-        # Create a page when we are on the last one, this is done to prevent to load
-        if self.current_page == self.pages -2 and  (self.end_index <= len(self.data)) :
-            self.start_index = self.end_index + 1
-            self.end_index = ((self.pages + 1) * self.rows_for_pages)
-
-            other_table = Table(self, self, self.data, self.start_index, self.end_index)
-            other_table.grid(row=2, column=0, sticky="nsew")
-            other_table.lower()
-            self.new_table.append(other_table)
-            self.pages +=1
-        
-        self.new_table[self.current_page].lower()  # Hide current
-        self.current_page += 1
-        self.new_table[self.current_page].lift()   # Show next
-        
-        self.page_label_var.set(str(self.current_page + 1))
-        self.update_button_states()
-
-
-    def event_prev_page(self):
-        if self.current_page == 0:
-            return
-
-        self.new_table[self.current_page].lower()
-        self.current_page -= 1
-        self.new_table[self.current_page].lift()
-
-        self.page_label_var.set(str(self.current_page + 1))
-        self.update_button_states()
-
-    def update_button_states(self):
-        if not (self.prev_btn and self.next_btn):
-            return
-            
-        # Update previous button
-        if self.current_page == 0:
-            # On first page - disable/gray out previous button
-            self.prev_btn.configure(fg_color=self.DISABLED_COLOR, hover = False)
-        else:
-            # Not on first page - enable previous button
-            self.prev_btn.configure(fg_color=self.DEFAULT_COLOR, hover = True)
-        
-        # Update next button
-        max_page = self.pages - 1
-        if self.current_page >= max_page:
-            # On last page - disable/gray out next button
-            self.next_btn.configure(fg_color=self.DISABLED_COLOR, hover = False)
-        else:
-            # Not on last page - enable next button
-            self.next_btn.configure(fg_color=self.DEFAULT_COLOR, hover = True)
-
-
-    def save_db_modification(self, action, row_id, date = None, amount = None, tag = None, desc = None):
+    def save_db_modification(self, action, row_id, date=None, amount=None, tag=None, desc=None):
         if action == "delete":
             self.db_transactions.append({
-                "action" : action,
-                "params" : row_id
+                "action": action,
+                "params": row_id
             })
         else:
             self.db_transactions.append({
-                "action" : action,
-                "params" : [date, amount, tag, desc]
+                "action": action,
+                "params": [date, amount, tag, desc]
             })
 
     def update_db(self):
-        # Tempo update db testing
+        # Process pending database transactions
         for txn in self.db_transactions:
-            self.db.remove_transaction(txn["params"] + 1)
+            if txn["action"] == "delete":
+                self.db.remove_transaction(txn["params"])
+        self.db_transactions.clear()
 
     def setup_ui(self):
+        self.search_bar_frame(self)                                         
+        self.ordering_frame(self)                                           
 
-        self.search_bar_frame(self)                                         # Add a search bar in the top of the frame
-        self.ordering_frame(self)                                           # Add buttons to order the list for every category
-        #self.table_frame(self)     
-        self.new_table[0].grid(row=2, column=0, sticky="nsew")     
-        self.add_transaction_frame(self)                                    # Add at the bottom of the frame a transaction frame to add
-
-
-
-    
-    # Function to scroll the table
-    def _on_mousewheel(self, event):
-        if event.num == 4:  # Linux scroll up
-            self.table_scroll._parent_canvas.yview_scroll(-1, "units")
-        elif event.num == 5:  # Linux scroll down
-            self.table_scroll._parent_canvas.yview_scroll(1, "units")
-        else:  # Windows/macOS
-            direction = -1 if event.delta > 0 else 1
-            self.table_scroll._parent_canvas.yview_scroll(direction, "units")
-            
-
-
-        
-  
-    # The table frame
-    def table_frame(self, main_frame):
-        # Table container - this is the main expandable section
-        table_container = ctk.CTkFrame(main_frame, fg_color="transparent")
-        table_container.grid(row=2, column=0, sticky="nsew", padx=30, pady=5)
-        table_container.grid_columnconfigure(0, weight=1)
-        table_container.grid_rowconfigure(0, weight=1)
-
-        # Create scrollable frame for table
-        self.table_scroll = ctk.CTkScrollableFrame(table_container, fg_color="#1a1a1a")
-        self.table_scroll.grid(row=0, column=0, sticky="nsew")
-        self.table_scroll.grid_columnconfigure(0, weight=1)
-
-        # Enable mouse scroll on the table scrollable frame
-        self.table_scroll.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows/macOS
-        self.table_scroll.bind_all("<Button-4>", self._on_mousewheel)    # Linux scroll up
-        self.table_scroll.bind_all("<Button-5>", self._on_mousewheel)    # Linux scroll down
-
-        for widget in self.table_scroll.winfo_children():
-            widget.destroy()
-
-        for i in range(5):
-            self.table_scroll.grid_columnconfigure(i, weight=1)
-
-        for idx, row in enumerate(self.data):
-            if idx >= 50:
-                break
-            self.create_table_row(idx, row)
-
-
-    def create_table_row(self, row_idx, row_data):
-        date = row_data[1]
-        amount = float(row_data[2])
-        tag = row_data[3]
-        desc = row_data[4]
-
-        amount_color = "#ff6b6b" if amount < 0 else "#51cf66"
-        amount_text = f"${abs(amount):.2f}" if amount >= 0 else f"-${abs(amount):.2f}"
-        
-        date_lab = ctk.CTkLabel(self.table_scroll, text=date)
-        date_lab.grid(row=row_idx, column=0, sticky="w", padx=10, pady=6)
-
-        amount_lab = ctk.CTkLabel(self.table_scroll, text=amount_text, text_color=amount_color)
-        amount_lab.grid(row=row_idx, column=1, sticky="w", padx=10)
-
-        tag_lab = ctk.CTkLabel(self.table_scroll, text=tag)
-        tag_lab.grid(row=row_idx, column=2, sticky="w", padx=10)
-
-        desc_lab = ctk.CTkLabel(self.table_scroll, text=desc)
-        desc_lab.grid(row=row_idx, column=3, sticky="w", padx=10)
-
-        del_btn = ctk.CTkButton(
-            self.table_scroll,
-            text="Delete",
-            width=60,
-            height=28,
-            fg_color="#ff6b6b",
-            hover_color="#ff5252",
-            font=ctk.CTkFont(size=12),
-            command=lambda idx=row_data[0]: self.__destroy_table_row(idx, date_lab, amount_lab, tag_lab, desc_lab, del_btn)
+        # Create virtual table with callback
+        self.virtual_table = VirtualTable(
+            self, 
+            self, 
+            self.data,
+            on_delete_callback=self.on_transaction_deleted
         )
-        del_btn.grid(row=row_idx, column=4, padx=10, pady=6)
-
-
+        self.virtual_table.grid(row=2, column=0, sticky="nsew")
         
-     
+        self.add_transaction_frame(self)                                    
+
+    def on_transaction_deleted(self, transaction_id):
+        """Handle transaction deletion from virtual table"""
+        # Remove from database
+        self.db.remove_transaction(transaction_id)
+        
+        # Update our data copies
+        self.original_data = [row for row in self.original_data if row[0] != transaction_id]
+        self.data = [row for row in self.data if row[0] != transaction_id]
+        
+        print(f"Transaction {transaction_id} deleted from database")
+
+    def apply_filters(self):
+        """Apply current search and date filters"""
+        # Start with original data
+        filtered_data = self.original_data.copy()
+        
+        # Apply date filter
+        if self.current_filter != "all":
+            filtered_data = self.filter_by_date_range(filtered_data, self.current_filter)
+        
+        # Apply search filter
+        if self.current_search:
+            query_lower = self.current_search.lower()
+            filtered_data = [
+                row for row in filtered_data
+                if any(str(field).lower().find(query_lower) != -1 for field in row[1:])
+            ]
+        
+        # Update data and refresh table
+        self.data = filtered_data
+        self.virtual_table.update_data(self.data)
+
+    def filter_by_date_range(self, data, filter_type):
+        """Filter data by date range"""
+        now = datetime.now()
+        
+        if filter_type == "year":
+            target_year = now.year
+            return [
+                row for row in data
+                if datetime.strptime(row[1], "%Y-%m-%d").year == target_year
+            ]
+        elif filter_type == "month":
+            target_year, target_month = now.year, now.month
+            return [
+                row for row in data
+                if (datetime.strptime(row[1], "%Y-%m-%d").year == target_year and
+                    datetime.strptime(row[1], "%Y-%m-%d").month == target_month)
+            ]
+        elif filter_type == "day":
+            target_date = now.strftime("%Y-%m-%d")
+            return [
+                row for row in data
+                if row[1] == target_date
+            ]
+        else:  # "all"
+            return data
+
     # The transaction frame
     def add_transaction_frame(self, main_frame):
         # Create add transaction frame at the bottom
@@ -277,22 +174,48 @@ class HomeView(BaseView):
         self.add_btn.grid(row=2, column=0, columnspan=4, pady=(5, 10), padx=10, sticky="ew")
 
     def add_transaction(self):
-        # Placeholder function for adding transaction
-        print("Add transaction clicked")
-        print(f"Date: {self.date_entry.get()}")
-        print(f"Amount: {self.amount_entry.get()}")
-        print(f"Category: {self.category_entry.get()}")
-        print(f"Description: {self.description_entry.get()}")
-
-
+        """Add new transaction and refresh table"""
+        try:
+            # Get input values
+            date = self.date_entry.get()
+            amount = float(self.amount_entry.get())
+            category = self.category_entry.get()
+            description = self.description_entry.get()
             
-
-
-
+            # Validate inputs
+            if not all([date, str(amount), category, description]):
+                print("Please fill all fields")
+                return
+                
+            # Validate date format
+            datetime.strptime(date, "%Y-%m-%d")
+            
+            # Add to database (you'll need to implement this in your db class)
+            new_id = self.db.add_transaction(date, amount, category, description)
+            
+            # Add to our data
+            new_transaction = [new_id, date, amount, category, description]
+            self.original_data.append(new_transaction)
+            
+            # Clear input fields
+            self.date_entry.delete(0, 'end')
+            self.amount_entry.delete(0, 'end')
+            self.category_entry.delete(0, 'end')
+            self.description_entry.delete(0, 'end')
+            
+            # Refresh table with current filters
+            self.apply_filters()
+            
+            print(f"Added transaction: {date}, ${amount}, {category}, {description}")
+            
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+        except Exception as e:
+            print(f"Error adding transaction: {e}")
 
     # Create a search bar in a frame
     def search_bar_frame(self, home_frame):
-        # Create the frame of the search  on the top of the home frame
+        # Create the frame of the search on the top of the home frame
         search_frame = ctk.CTkFrame(home_frame, fg_color="transparent", height=60)
         search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
         search_frame.grid_propagate(False)
@@ -316,7 +239,7 @@ class HomeView(BaseView):
         )
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))  # Right padding for lens icon
         
-        self.lens_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "search.png")), size=(24, 24))             # Icon for search bar
+        self.lens_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "search.png")), size=(24, 24))
         # Lens icon positioned at the end (inside the search bar area)
         lens_icon = ctk.CTkLabel(
             search_container, 
@@ -327,64 +250,65 @@ class HomeView(BaseView):
         )
         lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
 
-    # A function that use the search entry to search in the table, not yet implemented
     def on_search(self, var_name, index, operation):
-        search_text = self.search_var.get()
-        print(f"Searching for: {search_text}")  # For testing
-       
+        """Handle search input changes"""
+        self.current_search = self.search_var.get()
+        self.apply_filters()
 
-
- 
-
-    # The frame witch contains the buttons to order the tabe (The buttons are yet to be implemented)
+    # The frame which contains the buttons to order the table and date filters
     def ordering_frame(self, main_frame):
-         # Table header with sort buttons
+        # Table header with sort buttons
         header_frame = ctk.CTkFrame(main_frame, fg_color="#1a1a1a", height=50)
         header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
         header_frame.grid_propagate(False)
         
         headers = ["Date", "Amount", "Tag", "Description", ""]
-            
         column_weights = [2, 2, 2, 4, 1]
 
-        
-        # Add button
-        self.prev_btn = ctk.CTkButton(
+        # Date filter buttons (D = Day, M = Month, Y = Year)
+        self.day_btn = ctk.CTkButton(
             header_frame, 
-            text="<", 
+            text="D", 
             height=32,
-            width= 32,
-            command=self.event_prev_page,
+            width=32,
+            command=lambda: self.set_date_filter("day"),
             font=ctk.CTkFont(size=14, weight="bold"),
-            fg_color= self.DISABLED_COLOR,
-            hover = False
+            hover=True
         )
-        self.prev_btn.grid(row=0, column=5, padx=5, pady=8)
+        self.day_btn.grid(row=0, column=5, padx=5, pady=8)
 
-
-        self.page_btn = ctk.CTkButton(
+        self.month_btn = ctk.CTkButton(
             header_frame, 
-            textvariable=self.page_label_var, 
+            text="M",
             height=32,
-            width= 32,
-            command=self.add_transaction,
+            width=32,
+            command=lambda: self.set_date_filter("month"),
             font=ctk.CTkFont(size=14, weight="bold"),
-            hover = False
         )
-        self.page_btn.grid(row=0, column=6, padx=5, pady=8)
+        self.month_btn.grid(row=0, column=6, padx=5, pady=8)
 
-        self.next_btn = ctk.CTkButton(
+        self.year_btn = ctk.CTkButton(
             header_frame, 
-            text=">", 
+            text="Y", 
             height=32,
-            width= 32,
-            command=self.event_next_page,
+            width=32,
+            command=lambda: self.set_date_filter("year"),
             font=ctk.CTkFont(size=14, weight="bold")
         )
-        self.next_btn.grid(row=0, column=7, padx=5, pady=8)
+        self.year_btn.grid(row=0, column=7, padx=5, pady=8)
 
+        # All transactions button
+        self.all_btn = ctk.CTkButton(
+            header_frame, 
+            text="All", 
+            height=32,
+            width=32,
+            command=lambda: self.set_date_filter("all"),
+            font=ctk.CTkFont(size=12, weight="bold")
+        )
+        self.all_btn.grid(row=0, column=8, padx=5, pady=8)
 
-        
+        # Column headers and sort buttons
         for i, (header, weight) in enumerate(zip(headers, column_weights)):
             header_frame.grid_columnconfigure(i, weight=weight)
             
@@ -396,8 +320,8 @@ class HomeView(BaseView):
                 sort_btn = ctk.CTkButton(
                     btn_frame,
                     text=f"{header} ↕",
-                    command=lambda col=i: self.sort_table(col),
-                    width= 24,
+                    command=lambda col=i+1: self.sort_table(col),  # +1 because data columns start at index 1
+                    width=24,
                     height=32,
                     font=ctk.CTkFont(size=14, weight="bold")
                 )
@@ -410,18 +334,32 @@ class HomeView(BaseView):
                 )
                 label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
 
+    def set_date_filter(self, filter_type):
+        """Set the current date filter and update button colors"""
+        self.current_filter = filter_type
+        
+        # Reset all button colors
+        default_color = ctk.ThemeManager.theme["CTkButton"]["fg_color"]
+        active_color = "#4CAF50"  # Green for active filter
+        
+        self.day_btn.configure(fg_color=default_color)
+        self.month_btn.configure(fg_color=default_color)
+        self.year_btn.configure(fg_color=default_color)
+        self.all_btn.configure(fg_color=default_color)
+        
+        # Highlight active filter
+        if filter_type == "day":
+            self.day_btn.configure(fg_color=active_color)
+        elif filter_type == "month":
+            self.month_btn.configure(fg_color=active_color)
+        elif filter_type == "year":
+            self.year_btn.configure(fg_color=active_color)
+        elif filter_type == "all":
+            self.all_btn.configure(fg_color=active_color)
+        
+        # Apply the filter
+        self.apply_filters()
 
-    # Placeholder ordering functions (no functionality yet)
-    def order_by_date(self):
-        print("Order by date clicked")
-
-    def order_by_amount(self):
-        print("Order by amount clicked")
-
-    def order_by_category(self):
-        print("Order by category clicked")
-    
-    def order_by_description(self):
-        print("Order by description clicked")
-
-    
+    def sort_table(self, column_index):
+        """Sort the table by column"""
+        self.virtual_table.sort_data(column_index)

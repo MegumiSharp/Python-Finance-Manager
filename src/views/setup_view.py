@@ -190,6 +190,6 @@ class SetupView(BaseView):
             # Mark as not first time
             self.user.change_json_value(KEY_IS_FIRST_TIME, VALUE_FALSE)
 
-            # Clear the current view and show the welcome view (Is called from the controller)
+            # palle
             self.destroy()
             self.controller.switch_frame(WELCOME_FRAME) 
