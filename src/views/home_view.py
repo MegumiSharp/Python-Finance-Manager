@@ -21,9 +21,10 @@ class HomeView(BaseView):
         self.current_filter = "all"  # all, day, month, year
         self.current_search = ""
 
-        # Configure HomeView grid to expand
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
+        # Configure HomeView grid - now we have 2 columns
+        self.grid_columnconfigure(0, weight=3)  # Main content takes 3/4 of space
+        self.grid_columnconfigure(1, weight=1)  # Summary takes 1/4 of space
+        self.grid_rowconfigure(0, weight=1)  # Single row that expands
     
         self.setup_ui()
 
@@ -47,19 +48,168 @@ class HomeView(BaseView):
         self.db_transactions.clear()
 
     def setup_ui(self):
-        self.search_bar_frame(self)                                         
-        self.ordering_frame(self)                                           
+        # Create main content frame (left side)
+        self.main_content_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_content_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+        self.main_content_frame.grid_columnconfigure(0, weight=1)
+        self.main_content_frame.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
+
+        # Create summary frame (right side)
+        self.summary_frame = ctk.CTkFrame(self)
+        self.summary_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+        
+        # Setup main content components
+        self.search_bar_frame(self.main_content_frame)                                         
+        self.ordering_frame(self.main_content_frame)                                           
 
         # Create virtual table with callback
         self.virtual_table = VirtualTable(
-            self, 
+            self.main_content_frame, 
             self, 
             self.data,
             on_delete_callback=self.on_transaction_deleted
         )
         self.virtual_table.grid(row=2, column=0, sticky="nsew")
         
-        self.add_transaction_frame(self)                                    
+        self.add_transaction_frame(self.main_content_frame)
+        
+        # Setup summary panel
+        self.setup_summary_panel()
+
+    def setup_summary_panel(self):
+        """Create the summary panel on the right side"""
+        # Summary content framei
+        summary_content = ctk.CTkFrame(self.summary_frame)
+        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
+        summary_content.grid_columnconfigure(0, weight=1)
+        
+
+         # Total transactions
+        self.total_transactions_label_text = ctk.CTkLabel(
+            summary_content,
+            text="Total Transactions:",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.total_transactions_label_text.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
+
+        # Total transactions
+        self.total_transactions_label = ctk.CTkLabel(
+            summary_content,
+            text="0",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.total_transactions_label.grid(row=0, column=1, pady=(15, 5), padx=15, sticky="w")
+        
+        # Total income
+        self.total_income_label_text = ctk.CTkLabel(
+            summary_content,
+            text="Total Income:",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.total_income_label_text.grid(row=1, column=0, pady=5, padx=15, sticky="w")
+
+        self.total_income_label = ctk.CTkLabel(
+            summary_content,
+            text="Total Income:",
+            text_color="#2A9221",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.total_income_label.grid(row=1, column=1, pady=5, padx=15, sticky="w")
+        
+
+        # Total expenses
+        self.total_expenses_label_text = ctk.CTkLabel(
+            summary_content,
+            text="Total Expenses:",
+            font=ctk.CTkFont(size=16, weight="bold"),
+        )
+        self.total_expenses_label_text.grid(row=2, column=0, pady=5, padx=15, sticky="w")
+
+        # Total expenses
+        self.total_expenses_label = ctk.CTkLabel(
+            summary_content,
+            text="$0.00",
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color="red"
+        )
+        self.total_expenses_label.grid(row=2, column=1, pady=5, padx=15, sticky="w")
+        
+        # Net balance
+        self.net_balance_label_text = ctk.CTkLabel(
+            summary_content,
+            text="Balance:",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.net_balance_label_text.grid(row=3, column=0, pady=(5, 15), padx=15, sticky="w")
+
+                # Net balance
+        self.net_balance_label = ctk.CTkLabel(
+            summary_content,
+            text="$0.00",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        self.net_balance_label.grid(row=3, column=1, pady=(5, 15), padx=15, sticky="w")
+        
+        # Filter info
+        filter_info_frame = ctk.CTkFrame(self.summary_frame)
+        filter_info_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+        filter_info_frame.grid_columnconfigure(0, weight=1)
+        
+        filter_title = ctk.CTkLabel(
+            filter_info_frame,
+            text="Current Filter",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        filter_title.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
+        
+        self.income_btn = ctk.CTkButton(
+            filter_info_frame,
+            text="Income",
+            fg_color= "#2A9221",
+            command = self.show_income,
+            font=ctk.CTkFont(size=14)
+        )
+        self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
+        
+        # Make the summary frame expandable
+        self.summary_frame.grid_columnconfigure(0, weight=1)
+        self.summary_frame.grid_rowconfigure(3, weight=1)  # Add flexible space at bottom
+        
+        # Initial summary update
+        self.update_summary()
+
+    def update_summary(self):
+        """Update the summary panel with current data statistics"""
+        if not self.data:
+            self.total_transactions_label.configure(text="0")
+            self.total_income_label.configure(text="$0.00")
+            self.total_expenses_label.configure(text="$0.00")
+            self.net_balance_label.configure(text="$0.00")
+            return
+        
+        total_count = len(self.data)
+        total_income = sum(float(row[2]) for row in self.data if float(row[2]) > 0)
+        total_expenses = sum(abs(float(row[2])) for row in self.data if float(row[2]) < 0)
+        net_balance = total_income - total_expenses
+        
+        # Update labels
+        self.total_transactions_label.configure(text=f"{total_count}")
+        self.total_income_label.configure(text=f"${total_income:.2f}")
+        self.total_expenses_label.configure(text=f"${total_expenses:.2f}")
+        
+        # Color code the net balance
+        balance_color = "#2A9221" if net_balance >= 0 else "red"
+        self.net_balance_label.configure(
+            text=f"${net_balance:.2f}",
+            text_color=balance_color
+        )
+
+    def show_income(self):
+        self.sort_table(2, False)
+
+        self.update_summary()
+
+        
 
     def on_transaction_deleted(self, transaction_id):
         """Handle transaction deletion from virtual table"""
@@ -69,6 +219,9 @@ class HomeView(BaseView):
         # Update our data copies
         self.original_data = [row for row in self.original_data if row[0] != transaction_id]
         self.data = [row for row in self.data if row[0] != transaction_id]
+        
+        # Update summary
+        self.update_summary()
         
         print(f"Transaction {transaction_id} deleted from database")
 
@@ -80,7 +233,7 @@ class HomeView(BaseView):
         # Apply date filter
         if self.current_filter != "all":
             filtered_data = self.filter_by_date_range(filtered_data, self.current_filter)
-        
+
         # Apply search filter
         if self.current_search:
             query_lower = self.current_search.lower()
@@ -92,6 +245,9 @@ class HomeView(BaseView):
         # Update data and refresh table
         self.data = filtered_data
         self.virtual_table.update_data(self.data)
+        
+        # Update summary
+        self.update_summary()
 
     def filter_by_date_range(self, data, filter_type):
         """Filter data by date range"""
@@ -360,6 +516,6 @@ class HomeView(BaseView):
         # Apply the filter
         self.apply_filters()
 
-    def sort_table(self, column_index):
+    def sort_table(self, column_index, boolean = None):
         """Sort the table by column"""
-        self.virtual_table.sort_data(column_index)
+        self.virtual_table.sort_data(column_index, boolean)
