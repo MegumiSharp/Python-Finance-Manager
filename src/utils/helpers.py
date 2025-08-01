@@ -19,3 +19,11 @@ def seed_200_transactions(database):
         
         database.add_transaction(date=date, amount=amount, tag=tag, description=description)
         database.update_local()
+
+def is_valid_date(date : str):
+    try:
+        date_str = date.strip()
+        datetime.strptime(date_str, "%d/%m/%Y")
+    except ValueError:
+        return False
+    

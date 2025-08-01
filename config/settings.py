@@ -13,7 +13,7 @@ ASSETS_ROOT = PROJECT_ROOT / "assets"
 DATA_ROOT = PROJECT_ROOT / "data"
 
 # Specific paths
-THEMES_PATH = CONFIG_ROOT / "themes"
+THEMES_PATH = ASSETS_ROOT / "themes"
 BACKGROUND_PATH = ASSETS_ROOT / "images" / "backgrounds"
 ICONS_PATH = ASSETS_ROOT / "images" / "icons"
 DATABASE_PATH = DATA_ROOT / "database" / "transactions.db"

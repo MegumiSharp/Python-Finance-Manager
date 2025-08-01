@@ -1,8 +1,5 @@
 # Importing the necessary libraries
 import customtkinter
-from PIL import Image
-from CTkTable import *
-import tkinter.messagebox as messagebox
 
 # Importing the views and models used in the application
 from src.views.setup_view import SetupView
@@ -19,6 +16,7 @@ class AppController(customtkinter.CTk):
         super().__init__()
         self.current_view = None                                                 # The current View is the frame or view showed in the windows
         self.user = UserSettings()                                               # Initialize user settings
+        self.views = {}
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode(DEFAULT_APPEARANCE_MODE)
@@ -31,18 +29,8 @@ class AppController(customtkinter.CTk):
         self.maxsize(0, 0)
         self.resizable(width=False, height=False)
 
-
         # Start showing the right frame
         self.__startup()
-
-    # Used to not have duplicate code
-    def _show_view(self, view_class):
-        if self.current_view:
-            self.current_view.hide()  
-        
-        # Change the current_view to the class and use the abstract method show() to show it
-        self.current_view = view_class(self, controller=self, user=self.user)
-        self.current_view.show()
 
     # Startup function to decide what frame to show to the user, if it is the first time, the setup frame is showed
     def __startup(self):
@@ -51,6 +39,18 @@ class AppController(customtkinter.CTk):
             self._show_view(SetupView)
         else:
             self.switch_frame(WELCOME_FRAME)
+
+    # If the current_view is not empty, it hides it than create if the view_class is not present in the dictionary it create 
+    def _show_view(self, view_class):
+        if self.current_view:
+            self.current_view.hide()  
+
+        if view_class not in self.views:
+            self.views[view_class] = view_class(self, controller=self, user=self.user)
+        
+        # Change the current_view to the class and use the abstract method show() to show it
+        self.current_view = self.views[view_class]
+        self.current_view.show()
 
     # Function used to switch from the welcome frame to the dashboard frame, is also used in setup view to change frame
     def switch_frame(self, frame_name):
