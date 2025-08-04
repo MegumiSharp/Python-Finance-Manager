@@ -37,6 +37,8 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 MIN_WINDOW_WIDTH = 800
 MIN_WINDOW_HEIGHT = 600
+MAX_WINDOW_WIDTH = 1920
+MAX_WINDOW_HEIGHT = 1080
 
 # ============================================================================
 # THEME SETTINGS
@@ -157,6 +159,7 @@ DEFAULT_USER_SETTINGS = {
 WELCOME_FRAME = "welcome_frame"
 NAVIGATION_FRAME = "navigation_frame"
 DASHBOARD_FRAME = "dashboard_frame"
-
+HOMEVIEW_FRAME = "homeview_frame"
+BUDGET_FRAME = "budget_frame"
 # ============================================================================
 # END OF SETTINGS

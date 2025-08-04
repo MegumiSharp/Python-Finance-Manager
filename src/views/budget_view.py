@@ -3,7 +3,7 @@ import customtkinter as ctk
 from src.views.base_view import BaseView
 
 class BudgetView(BaseView):
-    def __init__(self, parent, controller=None, user=None):
+    def __init__(self, parent, controller=None, user=None, database=None):
         super().__init__(parent)
         self.controller = controller
         self.user = user

@@ -4,7 +4,6 @@ import os
 from config.settings import (KEY_IS_FIRST_TIME, KEY_NICKNAME, KEY_CURRENCY_SIGN,
                              KEY_BUDGET_NEEDS, KEY_BUDGET_WANTS, KEY_BUDGET_SAVING,
                              VALUE_FALSE, DEFAULT_NICKNAME,
-                             WINDOW_WIDTH, WINDOW_HEIGHT,
                              BACKGROUND_PATH,
                              WELCOME_FRAME)       
 
@@ -21,20 +20,25 @@ class SetupView(BaseView):
         self.controller = controller
         self.user = user
 
-        # Set the size of the window
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=0)  # Sidebar - fixed width
-        self.grid_columnconfigure(1, weight=1)  # Main content - expandable
-
+        # Inherite the grid from the baseview and than expand on the window, this is done to have  a responsive frame
+        self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.main_frame.pack(fill="both", expand=True)
+        
+        # Configure the main frame to use grid for sidebar and content area (one row and two column)
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=0)  # Sidebar - fixed width
+        self.main_frame.grid_columnconfigure(1, weight=1)  # Main content - expandable
+        self.main_frame.grid(row=0, column=0, sticky="nsew")
+        
+        # Creates the widgets in the frames
         self.setup_ui()
 
     # This method sets up the UI of the SetupView
     def setup_ui(self):
         # LEFT SIDE - Sidebar (Column 0)
-        self.sidebar_frame = ctk.CTkFrame(self, width=300, corner_radius=0)  
+        self.sidebar_frame = ctk.CTkFrame(self.main_frame, width=300, corner_radius=0)  
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(8, weight=1) 
-        self.sidebar_frame.grid_propagate(False) 
 
         # Title in the sidebar
         self.title_label = ctk.CTkLabel(self.sidebar_frame,  text=WELCOME_HEADER_TEXT, font=ctk.CTkFont(size=20, weight="bold"))
@@ -69,14 +73,14 @@ class SetupView(BaseView):
         self.error_label.grid(row=7, column=0, padx=20, pady=(10, 0), sticky="ew")
 
         # RIGHT SIDE - Main Content (Column 1) frame
-        self.main_content_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.main_content_frame = ctk.CTkFrame(self.main_frame, corner_radius=0)
         self.main_content_frame.grid(row=0, column=1, sticky="nsew")
         self.main_content_frame.grid_rowconfigure(0, weight=2)  # Info textbox - more space
         self.main_content_frame.grid_rowconfigure(1, weight=1)  # Budget rule frame - less space
         self.main_content_frame.grid_columnconfigure(0, weight=1)
 
         # Background image as background of main content
-        self.bg_image = ctk.CTkImage(Image.open(os.path.join(BACKGROUND_PATH, "background.jpg")), size=(WINDOW_WIDTH-300, WINDOW_HEIGHT))
+        self.bg_image = ctk.CTkImage(Image.open(os.path.join(BACKGROUND_PATH, "background.jpg")), size=(1920, 1080))
         self.bg_image_label = ctk.CTkLabel(self.main_content_frame, text="", image=self.bg_image) # Trick to set background image
         self.bg_image_label.place(x=0, y=0, relwidth=1, relheight=1) 
 
@@ -166,6 +170,7 @@ class SetupView(BaseView):
         # Return True if no errors
         return error_text == ""
 
+    # Store the user addes settings in the file json and command the controller to switch frame to the Welcome view
     def __continue_button_from_configuration_frame(self):
         nickname = self.nickname_entry.get()
         currency_sign = self.monetary_symbol_optionmenu.get()
@@ -190,6 +195,4 @@ class SetupView(BaseView):
             # Mark as not first time
             self.user.change_json_value(KEY_IS_FIRST_TIME, VALUE_FALSE)
 
-            # palle
-            self.destroy()
             self.controller.switch_frame(WELCOME_FRAME) 

@@ -8,9 +8,12 @@ class BaseView(ctk.CTkFrame, ABC):
         self.controller = controller
         self.user = user
 
+        # Setup the main frame 0x0 a normal window
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
     @abstractmethod
     def setup_ui(self):
-        """Metodo che ogni view deve implementare per costruire l'interfaccia"""
         pass
 
     def show(self):

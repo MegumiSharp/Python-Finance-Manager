@@ -2,6 +2,9 @@
 
 Here is the documentation for the project, which delves into my approach to using customtkinter and explains how the various parts of the program work. The project is intended as a learning and organizational exercise rather than as a production-ready application.
 
+One of the most important elements in the program is the grid system—the internal layout system used by Tkinter and adopted by CustomTkinter to position elements within the window. This is one of the most critical aspects to understand, as it effectively defines the structure of the window and the GUI.
+For a deeper explanation of how it works and how to manage it, refer to this [section](/docs/Application_Documentation/the_grid_layout.md).
+
 **File Tree:** 
 ```
 (project root)
@@ -170,3 +173,176 @@ This dictionary is used by `_show_view()`.
 
 This approach allows for the reuse of view instances from the beginning to the end of the application, enabling efficient switching through `switch_frame()`.
 
+`_hide_or_destroy_current_view` is self explainatory, decide to hide a view or destroy based on if the view is needed or not after the first time.
+
+
+## `BaseView.py`
+
+This is a base class, or abstract class, for all views in the application. It provides a common interface and basic functionality for all views. Each view **inherits** from this class and implements the `setup_ui` method. The core features of this class are the `show` and `hide` methods.
+
+Each view uses the `grid` functionality of **CustomTkinter** to arrange widgets in an invisible grid inside the window. Although it is generally best **not to mix** `pack` and `grid` (because `pack` stacks widgets one after another, either top to bottom or left to right), we only use the `pack` feature inside the base view.
+
+Here’s how it works: when creating a view, like `SetupView`, it uses `grid` to position widgets **inside its frame**, but the frame itself is **not initially placed** anywhere in the window. The frame is just initialized and not yet added to the window.
+
+Using the `show` function, the frame widget is packed into the window. Because all the widgets are inside the frame, this method makes it easy to show and hide entire views. Each view acts like a container, and calling `show` from the base view packs the container into the window.
+
+
+```
++----------------------------------+
+|           Main Window            |
+|                                  |
+|   +--------------------------+   | <-- frame (view container)
+|   |   Frame (initially NOT   |   |     contains widgets arranged by grid
+|   |   packed in window)      |   |
+|   |                          |   |
+|   |  +-------+  +--------+   |   | <-- widgets positioned by grid inside frame
+|   |  |Label  |  | Entry  |   |   |
+|   |  +-------+  +--------+   |   |
+|   |                          |   |
+|   +--------------------------+   |
+|                                  |
++----------------------------------+
+
+BaseView.show() method:
+- Calls `frame.pack()` to add the frame to the window,
+  making all the widgets inside visible.
+
+BaseView.hide() method:
+- Calls `frame.pack_forget()` to remove the frame from the window,
+  hiding the entire view.
+```
+
+Il seguente codice presente nel file:
+```python
+  self.grid_columnconfigure(0, weight=1)
+  self.grid_rowconfigure(0, weight=1)
+```
+Crea una griglia con 1 colonna e una riga, a tutti gli effetti un rettangolo che si espande nella finestra
+creata da customtkinter, riprendendo il disegnino in ascii, la griglia sará creata dentro le varie view e sará posizionato in riga 0 e colonna 0 a tutti gli effetti all'interno della finestra principale.
+
+
+## `setup_view.py` - First Startup configuration for the User
+
+Questo file si interessa di creare una view o un frame con all'interno degli elementi di configurazione del programma per l'utente. Questo tipo di configurazione riguardono il:
+
+- Nickname - Utilizzato per la schermata di welcome
+- Currencu Sign - Il simbolo da utilizzare nelle transazioni per identificare se si parla di euro, dollari o pounds
+- Percentuali per il budget rule - Un sistema per l'organizzazione del budget dedicato a mettere da parte, spese necessarie tipo bollette e spese superflue
+
+Inoltre in questa schermata ci sono delle informazioni utile come schermata introduttiva ed esplicativa al di fuori della repo github. É possibile che ulteriori elementi possano essere aggiunti.
+
+![setup view](/assets/images/docs_image/setup_view1.png)
+
+Per quanto riguarda il codice nel `__init__` si trova il codice necessario per ereditare dai parametri di quando l'istanza della classe verra chiamata, come controller e user_settings (json), oltre che l'ereditarietá di `BaseView`, generalemnte tutte le view hanno un aspetto simile.
+
+```python
+# This is the constructor of the SetupView class, it initializes the view and sets up the UI
+def __init__(self, parent, controller=None, user=None):
+    super().__init__(parent, controller, user)
+    self.controller = controller
+    self.user = user
+
+    # Inherite the grid from the baseview and than expand on the window, this is done to have  a responsive frame
+    self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+    self.main_frame.pack(fill="both", expand=True)
+    
+    # Configure the main frame to use grid for sidebar and content area
+    self.main_frame.grid_rowconfigure(0, weight=1)
+    self.main_frame.grid_columnconfigure(0, weight=0)  # Sidebar - fixed width
+    self.main_frame.grid_columnconfigure(1, weight=1)  # Main content - expandable
+    self.main_frame.grid(row=0, column=0, sticky="nsew")
+
+    # Creates the widgets in the frames
+    self.setup_ui()
+```
+
+The code comments itself, but like the next view, we inherited the baseview grid and expand it on the windows, with pack, than we apply the grid we want, when we are tired of this view, doing .hide will hide the view.
+
+
+## `welcome_view.py`
+
+A simple view for the start of the program, welcome the user. The user can choose a theme before continue to the dashboard.
+
+![Welcome View](/assets/images/docs_image/welcome_view1.png)
+
+Like other view we use the self baseview grid to create a frame and the create a grid on top of it. This is a simple grid  0x0, like th ebaseview. It is impotant to notice that even if the grid is equal to the baseview, is **needed** to ensure the central bar scale according to the size of the windows
+
+```python
+# Create main content frame from the baseview
+self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+self.main_frame.pack(fill="both", expand=True)
+
+# Configure the main frame to use grid for sidebar and content area
+self.main_frame.grid_rowconfigure(0, weight=1)
+self.main_frame.grid_columnconfigure(0, weight=1)
+self.main_frame.grid(row=0, column=0, sticky="nsew")
+
+```
+
+## `dashboard_controller.py` - Centralized application
+
+Questo file é un controller della dashboard, benché sia anche una view effettiva dell'applicazione. Inizialmente era una view e basta che gestiva le altre view, ma mi é sembrato giusto renderla un controller poiché questo fa.
+
+Una volta entrati nella dashboard, veniamo accolti dalla main home con tutte le transazioni da poter fare.
+
+![Dashboard View](/assets/images/docs_image/dashboard_view1.png)
+
+A sinistra abbiamo una sidebar per navigare all'interno della dashboard. 
+
+```python
+def __init__(self, parent, controller=None, user=None):
+    super().__init__(parent)
+    self.controller = controller
+    self.user = user
+    self.data = DatabaseManager()
+    self.current_view = None
+    self.views = {} 
+
+    # Create main content frame
+    self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+    self.main_frame.pack(fill="both", expand=True)
+    
+    # Configure the main frame to use grid for sidebar and content area
+    self.main_frame.grid_rowconfigure(0, weight=1)
+    self.main_frame.grid_columnconfigure(0, weight=0)  # Sidebar - fixed width
+    self.main_frame.grid_columnconfigure(1, weight=1)  # Main content - expandable
+
+    # Create a content container for the views (this will use pack)
+    self.content_container = ctk.CTkFrame(self.main_frame, corner_radius=0)
+    self.content_container.grid(row=0, column=1, sticky="nsew")
+
+    self.setup_ui()   
+```
+
+Nella dashboard creiamo effettivament la connessione al `database`, questo é utile pe ruan delle view che andremo ad utilizzare poi. Come ogni altra view, la dashboard necessita di prendere da `baseview` e creare una grid sopra di essa. Questa grid ha 1 riga e 2 colonne, due colonne perché una conterrá la sidebar e una conterrá le varie view che potremo selezionare dalla sidebar. Da notare il `weight` delle due colonne, fatt e in questo modo cosi che la sidebar non prenda tutto lo spazio ma solo la grandezza che noi li diciamo.
+
+Utilizziamo lo stesso metodo di app controller tenendo una variabile che indica la current-view e un dizionario di oggetti contenenti tutte le views, cosi da poterle cambiare a piacimento senza necessitá di ricrearle e quindi rendere piú veloce lo switch intra dashboard
+
+
+One of the most strong feature of the dashboard_controller is the scalability, adding a button is easy as writing 5 lines of code. It probably could be further improved, but for now it's ok.
+
+### How to create a New Button
+Creating a new Button is very simple, let's say we need a tag button:
+
+```python
+#In the import
+from src.views.budget_view import TagView
+
+# In innit
+self.icons = {
+  ...
+  TagView = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "tag_view.png")), size=(20, 20))
+}
+
+self.views = {
+  ...
+  TagView = TagView(self.content_container, controller=self.controller, user=self.user, database=self.data)
+}
+
+# In setup_ui
+...
+# Tag button (remembter to increase row )
+self.tag_button = self.__create_button(frame =self.navigation_frame, text = "Tag", istance = TagView,)
+self.tag_button.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
+self.buttons[TagView] = self.tag_button
+```

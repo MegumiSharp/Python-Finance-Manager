@@ -4,8 +4,9 @@ import customtkinter
 # Importing the views and models used in the application
 from src.views.setup_view import SetupView
 from src.views.welcome_view import WelcomeView
-from src.views.dashboard_view import DashboardView
 from src.models.user_settings import UserSettings
+from src.controllers.dashboard_controller import DashboardController
+
 
 # Import the necessary costants and settings used in the application
 from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, DEFAULT_APPEARANCE_MODE, KEY_IS_FIRST_TIME, VALUE_TRUE, WELCOME_FRAME, DASHBOARD_FRAME)
@@ -40,10 +41,22 @@ class AppController(customtkinter.CTk):
         else:
             self.switch_frame(WELCOME_FRAME)
 
+    # Checks if the current_view hold a value, if not return
+    def _hide_or_destroy_current_view(self, view_class):
+        if not self.current_view:
+            return
+
+        #If the class is SetupView in the current view, because is not needed after the first setup, we destroy it instead of hiding it
+        if isinstance(self.current_view, SetupView) and view_class == SetupView:
+            self.current_view.destroy()
+            return
+        
+        # If th current_view exist and is not the SetupView, we want to save it and re-use it in the future, maybe, so we hide it
+        self.current_view.hide()  
+
     # If the current_view is not empty, it hides it than create if the view_class is not present in the dictionary it create 
     def _show_view(self, view_class):
-        if self.current_view:
-            self.current_view.hide()  
+        self._hide_or_destroy_current_view(view_class)
 
         if view_class not in self.views:
             self.views[view_class] = view_class(self, controller=self, user=self.user)
@@ -57,6 +70,7 @@ class AppController(customtkinter.CTk):
         if frame_name == WELCOME_FRAME:
             self._show_view(WelcomeView)
         elif frame_name == DASHBOARD_FRAME:
-            self._show_view(DashboardView)
+            self._show_view(DashboardController)
         else:
             raise ValueError(f"Unknown frame name: {frame_name}")
+        

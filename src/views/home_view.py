@@ -4,7 +4,7 @@ from PIL import Image
 import os
 from config.settings import ICONS_PATH
 from src.views.virtual_table_view import VirtualTable
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class HomeView(BaseView):
@@ -21,11 +21,15 @@ class HomeView(BaseView):
         self.current_filter = "all"  # all, day, month, year
         self.current_search = ""
 
-        # Configure HomeView grid - now we have 2 columns
-        self.grid_columnconfigure(0, weight=3)  # Main content takes 3/4 of space
-        self.grid_columnconfigure(1, weight=1)  # Summary takes 1/4 of space
-        self.grid_rowconfigure(0, weight=1)  # Single row that expands
-    
+        # Create main content frame
+        self.main_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.main_frame.pack(fill="both", expand=True)
+        
+        # Configure the main frame to use grid - adjusted column weights
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)  # main_content_frame expands
+        self.main_frame.grid_columnconfigure(1, weight=0)  # summary_frame stays fixed
+
         self.setup_ui()
 
     def save_db_modification(self, action, row_id, date=None, amount=None, tag=None, desc=None):
@@ -48,15 +52,16 @@ class HomeView(BaseView):
         self.db_transactions.clear()
 
     def setup_ui(self):
-        # Create main content frame (left side)
-        self.main_content_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_content_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+        # Create main content frame (left side) - takes most of the space
+        self.main_content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.main_content_frame.grid(row=0, column=0, sticky="nsew", pady=(20, 20))  # Added top padding
         self.main_content_frame.grid_columnconfigure(0, weight=1)
         self.main_content_frame.grid_rowconfigure(2, weight=1)  # Make table frame stretch vertically
 
-        # Create summary frame (right side)
-        self.summary_frame = ctk.CTkFrame(self)
-        self.summary_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+        # Create summary frame (right side) - reduced width
+        self.summary_frame = ctk.CTkFrame(self.main_frame, width=250)  # Reduced from 300 to 250
+        self.summary_frame.grid(row=0, column=1, sticky="nsew", pady=(20, 20))  # Added top padding
+        self.summary_frame.grid_propagate(False)  # Important: prevent the frame from shrinking
         
         # Setup main content components
         self.search_bar_frame(self.main_content_frame)                                         
@@ -87,10 +92,10 @@ class HomeView(BaseView):
          # Total transactions
         self.total_transactions_label_text = ctk.CTkLabel(
             summary_content,
-            text="Total Transactions:",
-            font=ctk.CTkFont(size=16, weight="bold")
+            text="Transactions:",
+            font=ctk.CTkFont(size=14, weight="bold")
         )
-        self.total_transactions_label_text.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
+        self.total_transactions_label_text.grid(row=0, column=0, pady=(8, 4), padx=15, sticky="ew")
 
         # Total transactions
         self.total_transactions_label = ctk.CTkLabel(
@@ -98,32 +103,32 @@ class HomeView(BaseView):
             text="0",
             font=ctk.CTkFont(size=16, weight="bold")
         )
-        self.total_transactions_label.grid(row=0, column=1, pady=(15, 5), padx=15, sticky="w")
+        self.total_transactions_label.grid(row=1, column=0, pady=(0, 16), padx=15, sticky="ew")
         
         # Total income
         self.total_income_label_text = ctk.CTkLabel(
             summary_content,
-            text="Total Income:",
-            font=ctk.CTkFont(size=16, weight="bold")
+            text="Income:",
+            font=ctk.CTkFont(size=14, weight="bold")
         )
-        self.total_income_label_text.grid(row=1, column=0, pady=5, padx=15, sticky="w")
+        self.total_income_label_text.grid(row=2, column=0, pady=(8, 4), padx=15, sticky="ew")
 
         self.total_income_label = ctk.CTkLabel(
             summary_content,
-            text="Total Income:",
+            text="Income:",
             text_color="#2A9221",
             font=ctk.CTkFont(size=16, weight="bold")
         )
-        self.total_income_label.grid(row=1, column=1, pady=5, padx=15, sticky="w")
+        self.total_income_label.grid(row=3, column=0, pady=(0, 16), padx=15, sticky="ew")
         
 
         # Total expenses
         self.total_expenses_label_text = ctk.CTkLabel(
             summary_content,
-            text="Total Expenses:",
-            font=ctk.CTkFont(size=16, weight="bold"),
+            text="Expenses:",
+            font=ctk.CTkFont(size=14, weight="bold"),
         )
-        self.total_expenses_label_text.grid(row=2, column=0, pady=5, padx=15, sticky="w")
+        self.total_expenses_label_text.grid(row=4, column=0, pady=(8, 4), padx=15, sticky="ew")
 
         # Total expenses
         self.total_expenses_label = ctk.CTkLabel(
@@ -132,15 +137,15 @@ class HomeView(BaseView):
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color="red"
         )
-        self.total_expenses_label.grid(row=2, column=1, pady=5, padx=15, sticky="w")
+        self.total_expenses_label.grid(row=5, column=0, pady=(0, 16), padx=15, sticky="ew")
         
         # Net balance
         self.net_balance_label_text = ctk.CTkLabel(
             summary_content,
             text="Balance:",
-            font=ctk.CTkFont(size=16, weight="bold")
+            font=ctk.CTkFont(size=14, weight="bold")
         )
-        self.net_balance_label_text.grid(row=3, column=0, pady=(5, 15), padx=15, sticky="w")
+        self.net_balance_label_text.grid(row=6, column=0, pady=(8, 4), padx=15, sticky="ew")
 
                 # Net balance
         self.net_balance_label = ctk.CTkLabel(
@@ -148,7 +153,7 @@ class HomeView(BaseView):
             text="$0.00",
             font=ctk.CTkFont(size=16, weight="bold")
         )
-        self.net_balance_label.grid(row=3, column=1, pady=(5, 15), padx=15, sticky="w")
+        self.net_balance_label.grid(row=7, column=0, pady=(0, 16), padx=15, sticky="ew")
         
         # Filter info
         filter_info_frame = ctk.CTkFrame(self.summary_frame)
