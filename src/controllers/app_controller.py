@@ -1,4 +1,7 @@
 # Importing the necessary libraries
+import os
+import sys
+from tkinter import PhotoImage
 import customtkinter
 
 # Importing the views and models used in the application
@@ -9,7 +12,7 @@ from src.controllers.dashboard_controller import DashboardController
 
 
 # Import the necessary costants and settings used in the application
-from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, DEFAULT_APPEARANCE_MODE, KEY_IS_FIRST_TIME, VALUE_TRUE, WELCOME_FRAME, DASHBOARD_FRAME)
+from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, DEFAULT_APPEARANCE_MODE, KEY_IS_FIRST_TIME, VALUE_TRUE, WELCOME_FRAME, DASHBOARD_FRAME, ICONS_PATH,TASKBAR_ICON_FILE_NAME)
 
 # Main application GUI, implemented as a class
 class AppController(customtkinter.CTk):
@@ -18,6 +21,10 @@ class AppController(customtkinter.CTk):
         self.current_view = None                                                 # The current View is the frame or view showed in the windows
         self.user = UserSettings()                                               # Initialize user settings
         self.views = {}
+
+        # Modify the taskbar icon to the current expensia logo
+        img = PhotoImage(file=os.path.join(ICONS_PATH, TASKBAR_ICON_FILE_NAME))
+        self.iconphoto(True, img) 
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode(DEFAULT_APPEARANCE_MODE)

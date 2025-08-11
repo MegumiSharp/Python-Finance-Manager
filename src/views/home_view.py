@@ -1,12 +1,14 @@
-from src.views.base_view import BaseView
 import customtkinter as ctk
 from PIL import Image
 import os
+
+# Local imports
 from config.settings import ICONS_PATH
 from src.views.virtual_table_view import VirtualTable
+from src.views.base_view import BaseView
 from datetime import datetime
 
-
+# Home view in the dashboard, contains the transactions table, summary panel and add transaction form
 class HomeView(BaseView):
     def __init__(self, parent, controller=None, user=None, database=None):
         super().__init__(parent)

@@ -22,6 +22,7 @@ USER_SETTINGS_PATH = DATA_ROOT / "user_settings" / "user_settings.json"
 
 # Files Names
 BACKGROUND_FILE_NAME = "background.jpg"
+TASKBAR_ICON_FILE_NAME = "mini expension logo.png"
 
 
 # ============================================================================
