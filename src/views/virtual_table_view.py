@@ -20,6 +20,7 @@ Performance Optimizations:
 - Efficient scroll event handling
 """
 
+from config.settings import KEY_CURRENCY_SIGN
 from src.views.base_view import BaseView
 import customtkinter as ctk
 
@@ -33,13 +34,14 @@ class VirtualTable(BaseView):
     compared to traditional approaches that render all data.
     """
     
-    def __init__(self, parent, controller, data, on_delete_callback=None):
+    def __init__(self, parent, controller, data, user,  on_delete_callback=None):
         super().__init__(parent)
         
         # Core dependencies and data
         self.controller = controller
         self.data = data
         self.on_delete_callback = on_delete_callback
+        self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
         
         # Virtual scrolling configuration
         self.row_height = 40          # Fixed height per row for calculation accuracy
@@ -475,7 +477,7 @@ class VirtualTable(BaseView):
         """Update widget display content with proper formatting and colors."""
         # Format amount with appropriate color coding
         amount_color = "#ff6b6b" if data['amount'] < 0 else "#51cf66"
-        amount_text = f"${abs(data['amount']):.2f}"
+        amount_text = f"{abs(data['amount']):.2f}{self.currency_sign}"
         if data['amount'] < 0:
             amount_text = f"-{amount_text}"
         

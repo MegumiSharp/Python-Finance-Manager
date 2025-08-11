@@ -32,12 +32,7 @@ class HomeView(BaseView):
         self.current_filter = "all"  # Options: all, day, month, year
         self.current_search = ""
         
-        # Initialize UI layout
-        self._setup_main_layout()
-        self.setup_ui()
-
-    def _setup_main_layout(self):
-        """Configure the main layout structure with proper grid weights."""
+        # Configure the main layout structure with proper grid weights
         self.main_frame = ctk.CTkFrame(self, corner_radius=0)
         self.main_frame.pack(fill="both", expand=True)
         
@@ -45,6 +40,8 @@ class HomeView(BaseView):
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)  # Main content expands
         self.main_frame.grid_columnconfigure(1, weight=0)  # Summary panel fixed width
+
+        self.setup_ui()
 
     # =============================================================================
     # DATABASE OPERATIONS
@@ -74,6 +71,7 @@ class HomeView(BaseView):
         for txn in self.db_transactions:
             if txn["action"] == "delete":
                 self.db.remove_transaction(txn["params"])
+
         self.db_transactions.clear()
 
     # =============================================================================
@@ -117,6 +115,7 @@ class HomeView(BaseView):
             self.main_content_frame,
             self,
             self.data,
+            self.user,
             on_delete_callback=self.on_transaction_deleted
         )
         self.virtual_table.grid(row=2, column=0, sticky="nsew")
@@ -172,6 +171,7 @@ class HomeView(BaseView):
             text="$0.00", 
             font=ctk.CTkFont(size=16, weight="bold")
         )
+
         if color:
             value_label.configure(text_color=color)
         
@@ -204,6 +204,25 @@ class HomeView(BaseView):
             font=ctk.CTkFont(size=14)
         )
         self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+        # Expenses filter button
+        self.expenses_button = ctk.CTkButton(
+            filter_info_frame,
+            text="Expenses",
+            fg_color="#DB5745",
+            command=self.show_expenses,
+            font=ctk.CTkFont(size=14)
+        )
+        self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+        # All filter button
+        self.all = ctk.CTkButton(
+            filter_info_frame,
+            text="All",
+            command=self.show_all,
+            font=ctk.CTkFont(size=14)
+        )
+        self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
 
     def update_summary(self):
         """
@@ -244,7 +263,27 @@ class HomeView(BaseView):
         Filter to show only income transactions by sorting amount descending.
         Triggers table sort and summary update.
         """
-        self.sort_table(2, False)  # Sort by amount column, descending
+
+        #self.current_search = "+"
+        #self.apply_filters()
+        #self.update_summary()
+
+
+    def show_expenses(self):
+        """
+        Filter to show only income transactions by sorting amount descending.
+        Triggers table sort and summary update.
+        """
+        self.sort_table(2, True)  # Sort by amount column, descending
+        self.update_summary()
+
+
+    def show_all(self):
+        """
+        Filter to show only income transactions by sorting amount descending.
+        Triggers table sort and summary update.
+        """
+        self.sort_table(1, False)  # Sort by amount column, descending
         self.update_summary()
 
     # =============================================================================
