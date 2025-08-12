@@ -56,9 +56,7 @@ class VirtualTable(BaseView):
         elif event.num == 5 or event.delta < 0:
             self.scroll_frame._parent_canvas.yview_scroll(1, "units")
 
-    # A row is simply put a frame that exstends from left to right and have inside some labels and a button with the data of  data_row
     def _create_row(self, data_row, data_index):
-
         # Because the data is formatted in [database_index, date, amount, tag, desc] data_row[2] is the amount positioned in the list
         if data_row[2] >= 0:
             color = "#4EDF72"         # The amount is positive, is green
@@ -67,13 +65,28 @@ class VirtualTable(BaseView):
 
         # The widget row, a frame with inside all the labels and button to be considered as a transaction row
         row_frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
+        
+        # Configure columns with proportional weights for responsive design
+        row_frame.grid_columnconfigure(0, weight=15, uniform="col")   # date - 15% of width
+        row_frame.grid_columnconfigure(1, weight=15, uniform="col")   # amount - 15% of width  
+        row_frame.grid_columnconfigure(2, weight=15, uniform="col")   # tag - 15% of width
+        row_frame.grid_columnconfigure(3, weight=45, uniform="col")   # desc - 45% of width (flexible)
+        row_frame.grid_columnconfigure(4, weight=10, uniform="col")   # delete - 10% of width
 
-        # A dictionary of object and information
+        # Format the amount with proper spacing
+        amount_text = f"{data_row[2]}{self.currency_sign}"
+        
+        # A dictionary of object and information - NO fixed widths
         new_row = {
-            'date': ctk.CTkLabel(row_frame, text=data_row[1], anchor="w", width=150, height=28),
-            'amount': ctk.CTkLabel(row_frame, text=f'{data_row[2]}{self.currency_sign}', text_color= color, anchor="w", width=120, height=28),
-            'tag': ctk.CTkLabel(row_frame, text=data_row[3], anchor="w", width=120, height=28),
-            'desc': ctk.CTkLabel(row_frame, text=data_row[4], anchor="w", height=28),
+            'date': ctk.CTkLabel(row_frame, text=data_row[1], height=28, anchor="w", 
+                                font=ctk.CTkFont(size=12)),
+            'amount': ctk.CTkLabel(row_frame, text=amount_text, 
+                                text_color=color, font=ctk.CTkFont(size=14, weight="bold"), 
+                                height=28, anchor="e"),  # Right align the amount
+            'tag': ctk.CTkLabel(row_frame, text=data_row[3], anchor="w", height=28,
+                            font=ctk.CTkFont(size=12)),
+            'desc': ctk.CTkLabel(row_frame, text=data_row[4], anchor="w", height=28,
+                                font=ctk.CTkFont(size=12)),
             'delete': ctk.CTkButton(
                 row_frame,
                 text="Delete",
@@ -82,28 +95,21 @@ class VirtualTable(BaseView):
                 fg_color="#ff6b6b",
                 hover_color="#ff5252",
                 font=ctk.CTkFont(size=12),
-                command= lambda: self.__delete_button_event(self.widgets_list.index(row_frame))     #Takes the index of the current frame in the widgets list and it gives to delete button event
+                command=lambda: self.__delete_button_event(self.widgets_list.index(row_frame))
             ),
             'visible': True,
             'data_row': data_index,
-            'database_real_index' : data_row[0]
+            'database_real_index': data_row[0]
         }
 
-        # For the 5 main key, we place the dictionary[key] with the grid functioanlity. The description must be flexible, the delete button should have a different sticky
-        # to be able to be n the edge of the frame nad all the other should be normal.
-        col = 0
-        for key in ['date', 'amount', 'tag', 'desc', 'delete']:
-            if key == 'desc':
-                new_row['desc'].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="ew")
-                row_frame.grid_columnconfigure(col, weight=1)
-            elif key == 'delete':
-                new_row['delete'].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="e")
-            else:
-                new_row[key].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="w")
-
-            col += 1
+        # Place all widgets with consistent spacing and proper sticky values
+        new_row['date'].grid(row=len(self.widgets_list), column=0, padx=(15, 5), pady=2, sticky="ew")
+        new_row['amount'].grid(row=len(self.widgets_list), column=1, padx=(15, 15), pady=2, sticky="ew")  # Extra space after amount
+        new_row['tag'].grid(row=len(self.widgets_list), column=2, padx=(30, 5), pady=2, sticky="ew")
+        new_row['desc'].grid(row=len(self.widgets_list), column=3, padx=(40, 5), pady=2, sticky="ew")
+        new_row['delete'].grid(row=len(self.widgets_list), column=4, padx=(5, 15), pady=2, sticky="e")
         
-        # Lastly we add the reference of the frame widget to the widgets_list, this will give us the power to hide or destroy or show the childs of the widgets
+        # Lastly we add the reference of the frame widget to the widgets_list
         self.widgets_list.append(row_frame)
     
     # =============================================================================
