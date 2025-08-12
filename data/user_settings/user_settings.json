@@ -2,7 +2,7 @@
     "is_first_time": "false",
     "nickname": "User",
     "currency_sign": "\u20ac",
-    "theme": "Orange",
+    "theme": "Default",
     "budget_rule_needs": "50",
     "budget_rule_wants": "30",
     "budget_rule_saving": "20"

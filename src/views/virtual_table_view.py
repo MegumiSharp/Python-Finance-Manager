@@ -1,602 +1,260 @@
-"""
-Virtual Table Implementation with Scrolling and Widget Reuse
-============================================================
-
-This module implements a high-performance virtual table for displaying large datasets
-using CustomTkinter. The table uses widget pooling and absolute positioning to handle
-thousands of rows efficiently while maintaining smooth scrolling performance.
-
-Key Features:
-- Virtual scrolling for performance with large datasets
-- Widget pooling to minimize memory usage and improve rendering speed
-- Absolute positioning using place() for precise control
-- Real-time sorting and filtering support
-- Integrated delete functionality with callbacks
-
-Performance Optimizations:
-- Only renders visible rows plus buffer
-- Reuses widgets instead of creating/destroying them
-- Batch updates to minimize UI redraws
-- Efficient scroll event handling
-"""
-
 from config.settings import KEY_CURRENCY_SIGN
 from src.views.base_view import BaseView
 import customtkinter as ctk
 
-
+# A virtual scrollable table made out of widget created from the database local raw data
 class VirtualTable(BaseView):
-    """
-    High-performance virtual scrolling table implementation.
-    
-    Uses widget pooling and absolute positioning to efficiently display large datasets.
-    Only renders visible rows plus a small buffer, dramatically improving performance
-    compared to traditional approaches that render all data.
-    """
-    
-    def __init__(self, parent, controller, data, user,  on_delete_callback=None):
+    def __init__(self, parent, controller, data, user):
         super().__init__(parent)
-        
-        # Core dependencies and data
         self.controller = controller
         self.data = data
-        self.on_delete_callback = on_delete_callback
         self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
+
+        # Used to store the rows widgets, every row is a frame saved here, can be hided, deleted and showed, when needed, this is done to not recreate every widget everytime
+        self.widgets_list = []
         
-        # Virtual scrolling configuration
-        self.row_height = 40          # Fixed height per row for calculation accuracy
-        self.visible_rows = 15        # Initial estimate of visible rows
-        self.buffer_rows = 3          # Extra rows rendered above/below visible area
-        self.total_rows = len(data)
-        
-        # Scroll and rendering state tracking
-        self.scroll_top = 0
-        self.first_visible_row = 0
-        self.last_visible_row = 0
-        self.last_rendered_range = (-1, -1)  # Optimization: track what was last rendered
-        
-        # Widget management
-        self.row_widgets = []  # Pool of reusable widget sets
-        
+        # Configure main container to expand properly
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+    
         # Initialize UI and start rendering
         self.setup_ui()
-        self.after(100, self.refresh_view)  # Delay to ensure canvas is ready
 
     # =============================================================================
     # UI SETUP AND INITIALIZATION
     # =============================================================================
     
     def setup_ui(self):
-        """
-        Initialize the complete UI structure for virtual scrolling table.
-        Creates canvas-scrollbar combination with internal content frame.
-        """
-        # Configure main container to expand properly
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        
-        # Create table container with dark theme
-        self._create_table_container()
-        
-        # Create scrollable canvas with scrollbar
-        self._create_scrolling_canvas()
-        
-        # Create content frame inside canvas for absolute positioning
-        self._create_content_frame()
-        
-        # Setup event bindings for interaction
-        self._bind_scroll_events()
-        
-        # Initialize widget pool for performance
-        self.create_widget_pool()
-
-    def _create_table_container(self):
-        """Create the main container frame with proper theming."""
+        # Create main container
         self.table_container = ctk.CTkFrame(self, fg_color="#1a1a1a")
         self.table_container.grid(row=0, column=0, sticky="nsew", padx=30, pady=5)
         self.table_container.grid_columnconfigure(0, weight=1)
         self.table_container.grid_rowconfigure(0, weight=1)
 
-    def _create_scrolling_canvas(self):
-        """
-        Create canvas for virtual scrolling with integrated scrollbar.
-        Canvas enables precise control over rendering and scrolling behavior.
-        """
-        # Main scrollable canvas
-        self.canvas = ctk.CTkCanvas(
-            self.table_container,
-            bg="#1a1a1a",
-            highlightthickness=0,
-            height=600
-        )
-        self.canvas.grid(row=0, column=0, sticky="nsew")
-        
-        # Vertical scrollbar linked to canvas
-        self.scrollbar = ctk.CTkScrollbar(
-            self.table_container,
-            command=self.on_scrollbar_move
-        )
-        self.scrollbar.grid(row=0, column=1, sticky="ns")
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        # The scrollable frame is inside the frame main container
+        self.scroll_frame = ctk.CTkScrollableFrame(self.table_container, fg_color="transparent")
+        self.scroll_frame.grid(row=0, column=0, sticky="nsew")
+        self.scroll_frame.grid_columnconfigure(0, weight=1)
 
-    def _create_content_frame(self):
-        """
-        Create internal frame for absolute widget positioning.
-        This frame serves as the coordinate space for place() geometry manager.
-        """
-        self.content_frame = ctk.CTkFrame(self.canvas, fg_color="transparent")
-        self.canvas_window = self.canvas.create_window(0, 0, anchor="nw", window=self.content_frame)
+        # Bind mouse wheel scrolling (to scroll the frame with the mouse wheel)
+        self.scroll_frame.bind_all("<MouseWheel>", self._on_mousewheel)  # Windows / macOS
+        self.scroll_frame.bind_all("<Button-4>", self._on_mousewheel)    # Linux scroll up
+        self.scroll_frame.bind_all("<Button-5>", self._on_mousewheel)    # Linux scroll down
 
-    def _bind_scroll_events(self):
-        """
-        Setup event bindings for smooth scrolling across multiple widgets.
-        Ensures mouse wheel works regardless of which component has focus.
-        """
-        # Canvas resize handling for responsive layout
-        self.canvas.bind("<Configure>", self.on_canvas_configure)
-        
-        # Mouse wheel support across all relevant widgets
-        widgets_to_bind = [self, self.canvas, self.content_frame, self.table_container]
-        for widget in widgets_to_bind:
-            widget.bind("<MouseWheel>", self.on_mousewheel)     # Windows/Mac
-            widget.bind("<Button-4>", self.on_mousewheel)       # Linux scroll up
-            widget.bind("<Button-5>", self.on_mousewheel)       # Linux scroll down
+        # Creation of all row widget, we do it for every data_row in self.data, self.data is a list of list, every list have all the info to transform in widget
+        for i, data_row in enumerate(self.data):
+            self._create_row(data_row, i)
 
-    # =============================================================================
-    # WIDGET POOL MANAGEMENT
-    # =============================================================================
-    
-    def create_widget_pool(self):
-        """
-        Create reusable pool of widget sets for performance optimization.
-        
-        Widget pooling prevents constant creation/destruction of GUI elements,
-        which is expensive. Instead, we create a fixed pool and reuse widgets
-        by updating their content and position as needed.
-        """
-        # Calculate optimal pool size: visible area + buffer on both sides
-        pool_size = max(20, self.visible_rows + self.buffer_rows * 2)
-        
-        # Create widget sets for each potential row
-        for i in range(pool_size):
-            row_widgets = self._create_widget_set()
-            self.row_widgets.append(row_widgets)
+        # All the widgets starts as not placed in the grid, so we need to show them all
+        self.show_all()
 
-    def _create_widget_set(self):
-        """
-        Create a complete set of widgets for one table row.
-        Each set contains labels for data display and a delete button.
-        """
-        return {
-            'date': ctk.CTkLabel(
-                self.content_frame, 
-                text="", 
-                anchor="w", 
-                width=150, 
-                height=28
-            ),
-            'amount': ctk.CTkLabel(
-                self.content_frame, 
-                text="", 
-                anchor="w", 
-                width=120, 
-                height=28
-            ),
-            'tag': ctk.CTkLabel(
-                self.content_frame, 
-                text="", 
-                anchor="w", 
-                width=120, 
-                height=28
-            ),
-            'desc': ctk.CTkLabel(
-                self.content_frame, 
-                text="", 
-                anchor="w", 
-                width=200, 
-                height=28
-            ),
+    # When scrolling with the mouse the yview scroll down or up
+    def _on_mousewheel(self, event):
+        # Windows and macOS
+        if event.num == 4 or event.delta > 0:
+            self.scroll_frame._parent_canvas.yview_scroll(-1, "units")
+        elif event.num == 5 or event.delta < 0:
+            self.scroll_frame._parent_canvas.yview_scroll(1, "units")
+
+    # A row is simply put a frame that exstends from left to right and have inside some labels and a button with the data of  data_row
+    def _create_row(self, data_row, data_index):
+
+        # Because the data is formatted in [database_index, date, amount, tag, desc] data_row[2] is the amount positioned in the list
+        if data_row[2] >= 0:
+            color = "#4EDF72"         # The amount is positive, is green
+        else:
+            color = "#DF4E4E"         # The amount is negative, is red
+
+        # The widget row, a frame with inside all the labels and button to be considered as a transaction row
+        row_frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
+
+        # A dictionary of object and information
+        new_row = {
+            'date': ctk.CTkLabel(row_frame, text=data_row[1], anchor="w", width=150, height=28),
+            'amount': ctk.CTkLabel(row_frame, text=f'{data_row[2]}{self.currency_sign}', text_color= color, anchor="w", width=120, height=28),
+            'tag': ctk.CTkLabel(row_frame, text=data_row[3], anchor="w", width=120, height=28),
+            'desc': ctk.CTkLabel(row_frame, text=data_row[4], anchor="w", height=28),
             'delete': ctk.CTkButton(
-                self.content_frame,
+                row_frame,
                 text="Delete",
                 width=60,
                 height=28,
                 fg_color="#ff6b6b",
                 hover_color="#ff5252",
-                font=ctk.CTkFont(size=12)
+                font=ctk.CTkFont(size=12),
+                command= lambda: self.__delete_button_event(self.widgets_list.index(row_frame))     #Takes the index of the current frame in the widgets list and it gives to delete button event
             ),
-            'visible': False,      # Track visibility state
-            'data_row': -1         # Track which data row this widget set represents
+            'visible': True,
+            'data_row': data_index,
+            'database_real_index' : data_row[0]
         }
 
-    # =============================================================================
-    # WIDGET VISIBILITY MANAGEMENT
-    # =============================================================================
+        # For the 5 main key, we place the dictionary[key] with the grid functioanlity. The description must be flexible, the delete button should have a different sticky
+        # to be able to be n the edge of the frame nad all the other should be normal.
+        col = 0
+        for key in ['date', 'amount', 'tag', 'desc', 'delete']:
+            if key == 'desc':
+                new_row['desc'].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="ew")
+                row_frame.grid_columnconfigure(col, weight=1)
+            elif key == 'delete':
+                new_row['delete'].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="e")
+            else:
+                new_row[key].grid(row=len(self.widgets_list), column=col, padx=2, pady=2, sticky="w")
+
+            col += 1
+        
+        # Lastly we add the reference of the frame widget to the widgets_list, this will give us the power to hide or destroy or show the childs of the widgets
+        self.widgets_list.append(row_frame)
     
-    def hide_widget_row(self, row_widgets):
-        """
-        Efficiently hide a complete row of widgets.
-        Uses place_forget() to remove widgets from layout without destroying them.
-        """
-        if row_widgets['visible']:
-            # Hide all widgets in the row
-            for widget_key in ['date', 'amount', 'tag', 'desc', 'delete']:
-                row_widgets[widget_key].place_forget()
+    # =============================================================================
+    # Event to filter the widgets list
+    # =============================================================================
+
+    # Show all the widges in self.widgets_list
+    def show_all(self):
+        # After looping for all the widgets in the list, we position it in the grid with the index used as position, using a list ensure to not have empty position
+        # The widgets frame is child of the scroll frame, so when we call grid we are placing it inside the scroll frame
+        for index, widget in enumerate(self.widgets_list):
+            widget.grid(row = index, column = 0, padx = 32, pady = 4, sticky = "ew")
+            widget.grid()  # ensures the widget is visible if it was hidden before
+
+        # Position the scroll bar to the start of the frame on the top (this is usefull when we call show all from the button all)
+        self.scroll_frame._parent_canvas.yview_moveto(0)
             
-            # Update state tracking
-            row_widgets['visible'] = False
-            row_widgets['data_row'] = -1
+    # Unplace from the grid all the widget that are not income
+    def show_income(self):
+        # frame.winfo_children()[1].cget("text") === widget frame >> [ctklabel = date, ctklabel =amount ,ctklabel = tag, ctklabel = desc] >> [1]
+        # position equal the amount >>cget("text") from the label, the text have the amount
+        for frame in self.widgets_list:
+            label_ref = frame.winfo_children()[1].cget("text")
+            if float(label_ref.strip(self.currency_sign)) < 0:                     # We remove the currency sign and transform it into a float
+                frame.grid_remove()                                                # We remove it from the grid, but do not forget it, because we do not delete it from the list of widgets
+            else: 
+                frame.grid()                                                       # If the button is called after another button, some widgets that are income could be hided, this will show it
+        
+        # The scroll frame hight differ from income, expenses and all, so this solve the problem positioning on the top 
+        self.scroll_frame._parent_canvas.yview_moveto(0)
 
-    def show_widget_row(self, row_widgets, y_position, data_row):
-        """
-        Show and position a row of widgets using absolute positioning.
-        
-        Uses place() geometry manager for pixel-perfect control over widget positions.
-        Calculates responsive column widths based on canvas size.
-        """
-        # Get current canvas width for responsive layout
-        canvas_width = self._get_canvas_width()
-        
-        # Calculate column positions and widths
-        positions, widths = self._calculate_column_layout(canvas_width)
-        
-        # Update widget sizes for responsive design
-        self._resize_widgets(row_widgets, widths)
-        
-        # Position widgets using absolute coordinates
-        self._position_widgets(row_widgets, positions, y_position)
-        
-        # Update state tracking
-        row_widgets['visible'] = True
-        row_widgets['data_row'] = data_row
 
-    def _get_canvas_width(self):
-        """Get canvas width with fallback for initialization."""
-        canvas_width = self.canvas.winfo_width()
-        return canvas_width if canvas_width > 1 else 800
+    # Same as show_income, unplace the grid all the widget that are not expenses
+    def show_expenses(self):
+        for frame in self.widgets_list:
+            label_ref = frame.winfo_children()[1].cget("text")
+            if float(label_ref.strip(self.currency_sign)) > 0:
+                frame.grid_remove()
+            else: 
+                frame.grid()
 
-    def _calculate_column_layout(self, canvas_width):
-        """
-        Calculate responsive column positions and widths.
-        Returns positions and widths arrays for table columns.
-        """
-        # Column width ratios: Date, Amount, Tag, Description, Delete
-        col_ratios = [0.2, 0.2, 0.2, 0.3, 0.1]
-        
-        # Calculate absolute positions
-        positions = []
-        current_x = 10  # Left padding
-        
-        for ratio in col_ratios:
-            positions.append(current_x)
-            current_x += int((canvas_width - 40) * ratio)  # 40px total padding
-        
-        # Calculate column widths (excluding delete button)
-        widths = []
-        for ratio in col_ratios[:-1]:
-            widths.append(int((canvas_width - 40) * ratio - 10))  # 10px spacing
-        
-        return positions, widths
+        self.scroll_frame._parent_canvas.yview_moveto(0)
 
-    def _resize_widgets(self, row_widgets, widths):
-        """Update widget sizes for responsive layout."""
-        widget_keys = ['date', 'amount', 'tag', 'desc']
-        for key, width in zip(widget_keys, widths):
-            row_widgets[key].configure(width=width)
-
-    def _position_widgets(self, row_widgets, positions, y_position):
-        """Position all widgets in a row using place() geometry manager."""
-        row_widgets['date'].place(x=positions[0], y=y_position)
-        row_widgets['amount'].place(x=positions[1], y=y_position)
-        row_widgets['tag'].place(x=positions[2], y=y_position)
-        row_widgets['desc'].place(x=positions[3], y=y_position)
-        
-        # Center delete button vertically within row
-        row_widgets['delete'].place(x=positions[4], y=y_position + 6)
-
-    def hide_all_widgets(self):
-        """
-        Hide all widgets in the pool efficiently.
-        Used when clearing the table or switching to empty dataset.
-        """
-        for row_widgets in self.row_widgets:
-            self.hide_widget_row(row_widgets)
-        self.last_rendered_range = (-1, -1)  # Reset render tracking
 
     # =============================================================================
-    # VIRTUAL SCROLLING CORE LOGIC
+    # Delete button event confirmation
     # =============================================================================
-    
-    def refresh_view(self):
-        """
-        Complete refresh of the virtual table view.
-        
-        Recalculates scroll region, visible row count, and triggers full re-render.
-        Called when data changes or window is resized.
-        """
-        self.total_rows = len(self.data)
-        
-        # Handle empty data case
-        if self.total_rows == 0:
-            self._handle_empty_data()
-            return
-        
-        # Setup scrolling area for full dataset
-        self._configure_scroll_region()
-        
-        # Recalculate visible row count based on current canvas size
-        self._update_visible_row_count()
-        
-        # Force complete re-render
-        self.last_rendered_range = (-1, -1)
-        self.update_visible_items()
 
-    def _handle_empty_data(self):
-        """Configure table for empty dataset display."""
-        self.hide_all_widgets()
-        self.canvas.configure(scrollregion=(0, 0, 0, 100))
-        self.content_frame.configure(height=100)
+    # Delete button event to  open a confirmation button, a top level frame that let the user confirm of deny the deletion
+    def __delete_button_event(self, idx):
+        # Checks if other delete button dialoge box exists, if they exist, they are destroyed
+        for widget in self.controller.winfo_children():
+            if isinstance(widget, ctk.CTkToplevel):
+                widget.destroy()
 
-    def _configure_scroll_region(self):
-        """Setup canvas scroll region based on total data size."""
-        total_height = self.total_rows * self.row_height
-        self.canvas.configure(scrollregion=(0, 0, 0, total_height))
-        self.content_frame.configure(height=total_height)
+        # Retrieve all the text from the widget to show the user what is deleting it
+        date = self.widgets_list[idx].winfo_children()[0].cget("text")
+        amount = self.widgets_list[idx].winfo_children()[1].cget("text")
+        tag = self.widgets_list[idx].winfo_children()[2].cget("text")
+        desc = self.widgets_list[idx].winfo_children()[3].cget("text")
 
-    def _update_visible_row_count(self):
-        """Calculate how many rows can fit in current canvas height."""
-        canvas_height = self.canvas.winfo_height()
-        if canvas_height > 1:
-            self.visible_rows = min(
-                canvas_height // self.row_height + 2, 
-                self.total_rows
-            )
+        # Create a top level dialog box
+        top_level_dialog = ctk.CTkToplevel(self.controller)
+        top_level_dialog.title("Confirmation")
+        top_level_dialog.resizable(False, False)
+        top_level_dialog.grid_columnconfigure((0, 1), weight=1)
+        top_level_dialog.rowconfigure((0, 1, 2, 3, 4), weight=1)
+        top_level_dialog.attributes("-topmost", True)
+        top_level_dialog.transient(self.controller)
+        top_level_dialog.geometry("350x280")
 
-    def update_visible_items(self):
-        """
-        Core virtual scrolling logic - update which rows are actually rendered.
+        # Main warning message
+        self.warning_label = ctk.CTkLabel(master=top_level_dialog,
+                                        width=330,
+                                        text="Are you sure you want to delete:",
+                                        font=ctk.CTkFont(size=16, weight="bold"),
+                                        text_color="#ff6b6b",
+                                        fg_color="transparent")
+        self.warning_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(20, 5), sticky="ew")
         
-        This is the performance-critical function that determines which data rows
-        should be visible and updates the widget pool accordingly. Uses range
-        comparison to avoid unnecessary re-renders.
-        """
-        if self.total_rows == 0:
-            self.hide_all_widgets()
-            return
+        # Date field
+        self.date_label = ctk.CTkLabel(master=top_level_dialog,
+                                    width=330,
+                                    text=f"Date: {date}",
+                                    font=ctk.CTkFont(size=12, weight="bold"),
+                                    text_color="#4a90e2",
+                                    fg_color="transparent")
+        self.date_label.grid(row=1, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
-        # Calculate current scroll position and visible range
-        visible_range = self._calculate_visible_range()
-        first_row, last_row = visible_range
+        # Amount field
+        self.amount_label = ctk.CTkLabel(master=top_level_dialog,
+                                        width=330,
+                                        text=f"Amount: {amount}",
+                                        font=ctk.CTkFont(size=12, weight="bold"),
+                                        text_color="#28a745",
+                                        fg_color="transparent")
+        self.amount_label.grid(row=2, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
-        # OPTIMIZATION: Skip render if range hasn't changed
-        if visible_range == self.last_rendered_range:
-            return
+        # Tag field
+        self.tag_label = ctk.CTkLabel(master=top_level_dialog,
+                                    width=330,
+                                    text=f"Tag: {tag}",
+                                    font=ctk.CTkFont(size=12, weight="bold"),
+                                    text_color="#17a2b8",
+                                    fg_color="transparent")
+        self.tag_label.grid(row=3, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
-        # Clear all widgets and render new range
-        self._render_visible_range(first_row, last_row)
+        # Description field
+        self.desc_label = ctk.CTkLabel(master=top_level_dialog,
+                                    width=330,
+                                    wraplength=310,
+                                    text=f"Description: {desc}",
+                                    font=ctk.CTkFont(size=12),
+                                    text_color="#6c757d",
+                                    fg_color="transparent")
+        self.desc_label.grid(row=4, column=0, columnspan=2, padx=20, pady=(2, 15), sticky="ew")
         
-        # Update tracking for next optimization check
-        self.last_rendered_range = visible_range
+        # Buttons
+        self.ok_button = ctk.CTkButton(master=top_level_dialog,
+                                    width=120,
+                                    height=35,
+                                    border_width=0,
+                                    text='Delete',
+                                    font=ctk.CTkFont(size=14, weight="bold"),
+                                    fg_color="#ff6b6b",
+                                    hover_color="#ff5252",
+                                    command=lambda: self._ok_event(top_level_dialog, idx))
+        self.ok_button.grid(row=5, column=0, columnspan=1, padx=(20, 10), pady=(0, 20), sticky="ew")
+        
+        self.cancel_button = ctk.CTkButton(master=top_level_dialog,
+                                        width=120,
+                                        height=35,
+                                        border_width=0,
+                                        text='Cancel',
+                                        font=ctk.CTkFont(size=14),
+                                        fg_color="#6c757d",
+                                        hover_color="#5a6268",
+                                        command=lambda: self._cancel_event(top_level_dialog))
+        self.cancel_button.grid(row=5, column=1, columnspan=1, padx=(10, 20), pady=(0, 20), sticky="ew")
 
-    def _calculate_visible_range(self):
-        """
-        Calculate which data rows should be rendered based on scroll position.
-        Includes buffer rows above and below visible area for smooth scrolling.
-        """
-        try:
-            scroll_top = self.canvas.canvasy(0)
-        except:
-            scroll_top = 0
-        
-        # Calculate visible range with buffer
-        first_row = max(0, int(scroll_top // self.row_height) - self.buffer_rows)
-        last_row = min(
-            self.total_rows - 1, 
-            first_row + self.visible_rows + self.buffer_rows * 2
-        )
-        
-        return (first_row, last_row)
+    # Event the the user press the delete button inside the dialog box
+    def _ok_event(self, frame, idx):
+        self.__remove_row(idx)
+        frame.destroy()
 
-    def _render_visible_range(self, first_row, last_row):
-        """
-        Render the specified range of data rows using available widgets.
-        Maps data rows to widget pool entries and updates their content/position.
-        """
-        # Hide all widgets first
-        for row_widgets in self.row_widgets:
-            self.hide_widget_row(row_widgets)
-        
-        # Calculate how many rows to display
-        rows_to_display = last_row - first_row + 1
-        available_widgets = len(self.row_widgets)
-        
-        # Display data using available widget pool
-        for i in range(min(rows_to_display, available_widgets)):
-            data_row_index = first_row + i
-            
-            if data_row_index < len(self.data):
-                # Update widget content with current data
-                row_data = self.data[data_row_index]
-                self.update_row_widget_content(i, row_data)
-                
-                # Calculate absolute position for this row
-                y_position = data_row_index * self.row_height
-                
-                # Show widget at calculated position
-                self.show_widget_row(self.row_widgets[i], y_position, data_row_index)
+    # Event when the user presse the cancel button or the close windows button, destroy the window
+    def _cancel_event(self, frame):
+        frame.destroy()
 
-    # =============================================================================
-    # WIDGET CONTENT MANAGEMENT
-    # =============================================================================
-    
-    def update_row_widget_content(self, widget_index, row_data):
-        """
-        Update widget content without changing position or visibility.
-        
-        Handles data formatting, color coding, and event binding.
-        Includes error handling for malformed data rows.
-        """
-        if widget_index >= len(self.row_widgets):
-            return
-        
-        widgets = self.row_widgets[widget_index]
-        
-        try:
-            # Extract and validate data with fallbacks
-            extracted_data = self._extract_row_data(row_data)
-            
-            # Update display widgets with formatted data
-            self._update_display_widgets(widgets, extracted_data)
-            
-            # Setup delete button with transaction ID
-            self._configure_delete_button(widgets, row_data)
-            
-        except Exception as e:
-            print(f"Error updating row widget {widget_index}: {e}")
-            self._clear_widget_content(widgets)
-
-    def _extract_row_data(self, row_data):
-        """Extract and format data from row with error handling."""
-        date = str(row_data[1]) if len(row_data) > 1 else "N/A"
-        
-        # Handle amount with proper type conversion
-        raw_amount = row_data[2] if len(row_data) > 2 and row_data[2] != '' else 0.0
-        amount = float(raw_amount)
-        
-        tag = str(row_data[3]) if len(row_data) > 3 else "N/A"
-        desc = str(row_data[4]) if len(row_data) > 4 else "N/A"
-        
-        return {
-            'date': date,
-            'amount': amount,
-            'tag': tag,
-            'desc': desc
-        }
-
-    def _update_display_widgets(self, widgets, data):
-        """Update widget display content with proper formatting and colors."""
-        # Format amount with appropriate color coding
-        amount_color = "#ff6b6b" if data['amount'] < 0 else "#51cf66"
-        amount_text = f"{abs(data['amount']):.2f}{self.currency_sign}"
-        if data['amount'] < 0:
-            amount_text = f"-{amount_text}"
-        
-        # Update widget content
-        widgets['date'].configure(text=data['date'])
-        widgets['amount'].configure(text=amount_text, text_color=amount_color)
-        widgets['tag'].configure(text=data['tag'])
-        widgets['desc'].configure(text=data['desc'])
-
-    def _configure_delete_button(self, widgets, row_data):
-        """Setup delete button with appropriate transaction ID callback."""
-        transaction_id = row_data[0] if len(row_data) > 0 else None
-        
-        if transaction_id is not None:
-            widgets['delete'].configure(
-                command=lambda tid=transaction_id: self.delete_row(tid)
-            )
-        else:
-            widgets['delete'].configure(command=None)
-
-    def _clear_widget_content(self, widgets):
-        """Clear all widget content in case of errors."""
-        for key in ['date', 'amount', 'tag', 'desc']:
-            widgets[key].configure(text="")
-
-    # =============================================================================
-    # EVENT HANDLERS
-    # =============================================================================
-    
-    def delete_row(self, transaction_id):
-        """
-        Handle row deletion with data update and UI refresh.
-        Updates local data and triggers callback for database operations.
-        """
-        # Remove from local data copy
-        self.data = [row for row in self.data if row[0] != transaction_id]
-        
-        # Refresh display with updated data
-        self.refresh_view()
-        
-        # Notify parent component via callback
-        if self.on_delete_callback:
-            self.on_delete_callback(transaction_id)
-
-    def on_canvas_configure(self, event):
-        """
-        Handle canvas resize events for responsive layout.
-        Updates canvas window width and triggers view refresh.
-        """
-        # Update internal window width to match canvas
-        canvas_width = event.width
-        self.canvas.itemconfig(self.canvas_window, width=canvas_width)
-        
-        # Refresh view for responsive repositioning
-        self.after_idle(self.refresh_view)
-
-    def on_scrollbar_move(self, *args):
-        """
-        Handle scrollbar movement events.
-        Moves canvas view and updates visible items.
-        """
-        self.canvas.yview(*args)
-        # Use after_idle for smoother scrolling performance
-        self.after_idle(self.update_visible_items)
-
-    def on_mousewheel(self, event):
-        """
-        Handle mouse wheel scrolling with cross-platform compatibility.
-        Supports Windows (delta), Linux (num), and Mac scrolling.
-        """
-        # Calculate scroll direction based on event type
-        if hasattr(event, 'delta') and event.delta:
-            delta = -int(event.delta / 120)  # Windows/Mac
-        elif hasattr(event, 'num'):
-            delta = -1 if event.num == 4 else 1  # Linux
-        else:
-            return
-        
-        # Scroll canvas and update visible items immediately
-        self.canvas.yview_scroll(delta, "units")
-        self.update_visible_items()
-
-    # =============================================================================
-    # DATA OPERATIONS
-    # =============================================================================
-    
-    def update_data(self, new_data):
-        """
-        Update table with completely new dataset.
-        Handles None data gracefully and triggers full refresh.
-        """
-        self.data = new_data.copy() if new_data else []
-        self.refresh_view()
-
-    def sort_data(self, column_index, ascending=True):
-        """
-        Sort table data by specified column with type-aware comparison.
-        
-        Handles different data types appropriately:
-        - Dates: string comparison (assumes ISO format)
-        - Amounts: numeric comparison
-        - Text fields: case-insensitive string comparison
-        """
-        if not self.data:
-            return
-        
-        try:
-            # Apply appropriate sorting based on column type
-            if column_index == 1:  # Date column
-                self.data.sort(key=lambda x: x[1], reverse=not ascending)
-            elif column_index == 2:  # Amount column
-                self.data.sort(key=lambda x: float(x[2]), reverse=not ascending)
-            elif column_index == 3:  # Tag column
-                self.data.sort(key=lambda x: str(x[3]).lower(), reverse=not ascending)
-            elif column_index == 4:  # Description column
-                self.data.sort(key=lambda x: str(x[4]).lower(), reverse=not ascending)
-
-            # Refresh display with sorted data
-            self.refresh_view()
-            
-        except Exception as e:
-            print(f"Error sorting data: {e}")
+    # Remove the row from the widget list and from the screen
+    def __remove_row(self, idx):
+        self.widgets_list[idx].destroy()               # Remove it from the screen
+        self.widgets_list.pop(idx)
+        # Add code to delete it from the database local 

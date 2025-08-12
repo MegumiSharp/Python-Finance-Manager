@@ -346,3 +346,7 @@ self.tag_button = self.__create_button(frame =self.navigation_frame, text = "Tag
 self.tag_button.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
 self.buttons[TagView] = self.tag_button
 ```
+
+
+
+## `home_view.py`

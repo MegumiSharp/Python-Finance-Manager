@@ -11,3 +11,5 @@ data/user_settings/user_settings.json
 .vscode/settings.json
 
 examples
+
+src/views/backup

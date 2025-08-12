@@ -21,16 +21,9 @@ class HomeView(BaseView):
         # Core dependencies
         self.controller = controller
         self.user = user
-        self.db = database
-        
-        # Data management - working with copies for filtering performance
-        self.data = self.db.local_db.copy()
-        self.original_data = self.db.local_db.copy()
-        self.db_transactions = []  # Pending database operations queue
-        
-        # Filter and search state
-        self.current_filter = "all"  # Options: all, day, month, year
-        self.current_search = ""
+        self.data = database.local_db
+
+        self.label_text = ctk.StringVar(value="Welcome to Expensia!")
         
         # Configure the main layout structure with proper grid weights
         self.main_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -42,6 +35,134 @@ class HomeView(BaseView):
         self.main_frame.grid_columnconfigure(1, weight=0)  # Summary panel fixed width
 
         self.setup_ui()
+
+
+    # =============================================================================
+    # UI SETUP AND LAYOUT
+    # =============================================================================
+    
+    # Initialize all UI components in proper order. Creates main content area and summary panel with responsive layout.
+    def setup_ui(self):
+        # Left side: main content area (search, filters, table, add form)
+        self.main_content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.main_content_frame.grid(row=0, column=0, sticky="nsew")
+        self.main_content_frame.grid_columnconfigure(0, weight=1)
+        self.main_content_frame.grid_rowconfigure(2, weight=1)  # Table expands vertically
+
+        # Right side: Summary Frame content area (income, expenses, ec...)
+        self.summary_frame = ctk.CTkFrame(self.main_frame, width=250)
+        self.summary_frame.grid(row=0, column=1, sticky="nsew")
+        self.summary_frame.grid_propagate(False)  # Maintain fixed width
+        
+        
+        # Initialize the transaction table
+        self.transactions_table = VirtualTable(self.main_content_frame, self.controller, self.data, self.user)
+        self.transactions_table.grid(row=2, column=0, sticky="nsew")
+
+
+        #self.message_box()
+        # Initialize components in correct order
+        self.search_bar_frame()
+        self.ordering_frame(self.main_content_frame)
+
+
+
+        self.add_transaction_frame(self.main_content_frame)
+        self.setup_summary_panel()
+        self.message_box()
+
+
+
+
+
+    def message_box(self):
+
+        search_container = ctk.CTkFrame(
+            self.main_content_frame,
+            height=40,
+            border_width=4,
+            fg_color= "#1a1a1a",
+            border_color="#292929",
+            corner_radius=16
+        )
+        search_container.grid(row=5, column=0, sticky="ew", padx=30)
+        search_container.grid_propagate(False)
+        search_container.grid_columnconfigure(0, weight=1)
+        search_container.grid_rowconfigure(0, weight=1)
+
+        self.message_home_view = ctk.CTkLabel(
+            search_container,
+            font=ctk.CTkFont(size=14),
+            textvariable= self.label_text
+        )
+        self.message_home_view.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+
+
+    def change_message_home_view(self, new_message, new_color):
+        self.label_text.set(new_message)
+        self.message_home_view.configure(text_color = new_color)
+
+
+    # =============================================================================
+    # SEARCH FUNCTIONALITY
+    # =============================================================================
+    
+    def search_bar_frame(self):
+        """
+        Create search bar with magnifying glass icon.
+        Uses StringVar with trace callback for real-time search.
+        """
+        # Container frame with transparent background
+        search_frame = ctk.CTkFrame(self.main_content_frame, fg_color="transparent", height=60)
+        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady= (0, 8))
+        search_frame.grid_propagate(False)
+        search_frame.grid_columnconfigure(0, weight=1)
+        
+        # Search input container with icon overlay
+        search_container = ctk.CTkFrame(search_frame, height=40)
+        search_container.grid(row=0, column=0, sticky="ew", pady=10)
+        search_container.grid_propagate(False)
+        search_container.grid_columnconfigure(0, weight=1)
+        
+        # Search entry with real-time callback
+        self.search_var = ctk.StringVar()
+        self.search_var.trace_add("write", self.on_search)
+        
+        self.search_entry = ctk.CTkEntry(
+            search_container,
+            textvariable=self.search_var,
+            height=40,
+            font=ctk.CTkFont(size=14)
+        )
+        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))
+        
+        # Search icon overlay
+        self._add_search_icon(search_container)
+
+    def _add_search_icon(self, parent):
+        """Add magnifying glass icon to search bar."""
+        self.lens_image = ctk.CTkImage(
+            Image.open(os.path.join(ICONS_PATH, "search.png")),
+            size=(24, 24)
+        )
+        lens_icon = ctk.CTkLabel(
+            parent,
+            text="",
+            image=self.lens_image,
+            width=20,
+            height=20
+        )
+        lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
+
+    def on_search(self, var_name, index, operation):
+        """
+        Handle real-time search input changes.
+        Updates filter state and refreshes display immediately.
+        """
+        self.current_search = self.search_var.get()
+        self.apply_filters()
+
+
 
     # =============================================================================
     # DATABASE OPERATIONS
@@ -74,51 +195,26 @@ class HomeView(BaseView):
 
         self.db_transactions.clear()
 
-    # =============================================================================
-    # UI SETUP AND LAYOUT
-    # =============================================================================
-    
-    def setup_ui(self):
-        """
-        Initialize all UI components in proper order.
-        Creates main content area and summary panel with responsive layout.
-        """
-        # Left side: main content area (search, filters, table, add form)
-        self._create_main_content_area()
-        
-        # Right side: summary statistics panel
-        self._create_summary_panel()
-        
-        # Initialize components in correct order
-        self.search_bar_frame(self.main_content_frame)
-        self.ordering_frame(self.main_content_frame)
-        self._create_virtual_table()
-        self.add_transaction_frame(self.main_content_frame)
-        self.setup_summary_panel()
 
-    def _create_main_content_area(self):
-        """Create the main content frame with proper grid configuration."""
-        self.main_content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.main_content_frame.grid(row=0, column=0, sticky="nsew", pady=(20, 20))
-        self.main_content_frame.grid_columnconfigure(0, weight=1)
-        self.main_content_frame.grid_rowconfigure(2, weight=1)  # Table expands vertically
 
-    def _create_summary_panel(self):
-        """Create the fixed-width summary panel on the right side."""
-        self.summary_frame = ctk.CTkFrame(self.main_frame, width=250)
-        self.summary_frame.grid(row=0, column=1, sticky="nsew", pady=(20, 20))
-        self.summary_frame.grid_propagate(False)  # Maintain fixed width
 
-    def _create_virtual_table(self):
-        """Initialize the virtual scrolling table with delete callback."""
-        self.virtual_table = VirtualTable(
-            self.main_content_frame,
-            self,
-            self.data,
-            self.user,
-            on_delete_callback=self.on_transaction_deleted
-        )
-        self.virtual_table.grid(row=2, column=0, sticky="nsew")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # =============================================================================
     # SUMMARY PANEL
@@ -200,7 +296,7 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Income",
             fg_color="#2A9221",
-            command=self.show_income,
+            command=self.transactions_table.show_income,
             font=ctk.CTkFont(size=14)
         )
         self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -210,7 +306,7 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Expenses",
             fg_color="#DB5745",
-            command=self.show_expenses,
+            command=self.transactions_table.show_expenses,
             font=ctk.CTkFont(size=14)
         )
         self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -219,10 +315,13 @@ class HomeView(BaseView):
         self.all = ctk.CTkButton(
             filter_info_frame,
             text="All",
-            command=self.show_all,
+            command=self.transactions_table.show_all,
             font=ctk.CTkFont(size=14)
         )
         self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+
+
 
     def update_summary(self):
         """
@@ -258,33 +357,9 @@ class HomeView(BaseView):
         self.total_expenses_label.configure(text="$0.00")
         self.net_balance_label.configure(text="$0.00")
 
-    def show_income(self):
-        """
-        Filter to show only income transactions by sorting amount descending.
-        Triggers table sort and summary update.
-        """
-
-        #self.current_search = "+"
-        #self.apply_filters()
-        #self.update_summary()
 
 
-    def show_expenses(self):
-        """
-        Filter to show only income transactions by sorting amount descending.
-        Triggers table sort and summary update.
-        """
-        self.sort_table(2, True)  # Sort by amount column, descending
-        self.update_summary()
 
-
-    def show_all(self):
-        """
-        Filter to show only income transactions by sorting amount descending.
-        Triggers table sort and summary update.
-        """
-        self.sort_table(1, False)  # Sort by amount column, descending
-        self.update_summary()
 
     # =============================================================================
     # DATA OPERATIONS
@@ -369,7 +444,7 @@ class HomeView(BaseView):
                 row for row in data
                 if row[1] == target_date
             ]
-        else:  # "all"
+        else:  # "all" 
             return data
 
     # =============================================================================
@@ -382,18 +457,11 @@ class HomeView(BaseView):
         Uses CTkEntry widgets in a grid layout with validation.
         """
         # Create fixed-height container
-        add_frame = ctk.CTkFrame(main_frame, height=120)
-        add_frame.grid(row=4, column=0, sticky="ew", padx=30, pady=(10, 20))
+        add_frame = ctk.CTkFrame(main_frame, height= 80)
+        add_frame.grid(row=4, column=0, sticky="sew", padx=30, pady=8)
         add_frame.grid_propagate(False)
         add_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         
-        # Form title
-        add_label = ctk.CTkLabel(
-            add_frame,
-            text="Add New Transaction",
-            font=ctk.CTkFont(size=16, weight="bold")
-        )
-        add_label.grid(row=0, column=0, columnspan=4, pady=(10, 5))
         
         # Input fields with placeholders
         self._create_transaction_inputs(add_frame)
@@ -488,65 +556,7 @@ class HomeView(BaseView):
         self.category_entry.delete(0, 'end')
         self.description_entry.delete(0, 'end')
 
-    # =============================================================================
-    # SEARCH FUNCTIONALITY
-    # =============================================================================
-    
-    def search_bar_frame(self, home_frame):
-        """
-        Create search bar with magnifying glass icon.
-        Uses StringVar with trace callback for real-time search.
-        """
-        # Container frame with transparent background
-        search_frame = ctk.CTkFrame(home_frame, fg_color="transparent", height=60)
-        search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady=(30, 10))
-        search_frame.grid_propagate(False)
-        search_frame.grid_columnconfigure(0, weight=1)
-        
-        # Search input container with icon overlay
-        search_container = ctk.CTkFrame(search_frame, height=40)
-        search_container.grid(row=0, column=0, sticky="ew", pady=10)
-        search_container.grid_propagate(False)
-        search_container.grid_columnconfigure(0, weight=1)
-        
-        # Search entry with real-time callback
-        self.search_var = ctk.StringVar()
-        self.search_var.trace_add("write", self.on_search)
-        
-        self.search_entry = ctk.CTkEntry(
-            search_container,
-            textvariable=self.search_var,
-            height=40,
-            font=ctk.CTkFont(size=14)
-        )
-        self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))
-        
-        # Search icon overlay
-        self._add_search_icon(search_container)
-
-    def _add_search_icon(self, parent):
-        """Add magnifying glass icon to search bar."""
-        self.lens_image = ctk.CTkImage(
-            Image.open(os.path.join(ICONS_PATH, "search.png")),
-            size=(24, 24)
-        )
-        lens_icon = ctk.CTkLabel(
-            parent,
-            text="",
-            image=self.lens_image,
-            width=20,
-            height=20
-        )
-        lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
-
-    def on_search(self, var_name, index, operation):
-        """
-        Handle real-time search input changes.
-        Updates filter state and refreshes display immediately.
-        """
-        self.current_search = self.search_var.get()
-        self.apply_filters()
-
+  
     # =============================================================================
     # SORTING AND FILTERING CONTROLS
     # =============================================================================
@@ -649,9 +659,5 @@ class HomeView(BaseView):
         # Apply the new filter
         self.apply_filters()
 
-    def sort_table(self, column_index, boolean=None):
-        """
-        Delegate sorting to virtual table component.
-        Maintains separation of concerns between view and table logic.
-        """
-        self.virtual_table.sort_data(column_index, boolean)
+    def sort_table(self):
+       pass
