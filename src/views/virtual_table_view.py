@@ -63,6 +63,21 @@ class VirtualTable(BaseView):
         else:
             color = "#DF4E4E"         # The amount is negative, is red
 
+        # Change the color  and the boldiness of the tags if they are in the budget rule
+        tags_dict = {
+            "Needs" : "#4B89BB",
+            "Wants" : "#A048DB",
+            "Saving" : "#8DD390",
+            "Salary" : "#F1C42D"
+        }
+
+        if data_row[3] in tags_dict.keys():
+            tag_color = tags_dict[data_row[3]]
+            is_bold = ctk.CTkFont(size=14, weight="bold")
+        else:
+            tag_color = "#FFFFFF"
+            is_bold = ctk.CTkFont(size=12)
+
         # The widget row, a frame with inside all the labels and button to be considered as a transaction row
         row_frame = ctk.CTkFrame(self.scroll_frame, fg_color="transparent")
         
@@ -84,7 +99,7 @@ class VirtualTable(BaseView):
                                 text_color=color, font=ctk.CTkFont(size=14, weight="bold"), 
                                 height=28, anchor="e"),  # Right align the amount
             'tag': ctk.CTkLabel(row_frame, text=data_row[3], anchor="w", height=28,
-                            font=ctk.CTkFont(size=12)),
+                            font=is_bold, text_color=tag_color),
             'desc': ctk.CTkLabel(row_frame, text=data_row[4], anchor="w", height=28,
                                 font=ctk.CTkFont(size=12)),
             'delete': ctk.CTkButton(
@@ -153,6 +168,7 @@ class VirtualTable(BaseView):
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
 
+    # Show only the row witch contain the searched text used in the search bar
     def show_searched(self, text):
         # Show expenses when typing -
         if text == "-":
