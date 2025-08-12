@@ -69,8 +69,8 @@ class VirtualTable(BaseView):
         # Configure columns with proportional weights for responsive design
         row_frame.grid_columnconfigure(0, weight=15, uniform="col")   # date - 15% of width
         row_frame.grid_columnconfigure(1, weight=15, uniform="col")   # amount - 15% of width  
-        row_frame.grid_columnconfigure(2, weight=15, uniform="col")   # tag - 15% of width
-        row_frame.grid_columnconfigure(3, weight=45, uniform="col")   # desc - 45% of width (flexible)
+        row_frame.grid_columnconfigure(2, weight=20, uniform="col")   # tag - 15% of width
+        row_frame.grid_columnconfigure(3, weight=40, uniform="col")   # desc - 45% of width (flexible)
         row_frame.grid_columnconfigure(4, weight=10, uniform="col")   # delete - 10% of width
 
         # Format the amount with proper spacing
@@ -153,6 +153,32 @@ class VirtualTable(BaseView):
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
 
+    def show_searched(self, text):
+        # Show expenses when typing -
+        if text == "-":
+            self.show_expenses()
+            return
+        
+        # Show income when typing +
+        if text == "+":
+            self.show_income()
+            return
+
+        # Loop trough all frames in the widgets, and retrieve the texts of the labels, than search the text quary if is present in the labels, simple search
+        for frame in self.widgets_list:
+            search_text = text.lower()
+            date = frame.winfo_children()[0].cget("text").lower()
+            amount = frame.winfo_children()[1].cget("text").lower()
+            tag =  frame.winfo_children()[2].cget("text").lower()
+            desc = frame.winfo_children()[3].cget("text").lower()
+
+            # Search all
+            if search_text in f"{date} {amount} {tag} {desc}":
+                frame.grid()
+            else: 
+                frame.grid_remove()
+
+        self.scroll_frame._parent_canvas.yview_moveto(0)
 
     # =============================================================================
     # Delete button event confirmation

@@ -102,16 +102,12 @@ class HomeView(BaseView):
         self.label_text.set(new_message)
         self.message_home_view.configure(text_color = new_color)
 
-
     # =============================================================================
     # SEARCH FUNCTIONALITY
     # =============================================================================
     
+    # Create a search bar with magnifying glass icon. Uses StringVar with trace callback for real-time search.
     def search_bar_frame(self):
-        """
-        Create search bar with magnifying glass icon.
-        Uses StringVar with trace callback for real-time search.
-        """
         # Container frame with transparent background
         search_frame = ctk.CTkFrame(self.main_content_frame, fg_color="transparent", height=60)
         search_frame.grid(row=0, column=0, sticky="ew", padx=30, pady= (0, 8))
@@ -126,7 +122,7 @@ class HomeView(BaseView):
         
         # Search entry with real-time callback
         self.search_var = ctk.StringVar()
-        self.search_var.trace_add("write", self.on_search)
+        self.search_var.trace_add("write", lambda *args : self.transactions_table.show_searched(self.search_var.get()))
         
         self.search_entry = ctk.CTkEntry(
             search_container,
@@ -136,17 +132,12 @@ class HomeView(BaseView):
         )
         self.search_entry.grid(row=0, column=0, sticky="ew", padx=(5, 35))
         
-        # Search icon overlay
-        self._add_search_icon(search_container)
-
-    def _add_search_icon(self, parent):
-        """Add magnifying glass icon to search bar."""
         self.lens_image = ctk.CTkImage(
             Image.open(os.path.join(ICONS_PATH, "search.png")),
             size=(24, 24)
         )
         lens_icon = ctk.CTkLabel(
-            parent,
+            search_container,
             text="",
             image=self.lens_image,
             width=20,
@@ -154,13 +145,24 @@ class HomeView(BaseView):
         )
         lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
 
-    def on_search(self, var_name, index, operation):
-        """
-        Handle real-time search input changes.
-        Updates filter state and refreshes display immediately.
-        """
-        self.current_search = self.search_var.get()
-        self.apply_filters()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
