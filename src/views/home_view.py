@@ -3,7 +3,9 @@ from PIL import Image
 import os
 
 # Local imports
-from config.settings import ICONS_PATH
+from config.settings import (ICONS_PATH,
+                             COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN,
+                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.virtual_table_view import VirtualTable
 from src.views.base_view import BaseView
 from datetime import datetime
@@ -23,6 +25,7 @@ class HomeView(BaseView):
         self.user = user
         self.data = database.local_db
 
+        self.currency_sign = self.user.read_json_value(KEY_CURRENCY_SIGN)
         self.label_text = ctk.StringVar(value="Welcome to Expensia!")
         
         # Configure the main layout structure with proper grid weights
@@ -65,11 +68,10 @@ class HomeView(BaseView):
         self.search_bar_frame()
         self.ordering_frame(self.main_content_frame)
 
-
-
         self.add_transaction_frame(self.main_content_frame)
         self.setup_summary_panel()
         self.message_box()
+        self.transactions_table.show_all()
 
 
 
@@ -145,6 +147,175 @@ class HomeView(BaseView):
         )
         lens_icon.grid(row=0, column=0, sticky="e", padx=(0, 10))
 
+    # =============================================================================
+    # SUMMARY PANEL
+    # =============================================================================
+    
+    def setup_summary_panel(self):
+        """
+        Create summary panel showing transaction statistics and filter controls.
+        Uses CTkLabels with dynamic color coding for positive/negative values.
+        """
+        # Main statistics container
+        summary_content = ctk.CTkFrame(self.summary_frame)
+        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
+        summary_content.grid_columnconfigure(0, weight=1)
+        
+        # Main statistics container
+        summary_content = ctk.CTkFrame(self.summary_frame)
+        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
+        summary_content.grid_columnconfigure(0, weight=1)
+        
+        # Transactions
+        transaction_label = ctk.CTkLabel(
+            summary_content, 
+            text="Transactions:", 
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        transaction_label.grid(row=0, column=0, pady=(8, 4), padx=15, sticky="ew")
+        
+        transaction_value_label = ctk.CTkLabel(
+            summary_content, 
+            text="0.00", 
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        transaction_value_label.grid(row=1, column=0, pady=(0, 16), padx=15, sticky="ew")
+
+        # Income
+        income_label = ctk.CTkLabel(
+            summary_content, 
+            text="Income:", 
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        income_label.grid(row=2, column=0, pady=(8, 4), padx=15, sticky="ew")
+        
+        income_value_label = ctk.CTkLabel(
+            summary_content, 
+            text="0.00", 
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color=COLOR_INCOME  # green for income
+        )
+        income_value_label.grid(row=3, column=0, pady=(0, 16), padx=15, sticky="ew")
+
+        # Expenses
+        expenses_label = ctk.CTkLabel(
+            summary_content, 
+            text="Expenses:", 
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        expenses_label.grid(row=4, column=0, pady=(8, 4), padx=15, sticky="ew")
+        
+        expenses_value_label = ctk.CTkLabel(
+            summary_content, 
+            text="0.00", 
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color=COLOR_EXPENSE # matte dark red for expenses
+        )
+        expenses_value_label.grid(row=5, column=0, pady=(0, 16), padx=15, sticky="ew")
+
+        # Balance
+        balance_label = ctk.CTkLabel(
+            summary_content, 
+            text="Balance:", 
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        balance_label.grid(row=6, column=0, pady=(8, 4), padx=15, sticky="ew")
+        
+        balance_value_label = ctk.CTkLabel(
+            summary_content, 
+            text="0.00", 
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color=COLOR_BALANCE  # dark gray for neutral
+        )
+        balance_value_label.grid(row=7, column=0, pady=(0, 16), padx=15, sticky="ew")
+
+        # Store label references if you want to update them later
+        self.summary_labels = {
+            KEY_SUM_TRANSACTIONS: transaction_value_label,
+            KEY_SUM_INCOME: income_value_label,
+            KEY_SUM_EXPENSES: expenses_value_label,
+            KEY_SUM_BALANCE: balance_value_label
+        }
+
+        # Filter controls section
+        self._create_filter_controls()
+        
+        # Configure layout weights for proper expansion
+        self.summary_frame.grid_columnconfigure(0, weight=1)
+        self.summary_frame.grid_rowconfigure(3, weight=1)
+        
+        # Initialize with current data (one time use)
+        self.transactions_table.register_summary_callback(self.on_summary_updated)
+
+        # We brute force the first update of the summery, (not the best way) 
+        self.on_summary_updated(self.transactions_table._calculate_summary())
+
+    # Summary callback function is passed in the virtual table and used to update the labels in summary
+    # Summary_data is a dictionary with the values
+    def on_summary_updated(self, summary_data):
+        self.summary_labels[KEY_SUM_TRANSACTIONS].configure(text=f"{summary_data[KEY_SUM_TRANSACTIONS]}")
+        self.summary_labels[KEY_SUM_INCOME].configure(text=f"{summary_data[KEY_SUM_INCOME]:.2f}{self.currency_sign}")
+        self.summary_labels[KEY_SUM_EXPENSES].configure(text=f"{summary_data[KEY_SUM_EXPENSES]:.2f}{self.currency_sign}")
+        self.summary_labels[KEY_SUM_BALANCE].configure(text=f"{summary_data[KEY_SUM_BALANCE]:.2f}{self.currency_sign}")
+
+        # Dynamic color updates based on balance
+        if summary_data['balance'] >= 0:
+            self.summary_labels[KEY_SUM_BALANCE].configure(
+                text_color=COLOR_INCOME)
+        else:
+            self.summary_labels[KEY_SUM_BALANCE].configure(
+                text_color=COLOR_EXPENSE)
+
+    
+    def _create_filter_controls(self):
+        """Create filter information panel with income filter button."""
+        filter_info_frame = ctk.CTkFrame(self.summary_frame)
+        filter_info_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+        filter_info_frame.grid_columnconfigure(0, weight=1)
+        
+        # Filter section title
+        filter_title = ctk.CTkLabel(
+            filter_info_frame,
+            text="Fast Filters",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        filter_title.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
+        
+        # Income filter button
+        self.income_btn = ctk.CTkButton(
+            filter_info_frame,
+            text="Income",
+            fg_color="#2A9221",
+            command=self.transactions_table.show_income,
+            font=ctk.CTkFont(size=14)
+        )
+        self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+        # Expenses filter button
+        self.expenses_button = ctk.CTkButton(
+            filter_info_frame,
+            text="Expenses",
+            fg_color="#DB5745",
+            command=self.transactions_table.show_expenses,
+            font=ctk.CTkFont(size=14)
+        )
+        self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+        # All filter button
+        self.all = ctk.CTkButton(
+            filter_info_frame,
+            text="All",
+            command=self.transactions_table.show_all,
+            font=ctk.CTkFont(size=14)
+        )
+        self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
+
+    
+
+
+
+
+
 
 
 
@@ -197,167 +368,6 @@ class HomeView(BaseView):
 
         self.db_transactions.clear()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # =============================================================================
-    # SUMMARY PANEL
-    # =============================================================================
-    
-    def setup_summary_panel(self):
-        """
-        Create summary panel showing transaction statistics and filter controls.
-        Uses CTkLabels with dynamic color coding for positive/negative values.
-        """
-        # Main statistics container
-        summary_content = ctk.CTkFrame(self.summary_frame)
-        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-        summary_content.grid_columnconfigure(0, weight=1)
-
-        # Transaction count display
-        self._create_summary_stat(summary_content, "Transactions:", "total_transactions", 0, 1)
-        
-        # Income display with green color
-        self._create_summary_stat(summary_content, "Income:", "total_income", 2, 3, "#2A9221")
-        
-        # Expenses display with red color
-        self._create_summary_stat(summary_content, "Expenses:", "total_expenses", 4, 5, "red")
-        
-        # Net balance with dynamic color based on value
-        self._create_summary_stat(summary_content, "Balance:", "net_balance", 6, 7)
-
-        # Filter controls section
-        self._create_filter_controls()
-        
-        # Configure layout weights for proper expansion
-        self.summary_frame.grid_columnconfigure(0, weight=1)
-        self.summary_frame.grid_rowconfigure(3, weight=1)
-        
-        # Initialize with current data
-        self.update_summary()
-
-    def _create_summary_stat(self, parent, label_text, attr_prefix, label_row, value_row, color=None):
-        """
-        Helper method to create consistent summary statistic displays.
-        Creates label-value pairs with optional color coding.
-        """
-        # Label
-        label = ctk.CTkLabel(parent, text=label_text, font=ctk.CTkFont(size=14, weight="bold"))
-        label.grid(row=label_row, column=0, pady=(8, 4), padx=15, sticky="ew")
-        
-        # Value
-        value_label = ctk.CTkLabel(
-            parent, 
-            text="$0.00", 
-            font=ctk.CTkFont(size=16, weight="bold")
-        )
-
-        if color:
-            value_label.configure(text_color=color)
-        
-        value_label.grid(row=value_row, column=0, pady=(0, 16), padx=15, sticky="ew")
-        
-        # Store reference for updates
-        setattr(self, f"{attr_prefix}_label_text", label)
-        setattr(self, f"{attr_prefix}_label", value_label)
-
-    def _create_filter_controls(self):
-        """Create filter information panel with income filter button."""
-        filter_info_frame = ctk.CTkFrame(self.summary_frame)
-        filter_info_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
-        filter_info_frame.grid_columnconfigure(0, weight=1)
-        
-        # Filter section title
-        filter_title = ctk.CTkLabel(
-            filter_info_frame,
-            text="Fast Filters",
-            font=ctk.CTkFont(size=16, weight="bold")
-        )
-        filter_title.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
-        
-        # Income filter button
-        self.income_btn = ctk.CTkButton(
-            filter_info_frame,
-            text="Income",
-            fg_color="#2A9221",
-            command=self.transactions_table.show_income,
-            font=ctk.CTkFont(size=14)
-        )
-        self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
-
-        # Expenses filter button
-        self.expenses_button = ctk.CTkButton(
-            filter_info_frame,
-            text="Expenses",
-            fg_color="#DB5745",
-            command=self.transactions_table.show_expenses,
-            font=ctk.CTkFont(size=14)
-        )
-        self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
-
-        # All filter button
-        self.all = ctk.CTkButton(
-            filter_info_frame,
-            text="All",
-            command=self.transactions_table.show_all,
-            font=ctk.CTkFont(size=14)
-        )
-        self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
-
-
-
-
-    def update_summary(self):
-        """
-        Recalculate and update all summary statistics based on current filtered data.
-        Handles empty data gracefully and applies color coding to balance.
-        """
-        if not self.data:
-            self._set_empty_summary()
-            return
-        
-        # Calculate statistics from current filtered data
-        total_count = len(self.data)
-        total_income = sum(float(row[2]) for row in self.data if float(row[2]) > 0)
-        total_expenses = sum(abs(float(row[2])) for row in self.data if float(row[2]) < 0)
-        net_balance = total_income - total_expenses
-        
-        # Update display labels
-        self.total_transactions_label.configure(text=f"{total_count}")
-        self.total_income_label.configure(text=f"${total_income:.2f}")
-        self.total_expenses_label.configure(text=f"${total_expenses:.2f}")
-        
-        # Dynamic color coding for balance
-        balance_color = "#2A9221" if net_balance >= 0 else "red"
-        self.net_balance_label.configure(
-            text=f"${net_balance:.2f}",
-            text_color=balance_color
-        )
-
-    def _set_empty_summary(self):
-        """Set all summary values to zero when no data is available."""
-        self.total_transactions_label.configure(text="0")
-        self.total_income_label.configure(text="$0.00")
-        self.total_expenses_label.configure(text="$0.00")
-        self.net_balance_label.configure(text="$0.00")
 
 
 
@@ -598,7 +608,6 @@ class HomeView(BaseView):
                     font=ctk.CTkFont(size=14, weight="bold")
                 )
                 label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
-
     def _create_sort_button(self, parent, header, column_index):
         """Create individual sort button for a column."""
         btn_frame = ctk.CTkFrame(parent, fg_color="transparent")

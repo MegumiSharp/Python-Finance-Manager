@@ -1,6 +1,7 @@
 from config.settings import (KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
-                            COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME)
+                            COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
+                            KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.base_view import BaseView
 import customtkinter as ctk
 
@@ -11,6 +12,9 @@ class VirtualTable(BaseView):
         self.controller = controller
         self.data = data
         self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
+        
+        # Callback used for updating summary
+        self.summary_callback = None
 
         # Used to store the rows widgets, every row is a frame saved here, can be hided, deleted and showed, when needed, this is done to not recreate every widget everytime
         self.widgets_list = []
@@ -46,9 +50,6 @@ class VirtualTable(BaseView):
         # Creation of all row widget, we do it for every data_row in self.data, self.data is a list of list, every list have all the info to transform in widget
         for i, data_row in enumerate(self.data):
             self._create_row(data_row, i)
-
-        # All the widgets starts as not placed in the grid, so we need to show them all
-        self.show_all()
 
     # When scrolling with the mouse the yview scroll down or up
     def _on_mousewheel(self, event):
@@ -107,7 +108,7 @@ class VirtualTable(BaseView):
                 font=ctk.CTkFont(size=12),
                 command=lambda: self.__delete_button_event(self.widgets_list.index(row_frame))
             ),
-            'visible': True,
+            'visible': False,
             'data_row': data_index,
             'database_real_index': data_row[0]
         }
@@ -121,7 +122,7 @@ class VirtualTable(BaseView):
         
         # Lastly we add the reference of the frame widget to the widgets_list
         self.widgets_list.append(row_frame)
-    
+
     # =============================================================================
     # Event to filter the widgets list
     # =============================================================================
@@ -136,6 +137,7 @@ class VirtualTable(BaseView):
 
         # Position the scroll bar to the start of the frame on the top (this is usefull when we call show all from the button all)
         self.scroll_frame._parent_canvas.yview_moveto(0)
+        self._notify_summary_changed()                        # Notify to change the summary values using the callback funnction and implementation
             
     # Unplace from the grid all the widget that are not income
     def show_income(self):
@@ -150,18 +152,19 @@ class VirtualTable(BaseView):
         
         # The scroll frame hight differ from income, expenses and all, so this solve the problem positioning on the top 
         self.scroll_frame._parent_canvas.yview_moveto(0)
-
+        self._notify_summary_changed()                       # Notify to change the summary values using the callback funnction and implementation
 
     # Same as show_income, unplace the grid all the widget that are not expenses
     def show_expenses(self):
         for frame in self.widgets_list:
             label_ref = frame.winfo_children()[1].cget("text")
-            if float(label_ref.strip(self.currency_sign)) > 0:
+            if float(label_ref.removesuffix(self.currency_sign)) > 0:
                 frame.grid_remove()
             else: 
                 frame.grid()
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
+        self._notify_summary_changed()                       # Notify to change the summary values using the callback funnction and implementation
 
     # Show only the row witch contain the searched text used in the search bar
     def show_searched(self, text):
@@ -190,6 +193,7 @@ class VirtualTable(BaseView):
                 frame.grid_remove()
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
+        self._notify_summary_changed()                        # Notify to change the summary values using the callback funnction and implementation
 
     # =============================================================================
     # Delete button event confirmation
@@ -291,6 +295,7 @@ class VirtualTable(BaseView):
     def _ok_event(self, frame, idx):
         self.__remove_row(idx)
         frame.destroy()
+        self._notify_summary_changed()                  # Notify to change the summary values using the callback funnction and implementation
 
     # Event when the user presse the cancel button or the close windows button, destroy the window
     def _cancel_event(self, frame):
@@ -301,3 +306,42 @@ class VirtualTable(BaseView):
         self.widgets_list[idx].destroy()               # Remove it from the screen
         self.widgets_list.pop(idx)
         # Add code to delete it from the database local 
+
+    # =============================================================================
+    # Update summary
+    # =============================================================================
+    
+    # One time use to register the callback function that use the labels
+    def register_summary_callback(self, callback_function):
+        self.summary_callback = callback_function
+
+    # If something in the table is changed is notified, we calculate the new summary and we pass the dictionary with the values to be used in the callback function in the home_view
+    def _notify_summary_changed(self):
+        summary_data = self._calculate_summary()
+        self.summary_callback(summary_data)
+
+    # Calculte the summary values
+    def _calculate_summary(self):
+        income = 0
+        expenses = 0
+        transactions = 0
+
+        # If the widget in list is visible we take the amount and use for the income expenses and transactions, based if > or < 0
+        for widget in self.widgets_list:
+            if widget.winfo_manager():
+                amount = float(widget.winfo_children()[1].cget("text").removesuffix(self.currency_sign))
+                
+                if amount >= 0:
+                    income += amount
+                else:
+                    expenses += amount
+               
+                transactions += 1
+
+        # We return a dictionary of values used in the homeview to change the summary panel
+        return {
+            KEY_SUM_TRANSACTIONS: transactions,
+            KEY_SUM_INCOME: income,
+            KEY_SUM_EXPENSES: expenses,
+            KEY_SUM_BALANCE: (income + expenses)
+        }

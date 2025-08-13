@@ -92,6 +92,7 @@ SETTINGS_TABLE = "user_settings"
 COLOR_EXPENSE = "#DF4E4E"  # Red for expenses
 COLOR_INCOME = "#4EDF72"   # Green for income
 COLOR_ERROR = "#D61A3C"    # Error messages
+COLOR_BALANCE = "#3D85D8"
 
 COLOR_DELETE_BTN = "#ff6b6b"
 COLOR_DELETE_BTN_HOVER = "#ff5252"
@@ -189,5 +190,16 @@ NAVIGATION_FRAME = "navigation_frame"
 DASHBOARD_FRAME = "dashboard_frame"
 HOMEVIEW_FRAME = "homeview_frame"
 BUDGET_FRAME = "budget_frame"
+
+# ============================================================================
+# Summary Key
+# ============================================================================
+
+KEY_SUM_TRANSACTIONS = "transactions"
+KEY_SUM_INCOME = "income"
+KEY_SUM_EXPENSES= "expenses"
+KEY_SUM_BALANCE = "balance"
+
+
 # ============================================================================
 # END OF SETTINGS
