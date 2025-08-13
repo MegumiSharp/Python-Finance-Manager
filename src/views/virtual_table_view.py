@@ -1,4 +1,6 @@
-from config.settings import KEY_CURRENCY_SIGN
+from config.settings import (KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+                            COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
+                            COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME)
 from src.views.base_view import BaseView
 import customtkinter as ctk
 
@@ -59,20 +61,13 @@ class VirtualTable(BaseView):
     def _create_row(self, data_row, data_index):
         # Because the data is formatted in [database_index, date, amount, tag, desc] data_row[2] is the amount positioned in the list
         if data_row[2] >= 0:
-            color = "#4EDF72"         # The amount is positive, is green
+            color = COLOR_INCOME      # The amount is positive, is green
         else:
-            color = "#DF4E4E"         # The amount is negative, is red
+            color = COLOR_EXPENSE        # The amount is negative, is red
 
-        # Change the color  and the boldiness of the tags if they are in the budget rule
-        tags_dict = {
-            "Needs" : "#4B89BB",
-            "Wants" : "#A048DB",
-            "Saving" : "#8DD390",
-            "Salary" : "#F1C42D"
-        }
-
-        if data_row[3] in tags_dict.keys():
-            tag_color = tags_dict[data_row[3]]
+        #Tags dictionary have key : color , every key is a tag
+        if data_row[3] in TAGS_DICTIONARY.keys():
+            tag_color = TAGS_DICTIONARY[data_row[3]]
             is_bold = ctk.CTkFont(size=14, weight="bold")
         else:
             tag_color = "#FFFFFF"
@@ -107,8 +102,8 @@ class VirtualTable(BaseView):
                 text="Delete",
                 width=60,
                 height=28,
-                fg_color="#ff6b6b",
-                hover_color="#ff5252",
+                fg_color=COLOR_DELETE_BTN,
+                hover_color=COLOR_DELETE_BTN_HOVER,
                 font=ctk.CTkFont(size=12),
                 command=lambda: self.__delete_button_event(self.widgets_list.index(row_frame))
             ),
@@ -228,7 +223,7 @@ class VirtualTable(BaseView):
                                         width=330,
                                         text="Are you sure you want to delete:",
                                         font=ctk.CTkFont(size=16, weight="bold"),
-                                        text_color="#ff6b6b",
+                                        text_color=COLOR_DELETE_BTN,
                                         fg_color="transparent")
         self.warning_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(20, 5), sticky="ew")
         
@@ -237,7 +232,7 @@ class VirtualTable(BaseView):
                                     width=330,
                                     text=f"Date: {date}",
                                     font=ctk.CTkFont(size=12, weight="bold"),
-                                    text_color="#4a90e2",
+                                    text_color=COLOR_DATE_FIELD,
                                     fg_color="transparent")
         self.date_label.grid(row=1, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
@@ -246,7 +241,7 @@ class VirtualTable(BaseView):
                                         width=330,
                                         text=f"Amount: {amount}",
                                         font=ctk.CTkFont(size=12, weight="bold"),
-                                        text_color="#28a745",
+                                        text_color=COLOR_INCOME,
                                         fg_color="transparent")
         self.amount_label.grid(row=2, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
@@ -255,7 +250,7 @@ class VirtualTable(BaseView):
                                     width=330,
                                     text=f"Tag: {tag}",
                                     font=ctk.CTkFont(size=12, weight="bold"),
-                                    text_color="#17a2b8",
+                                    text_color=COLOR_TAG_FIELD,
                                     fg_color="transparent")
         self.tag_label.grid(row=3, column=0, columnspan=2, padx=20, pady=2, sticky="w")
         
@@ -265,7 +260,7 @@ class VirtualTable(BaseView):
                                     wraplength=310,
                                     text=f"Description: {desc}",
                                     font=ctk.CTkFont(size=12),
-                                    text_color="#6c757d",
+                                    text_color=COLOR_DESC_FIELD,
                                     fg_color="transparent")
         self.desc_label.grid(row=4, column=0, columnspan=2, padx=20, pady=(2, 15), sticky="ew")
         
@@ -276,8 +271,8 @@ class VirtualTable(BaseView):
                                     border_width=0,
                                     text='Delete',
                                     font=ctk.CTkFont(size=14, weight="bold"),
-                                    fg_color="#ff6b6b",
-                                    hover_color="#ff5252",
+                                    fg_color=COLOR_DELETE_BTN,
+                                    hover_color=COLOR_DELETE_BTN_HOVER,
                                     command=lambda: self._ok_event(top_level_dialog, idx))
         self.ok_button.grid(row=5, column=0, columnspan=1, padx=(20, 10), pady=(0, 20), sticky="ew")
         
@@ -287,8 +282,8 @@ class VirtualTable(BaseView):
                                         border_width=0,
                                         text='Cancel',
                                         font=ctk.CTkFont(size=14),
-                                        fg_color="#6c757d",
-                                        hover_color="#5a6268",
+                                        fg_color=COLOR_CANCEL_BTN,
+                                        hover_color=COLOR_CANCEL_BTN_HOVER,
                                         command=lambda: self._cancel_event(top_level_dialog))
         self.cancel_button.grid(row=5, column=1, columnspan=1, padx=(10, 20), pady=(0, 20), sticky="ew")
 

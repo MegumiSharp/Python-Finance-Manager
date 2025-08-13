@@ -89,9 +89,36 @@ SETTINGS_TABLE = "user_settings"
 # ============================================================================
 
 # Colors
-COLOR_EXPENSE = "#ff6b6b"  # Red for expenses
-COLOR_INCOME = "#51cf66"   # Green for income
+COLOR_EXPENSE = "#DF4E4E"  # Red for expenses
+COLOR_INCOME = "#4EDF72"   # Green for income
 COLOR_ERROR = "#D61A3C"    # Error messages
+
+COLOR_DELETE_BTN = "#ff6b6b"
+COLOR_DELETE_BTN_HOVER = "#ff5252"
+
+COLOR_CANCEL_BTN = "#6c757d"
+COLOR_CANCEL_BTN_HOVER = "#5a6268"
+
+COLOR_DATE_FIELD = "#4a90e2"
+COLOR_TAG_FIELD =  "#17a2b8"
+COLOR_DESC_FIELD = "#6c757d"
+
+COLOR_NEEDS_TAG = "#4B89BB"
+COLOR_WANTS_TAG = "#A048DB"
+COLOR_SAVING_TAG = "#8DD390"
+COLOR_SALARY_TAG = "#F1C42D"
+
+BUDGET_TAG_NEEDS = "Needs"
+BUDGET_TAG_WANTS = "Wants"
+BUDGET_TAG_SAVING = "Saving"
+BUDGET_TAG_SALARY = "Salary"
+
+TAGS_DICTIONARY = {
+    BUDGET_TAG_NEEDS : COLOR_NEEDS_TAG,
+    BUDGET_TAG_WANTS : COLOR_WANTS_TAG,
+    BUDGET_TAG_SAVING : COLOR_SAVING_TAG,
+    BUDGET_TAG_SALARY : COLOR_SALARY_TAG
+}
 
 # Fonts
 DEFAULT_FONT_SIZE = 14

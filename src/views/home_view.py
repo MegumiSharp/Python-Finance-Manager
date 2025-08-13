@@ -288,7 +288,7 @@ class HomeView(BaseView):
         # Filter section title
         filter_title = ctk.CTkLabel(
             filter_info_frame,
-            text="Current Filter",
+            text="Fast Filters",
             font=ctk.CTkFont(size=16, weight="bold")
         )
         filter_title.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
