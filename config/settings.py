@@ -22,7 +22,11 @@ USER_SETTINGS_PATH = DATA_ROOT / "user_settings" / "user_settings.json"
 
 # Files Names
 BACKGROUND_FILE_NAME = "background.jpg"
+
+# Icons File Names
 TASKBAR_ICON_FILE_NAME = "mini expension logo.png"
+EDIT_ICON_FILE_NAME = "d-edit.png"
+DELETE_ICON_FILE_NAME = "s-remove.png"
 
 
 # ============================================================================

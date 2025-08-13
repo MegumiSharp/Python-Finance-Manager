@@ -589,7 +589,7 @@ class HomeView(BaseView):
         header_frame.grid_columnconfigure(2, weight=15, uniform="col")  # Tag column
         header_frame.grid_columnconfigure(3, weight=30, uniform="col")  # Description column (wider)
         header_frame.grid_columnconfigure(4, weight=10, uniform="col")  # Actions column
-        header_frame.grid_columnconfigure(5, weight=10, uniform="col")  # Actions column
+        header_frame.grid_columnconfigure(5, weight=5, uniform="col")  # Actions column
 
         # Date button
         date_btn = ctk.CTkButton(

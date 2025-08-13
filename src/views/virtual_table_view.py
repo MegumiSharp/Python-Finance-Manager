@@ -1,9 +1,12 @@
-from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
                             COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.base_view import BaseView
 import customtkinter as ctk
+from PIL import Image
+import os
+
 
 # A virtual scrollable table made out of widget created from the database local raw data
 class VirtualTable(BaseView):
@@ -12,7 +15,11 @@ class VirtualTable(BaseView):
         self.controller = controller
         self.data = data
         self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
+
+        self.edit_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, EDIT_ICON_FILE_NAME)))
         
+        self.delete_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, DELETE_ICON_FILE_NAME)))
+
         # Callback used for updating summary
         self.summary_callback = None
 
@@ -82,8 +89,8 @@ class VirtualTable(BaseView):
         row_frame.grid_columnconfigure(1, weight=15, uniform="col")   # amount - 15% of width  
         row_frame.grid_columnconfigure(2, weight=15, uniform="col")   # tag - 15% of width
         row_frame.grid_columnconfigure(3, weight=30, uniform="col")   # desc - 40% of width (flexible)
-        row_frame.grid_columnconfigure(4, weight=10, uniform="col")   # modify - 10% of width
-        row_frame.grid_columnconfigure(5, weight=10, uniform="col")   # delete - 10% of width
+        row_frame.grid_columnconfigure(4, weight=5, uniform="col")   # modify - 10% of width
+        row_frame.grid_columnconfigure(5, weight=5, uniform="col")   # delete - 10% of width
 
         # Format the amount with proper spacing
         amount_text = f"{data_row[2]}{self.currency_sign}"
@@ -101,9 +108,10 @@ class VirtualTable(BaseView):
                                 font=ctk.CTkFont(size=12)),
             'modify': ctk.CTkButton(
                 row_frame,
-                text="Edit",
-                width=120,
-                height=28,
+                text= "",
+                image= self.edit_image,
+                width=32,
+                height=32,
                 fg_color=COLOR_EDIT_BTN,
                 hover_color=COLOR_EDIT_BTN_HOVER,
                 font=ctk.CTkFont(size=12),
@@ -111,9 +119,10 @@ class VirtualTable(BaseView):
             ),
             'delete': ctk.CTkButton(
                 row_frame,
-                text="Delete",
-                width=80,
-                height=28,
+                text= "",
+                image= self.delete_image,
+                width=32,
+                height=32,
                 fg_color=COLOR_DELETE_BTN,
                 hover_color=COLOR_DELETE_BTN_HOVER,
                 font=ctk.CTkFont(size=12),
@@ -129,8 +138,8 @@ class VirtualTable(BaseView):
         new_row['amount'].grid(row=0, column=1, padx =(0, 16), pady=2, sticky="ew")  # Extra space after amount
         new_row['tag'].grid(row=0, column=2, pady=2, sticky="ew")
         new_row['desc'].grid(row=0, column=3, pady=2, sticky="ew")
-        new_row['modify'].grid(row=0, column=4, padx =(0, 8), pady=2, sticky="e")
-        new_row['delete'].grid(row=0, column=5, pady=2, sticky="e")
+        new_row['modify'].grid(row=0, column=4,pady=2, sticky="e")
+        new_row['delete'].grid(row=0, column=5, padx= (8,0), pady=2, sticky="w")
         
         # Lastly we add the reference of the frame widget to the widgets_list
         self.widgets_list.append(row_frame)
