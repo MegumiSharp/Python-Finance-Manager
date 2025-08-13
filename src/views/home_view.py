@@ -71,7 +71,7 @@ class HomeView(BaseView):
         self.add_transaction_frame(self.main_content_frame)
         self.setup_summary_panel()
         self.message_box()
-        self.transactions_table.show_all()
+        self.transactions_table.order_by_date()           # Order the widgets by deafult by date and show all widges
 
 
 
@@ -583,46 +583,63 @@ class HomeView(BaseView):
         header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
         header_frame.grid_propagate(False)
         
-        # Create sortable column headers
-        self._create_column_headers(header_frame)
-        
-        # Add date filter buttons
-        self._create_date_filter_buttons(header_frame)
+        # Configure the main frame columns to ensure proper distribution
+        header_frame.grid_columnconfigure(0, weight=1)  # Date column
+        header_frame.grid_columnconfigure(1, weight=1)  # Amount column
+        header_frame.grid_columnconfigure(2, weight=1)  # Tag column
+        header_frame.grid_columnconfigure(3, weight=3)  # Description column (wider)
+        header_frame.grid_columnconfigure(4, weight=1)  # Actions column
 
-    def _create_column_headers(self, parent):
-        """Create sortable column headers with appropriate weights."""
-        headers = ["Date", "Amount", "Tag", "Description", ""]
-        column_weights = [2, 2, 2, 4, 1]
-
-        for i, (header, weight) in enumerate(zip(headers, column_weights)):
-            parent.grid_columnconfigure(i, weight=weight)
-            
-            # Sortable columns get buttons
-            if header in ["Date", "Amount", "Tag"]:
-                self._create_sort_button(parent, header, i)
-            else:
-                # Non-sortable columns get labels
-                label = ctk.CTkLabel(
-                    parent,
-                    text=header,
-                    font=ctk.CTkFont(size=14, weight="bold")
-                )
-                label.grid(row=0, column=i, sticky="ew", padx=10, pady=8)
-    def _create_sort_button(self, parent, header, column_index):
-        """Create individual sort button for a column."""
-        btn_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        btn_frame.grid(row=0, column=column_index, sticky="ew", padx=5, pady=8)
-        btn_frame.grid_columnconfigure(0, weight=1)
-        
-        sort_btn = ctk.CTkButton(
-            btn_frame,
-            text=f"{header} ↕",
-            command=lambda col=column_index+1: self.sort_table(col),
-            width=24,
+        # Date button
+        date_btn = ctk.CTkButton(
+            header_frame,
+            text="Date ↕",
+            command=self.transactions_table.order_by_date,
+            width=80,
             height=32,
             font=ctk.CTkFont(size=14, weight="bold")
         )
-        sort_btn.grid(row=0, column=0, sticky="ew")
+        date_btn.grid(row=0, column=0, sticky="ew", padx=5, pady=8)
+        
+        # Amount button
+        amount_btn = ctk.CTkButton(
+            header_frame,
+            text="Amount ↕",
+            command=self.transactions_table.order_by_amount,
+            width=80,
+            height=32,
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        amount_btn.grid(row=0, column=1, sticky="ew", padx=5, pady=8)
+        
+        # Tag label
+        tag_label = ctk.CTkLabel(
+            header_frame,
+            text="Tag",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        tag_label.grid(row=0, column=2, sticky="ew", padx=10, pady=8)
+    
+        # Description label
+        description_label = ctk.CTkLabel(
+            header_frame,
+            text="Description",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        description_label.grid(row=0, column=3, sticky="ew", padx=10, pady=8)
+    
+        # Actions column (empty header)
+        actions_label = ctk.CTkLabel(
+            header_frame,
+            text="Actions",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        actions_label.grid(row=0, column=4, sticky="ew", padx=10, pady=8)
+
+
+
+
+
 
     def _create_date_filter_buttons(self, parent):
         """Create compact date filter buttons (D, M, Y, All)."""
@@ -669,6 +686,3 @@ class HomeView(BaseView):
         
         # Apply the new filter
         self.apply_filters()
-
-    def sort_table(self):
-       pass

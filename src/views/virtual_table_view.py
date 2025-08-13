@@ -114,11 +114,11 @@ class VirtualTable(BaseView):
         }
 
         # Place all widgets with consistent spacing and proper sticky values
-        new_row['date'].grid(row=len(self.widgets_list), column=0, padx=(15, 5), pady=2, sticky="ew")
-        new_row['amount'].grid(row=len(self.widgets_list), column=1, padx=(15, 15), pady=2, sticky="ew")  # Extra space after amount
-        new_row['tag'].grid(row=len(self.widgets_list), column=2, padx=(30, 5), pady=2, sticky="ew")
-        new_row['desc'].grid(row=len(self.widgets_list), column=3, padx=(40, 5), pady=2, sticky="ew")
-        new_row['delete'].grid(row=len(self.widgets_list), column=4, padx=(5, 15), pady=2, sticky="e")
+        new_row['date'].grid(row=0, column=0, padx=(15, 5), pady=2, sticky="ew")
+        new_row['amount'].grid(row=0, column=1, padx=(15, 15), pady=2, sticky="ew")  # Extra space after amount
+        new_row['tag'].grid(row=0, column=2, padx=(30, 5), pady=2, sticky="ew")
+        new_row['desc'].grid(row=0, column=3, padx=(40, 5), pady=2, sticky="ew")
+        new_row['delete'].grid(row=0, column=4, padx=(5, 15), pady=2, sticky="e")
         
         # Lastly we add the reference of the frame widget to the widgets_list
         self.widgets_list.append(row_frame)
@@ -138,6 +138,17 @@ class VirtualTable(BaseView):
         # Position the scroll bar to the start of the frame on the top (this is usefull when we call show all from the button all)
         self.scroll_frame._parent_canvas.yview_moveto(0)
         self._notify_summary_changed()                        # Notify to change the summary values using the callback funnction and implementation
+
+    def hide_all(self):
+        # After looping for all the widgets in the list, we position it in the grid with the index used as position, using a list ensure to not have empty position
+        # The widgets frame is child of the scroll frame, so when we call grid we are placing it inside the scroll frame
+        for widget in self.widgets_list:
+            widget.grid_remove()  # ensures the widget is visible if it was hidden before
+
+        # Position the scroll bar to the start of the frame on the top (this is usefull when we call show all from the button all)
+        self.scroll_frame._parent_canvas.yview_moveto(0)
+        self._notify_summary_changed()                        # Notify to change the summary values using the callback funnction and implementation
+
             
     # Unplace from the grid all the widget that are not income
     def show_income(self):
@@ -345,3 +356,46 @@ class VirtualTable(BaseView):
             KEY_SUM_EXPENSES: expenses,
             KEY_SUM_BALANCE: (income + expenses)
         }
+    
+    # =============================================================================
+    # Date Ordering
+    # =============================================================================
+    
+    # Function called when the button date is pressed, order the transactions by date
+    def order_by_date(self, state=[False]):
+
+        # Even if a bad practice this is a reference to the previous arguments everythime is called, is a way to change the ordering, ascending and descending based on the click by user
+        state[0] = not state[0] 
+
+        # This method use the built-in sorting (that use the Timsort) the best way to order an array of date, the problem was to get this array of dates.
+        # Firstly we have an empty list and a list of pair
+        new_widget_list = []
+        date_index_pair = []
+
+
+        # We append to the list of pair a pair conteining the index and date
+        for i, widget in enumerate(self.widgets_list):
+            date = widget.winfo_children()[0].cget("text")
+
+            date_index_pair.append((date, i))
+
+        # Thanks to sorted built in  function we order by date first element of the pairs, the index is ignored
+        sorted_pairs = sorted(date_index_pair, reverse=state[0])
+        # sorted_pairs = sorted(date_widget_pairs, reverse=True)  # Descending
+
+        # Hide_all is responsable to hiding the current transactions
+        self.hide_all()
+
+        # We append to the new_widgets list, the widgets in order, using the index inside the sorted pair to retrieve the widget from the original list
+        for pair in sorted_pairs:
+            widget = self.widgets_list[pair[1]]
+            new_widget_list.append(widget)
+        
+        # We overwrite the widgets list with the new widgets list and than show them all
+        self.widgets_list = new_widget_list
+
+        self.show_all()
+
+    
+    def order_by_amount(self):
+        pass
