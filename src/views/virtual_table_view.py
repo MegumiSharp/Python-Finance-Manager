@@ -363,7 +363,6 @@ class VirtualTable(BaseView):
     
     # Function called when the button date is pressed, order the transactions by date
     def order_by_date(self, state=[False]):
-
         # Even if a bad practice this is a reference to the previous arguments everythime is called, is a way to change the ordering, ascending and descending based on the click by user
         state[0] = not state[0] 
 
@@ -372,11 +371,9 @@ class VirtualTable(BaseView):
         new_widget_list = []
         date_index_pair = []
 
-
         # We append to the list of pair a pair conteining the index and date
         for i, widget in enumerate(self.widgets_list):
             date = widget.winfo_children()[0].cget("text")
-
             date_index_pair.append((date, i))
 
         # Thanks to sorted built in  function we order by date first element of the pairs, the index is ignored
@@ -396,6 +393,35 @@ class VirtualTable(BaseView):
 
         self.show_all()
 
-    
-    def order_by_amount(self):
-        pass
+     # Function called when the button date is pressed, order the transactions by amount
+    def order_by_amount(self, state=[False]):
+        # Even if a bad practice this is a reference to the previous arguments everythime is called, is a way to change the ordering, ascending and descending based on the click by user
+        state[0] = not state[0] 
+
+        # This method use the built-in sorting (that use the Timsort) the best way to order an array of date, the problem was to get this array of dates.
+        # Firstly we have an empty list and a list of pair
+        new_widget_list = []
+        amount_index_pair = []
+
+        # We append to the list of pair a pair conteining the index and date
+        for i, widget in enumerate(self.widgets_list):
+            amount = widget.winfo_children()[1].cget("text").strip(self.currency_sign)
+            amount_index_pair.append((amount, i))
+
+        # Thanks to sorted built in  function we order by date first element of the pairs, the index is ignored
+        sorted_pairs = sorted(amount_index_pair, reverse=state[0])
+        # sorted_pairs = sorted(date_widget_pairs, reverse=True)  # Descending
+
+        # Hide_all is responsable to hiding the current transactions
+        self.hide_all()
+
+        # We append to the new_widgets list, the widgets in order, using the index inside the sorted pair to retrieve the widget from the original list
+        for pair in sorted_pairs:
+            widget = self.widgets_list[pair[1]]
+            new_widget_list.append(widget)
+        
+        # We overwrite the widgets list with the new widgets list and than show them all
+        self.widgets_list = new_widget_list
+
+        self.show_all()
+        
