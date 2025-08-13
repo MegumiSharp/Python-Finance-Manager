@@ -28,7 +28,10 @@ class AppController(customtkinter.CTk):
 
         # Set Windows Settings like appearance and color theme or size and name
         customtkinter.set_appearance_mode(DEFAULT_APPEARANCE_MODE)
-        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
+        
+        # The geometry of the window, it appear in the same position (working for monitor 1920x1080 , with 2 monitor)
+        self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+300+150")
+
         self.title(APP_NAME)
 
         # Block the resizing of the window (allegedly)
