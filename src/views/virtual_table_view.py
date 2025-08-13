@@ -1,4 +1,4 @@
-from config.settings import (KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
                             COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
@@ -80,9 +80,10 @@ class VirtualTable(BaseView):
         # Configure columns with proportional weights for responsive design
         row_frame.grid_columnconfigure(0, weight=15, uniform="col")   # date - 15% of width
         row_frame.grid_columnconfigure(1, weight=15, uniform="col")   # amount - 15% of width  
-        row_frame.grid_columnconfigure(2, weight=20, uniform="col")   # tag - 15% of width
-        row_frame.grid_columnconfigure(3, weight=40, uniform="col")   # desc - 45% of width (flexible)
-        row_frame.grid_columnconfigure(4, weight=10, uniform="col")   # delete - 10% of width
+        row_frame.grid_columnconfigure(2, weight=15, uniform="col")   # tag - 15% of width
+        row_frame.grid_columnconfigure(3, weight=30, uniform="col")   # desc - 40% of width (flexible)
+        row_frame.grid_columnconfigure(4, weight=10, uniform="col")   # modify - 10% of width
+        row_frame.grid_columnconfigure(5, weight=10, uniform="col")   # delete - 10% of width
 
         # Format the amount with proper spacing
         amount_text = f"{data_row[2]}{self.currency_sign}"
@@ -98,10 +99,20 @@ class VirtualTable(BaseView):
                             font=is_bold, text_color=tag_color),
             'desc': ctk.CTkLabel(row_frame, text=data_row[4], anchor="w", height=28,
                                 font=ctk.CTkFont(size=12)),
+            'modify': ctk.CTkButton(
+                row_frame,
+                text="Edit",
+                width=120,
+                height=28,
+                fg_color=COLOR_EDIT_BTN,
+                hover_color=COLOR_EDIT_BTN_HOVER,
+                font=ctk.CTkFont(size=12),
+                command=lambda: self.__edit_button_event(self.widgets_list.index(row_frame))
+            ),
             'delete': ctk.CTkButton(
                 row_frame,
                 text="Delete",
-                width=60,
+                width=80,
                 height=28,
                 fg_color=COLOR_DELETE_BTN,
                 hover_color=COLOR_DELETE_BTN_HOVER,
@@ -114,11 +125,12 @@ class VirtualTable(BaseView):
         }
 
         # Place all widgets with consistent spacing and proper sticky values
-        new_row['date'].grid(row=0, column=0, padx=(15, 5), pady=2, sticky="ew")
-        new_row['amount'].grid(row=0, column=1, padx=(15, 15), pady=2, sticky="ew")  # Extra space after amount
-        new_row['tag'].grid(row=0, column=2, padx=(30, 5), pady=2, sticky="ew")
-        new_row['desc'].grid(row=0, column=3, padx=(40, 5), pady=2, sticky="ew")
-        new_row['delete'].grid(row=0, column=4, padx=(5, 15), pady=2, sticky="e")
+        new_row['date'].grid(row=0, column=0, pady=2, sticky="ew")
+        new_row['amount'].grid(row=0, column=1, padx =(0, 16), pady=2, sticky="ew")  # Extra space after amount
+        new_row['tag'].grid(row=0, column=2, pady=2, sticky="ew")
+        new_row['desc'].grid(row=0, column=3, pady=2, sticky="ew")
+        new_row['modify'].grid(row=0, column=4, padx =(0, 8), pady=2, sticky="e")
+        new_row['delete'].grid(row=0, column=5, pady=2, sticky="e")
         
         # Lastly we add the reference of the frame widget to the widgets_list
         self.widgets_list.append(row_frame)
@@ -207,7 +219,7 @@ class VirtualTable(BaseView):
         self._notify_summary_changed()                        # Notify to change the summary values using the callback funnction and implementation
 
     # =============================================================================
-    # Delete button event confirmation
+    # Delete button event confirmation 
     # =============================================================================
 
     # Delete button event to  open a confirmation button, a top level frame that let the user confirm of deny the deletion
@@ -317,6 +329,15 @@ class VirtualTable(BaseView):
         self.widgets_list[idx].destroy()               # Remove it from the screen
         self.widgets_list.pop(idx)
         # Add code to delete it from the database local 
+
+
+    # =============================================================================
+    # Edit button event confirmation 
+    # =============================================================================
+
+    # Edit button event to  open a confirmation button, a top level frame that let the user confirm of deny the deletion
+    def __edit_button_event(self, idx):
+        pass
 
     # =============================================================================
     # Update summary

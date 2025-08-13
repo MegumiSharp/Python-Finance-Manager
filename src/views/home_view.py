@@ -582,13 +582,14 @@ class HomeView(BaseView):
         header_frame = ctk.CTkFrame(main_frame, fg_color="#1a1a1a", height=50)
         header_frame.grid(row=1, column=0, sticky="ew", padx=30, pady=(0, 10))
         header_frame.grid_propagate(False)
-        
+
         # Configure the main frame columns to ensure proper distribution
-        header_frame.grid_columnconfigure(0, weight=1)  # Date column
-        header_frame.grid_columnconfigure(1, weight=1)  # Amount column
-        header_frame.grid_columnconfigure(2, weight=1)  # Tag column
-        header_frame.grid_columnconfigure(3, weight=3)  # Description column (wider)
-        header_frame.grid_columnconfigure(4, weight=1)  # Actions column
+        header_frame.grid_columnconfigure(0, weight=15, uniform="col")  # Date column
+        header_frame.grid_columnconfigure(1, weight=15, uniform="col")  # Amount column
+        header_frame.grid_columnconfigure(2, weight=15, uniform="col")  # Tag column
+        header_frame.grid_columnconfigure(3, weight=30, uniform="col")  # Description column (wider)
+        header_frame.grid_columnconfigure(4, weight=10, uniform="col")  # Actions column
+        header_frame.grid_columnconfigure(5, weight=10, uniform="col")  # Actions column
 
         # Date button
         date_btn = ctk.CTkButton(
@@ -636,8 +637,13 @@ class HomeView(BaseView):
         )
         actions_label.grid(row=0, column=4, sticky="ew", padx=10, pady=8)
 
-
-
+        # empty header
+        actions_label = ctk.CTkLabel(
+            header_frame,
+            text="",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        actions_label.grid(row=0, column=5, sticky="ew", padx=10, pady=8)
 
 
 
