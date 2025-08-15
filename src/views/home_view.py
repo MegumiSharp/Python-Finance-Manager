@@ -290,7 +290,8 @@ class HomeView(BaseView):
         filter_title.grid(row=0, column=0, pady=4, padx=15, sticky="w")
 
         optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
-                                                        values=self.transactions_table.get_dates())
+                                                        values=self.transactions_table.get_dates(),
+                                                        command = self.transactions_table.filter_dates)
         optionmenu_1.grid(row=1, column=0, padx=20)
 
         

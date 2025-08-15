@@ -463,7 +463,6 @@ class VirtualTable(BaseView):
     
     # Gets the year dates from the data, this is used for the optionmenu in the summary sidebar
     def get_dates(self):
-
         # It create a set (so without duplicates) of the element in index 1 sliced. The element in index 1 of self.data is the date formatted in "2025-02-10", this is sliced to "2025" and than
         # added to the set, giving something like this {'2025', '2024'}
         dates ={sublist[1][0:4] for sublist in self.data}
@@ -471,4 +470,26 @@ class VirtualTable(BaseView):
         # The sets is than sorted and converted in a list, because optionmenu accepts only list
         sorted_dates = list(sorted(dates))
 
+        sorted_dates.insert(0, "All")
+
         return sorted_dates
+    
+
+    def filter_dates(self, year):
+
+        if year == "All":
+            self.show_all()
+            self.scroll_frame._parent_canvas.yview_moveto(0)
+            self._notify_summary_changed()   
+            return
+
+        for frame in self.widgets_list:
+            label_ref = frame.winfo_children()[0].cget("text")[0:4]
+            if label_ref != year:
+                frame.grid_remove()
+            else: 
+                frame.grid()
+
+        self.scroll_frame._parent_canvas.yview_moveto(0)
+        self._notify_summary_changed()   
+
