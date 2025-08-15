@@ -27,7 +27,10 @@ class HomeView(BaseView):
 
         self.currency_sign = self.user.read_json_value(KEY_CURRENCY_SIGN)
         self.label_text = ctk.StringVar(value="Welcome to Expensia!")
-        
+
+        self.current_date_selection = "All"
+        self.current_month_selection = "All"
+
         # Configure the main layout structure with proper grid weights
         self.main_frame = ctk.CTkFrame(self, corner_radius=0)
         self.main_frame.pack(fill="both", expand=True)
@@ -291,13 +294,33 @@ class HomeView(BaseView):
 
         optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
                                                         values=self.transactions_table.get_dates(),
-                                                        command = self.transactions_table.filter_dates)
+                                                        command = self.on_date_changed)
         optionmenu_1.grid(row=1, column=0, padx=20)
 
         
-        optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
-                                                        values=["All", "Jan", "Feb", "Mar", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"])
-        optionmenu_1.grid(row=2, column=0, padx=20, pady=(16,1))
+        optionmenu_2 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
+                                                        values=["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                                                        command = self.on_month_changed)
+        optionmenu_2.grid(row=2, column=0, padx=20, pady=(16,1))
+
+
+    def on_date_changed(self, value):
+        self.current_date_selection = value
+
+        self.transactions_table.filter_date_month(
+            date_value=self.current_date_selection,
+            month_value=self.current_month_selection
+        )
+
+    def on_month_changed(self, value):
+        self.current_month_selection = value
+
+        self.transactions_table.filter_date_month(
+            date_value=self.current_date_selection,
+            month_value=self.current_month_selection
+        )
+
+
 
 
 

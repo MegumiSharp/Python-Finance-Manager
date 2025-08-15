@@ -474,22 +474,62 @@ class VirtualTable(BaseView):
 
         return sorted_dates
     
+    
+    def filter_date_month(self, date_value, month_value):
+        months = {
+            "Jan": "01",
+            "Feb": "02",
+            "Mar": "03",
+            "Apr": "04",
+            "May": "05",
+            "Jun": "06",
+            "Jul": "07",
+            "Aug": "08",
+            "Sep": "09",
+            "Oct": "10",
+            "Nov": "11",
+            "Dec": "12"
+        }
 
-    def filter_dates(self, year):
-
-        if year == "All":
+        if date_value == "All" and month_value ==  "All":
             self.show_all()
+            self.scroll_frame._parent_canvas.yview_moveto(0)
+            self._notify_summary_changed()   
+            return
+        
+        if date_value == "All" and month_value != "All":
+            for frame in self.widgets_list:
+                label_ref = frame.winfo_children()[0].cget("text")[5:7]
+                print(months[month_value])
+                if label_ref == months[month_value]:
+                    frame.grid()
+                else: 
+                    frame.grid_remove()
+
+            self.scroll_frame._parent_canvas.yview_moveto(0)
+            self._notify_summary_changed()   
+            return
+        
+        if month_value == "All" and date_value != "All":
+            for frame in self.widgets_list:
+                year_label = frame.winfo_children()[0].cget("text")[0:4]
+                if date_value == year_label:
+                    frame.grid()
+                else: 
+                    frame.grid_remove()
+
             self.scroll_frame._parent_canvas.yview_moveto(0)
             self._notify_summary_changed()   
             return
 
         for frame in self.widgets_list:
-            label_ref = frame.winfo_children()[0].cget("text")[0:4]
-            if label_ref != year:
-                frame.grid_remove()
-            else: 
+            year_label = frame.winfo_children()[0].cget("text")[0:4]
+            month_label = frame.winfo_children()[0].cget("text")[5:7]
+            if date_value == year_label and months[month_value] == month_label:
                 frame.grid()
+            else: 
+                frame.grid_remove()
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
         self._notify_summary_changed()   
-
+  
