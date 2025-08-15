@@ -394,67 +394,73 @@ class VirtualTable(BaseView):
     
     # Function called when the button date is pressed, order the transactions by date
     def order_by_date(self, state=[False]):
-        # Even if a bad practice this is a reference to the previous arguments everythime is called, is a way to change the ordering, ascending and descending based on the click by user
+        # Toggle sorting order (ascending/descending)
         state[0] = not state[0] 
 
-        # This method use the built-in sorting (that use the Timsort) the best way to order an array of date, the problem was to get this array of dates.
-        # Firstly we have an empty list and a list of pair
-        new_widget_list = []
+        # Create list to store only visible widgets with their amount values
+        visible_widgets = []
         date_index_pair = []
 
-        # We append to the list of pair a pair conteining the index and date
+        # Collect only visible (mapped) widgets
         for i, widget in enumerate(self.widgets_list):
-            date = widget.winfo_children()[0].cget("text")
-            date_index_pair.append((date, i))
+            if widget.winfo_ismapped():  # Only process visible widgets
+                visible_widgets.append(widget)
+                # Get amount text, remove currency sign, convert to float
+                date_text = widget.winfo_children()[0].cget("text")
+                date_index_pair.append((date_text, len(visible_widgets) - 1))
 
-        # Thanks to sorted built in  function we order by date first element of the pairs, the index is ignored
-        sorted_pairs = sorted(date_index_pair, reverse=state[0])
-        # sorted_pairs = sorted(date_widget_pairs, reverse=True)  # Descending
+        # Sort by amount (numeric sorting, not string sorting)
+        sorted_pairs = sorted(date_index_pair, key=lambda x: x[0], reverse=state[0])
 
-        # Hide_all is responsable to hiding the current transactions
-        self.hide_all()
+        # Hide all currently visible widgets
+        for widget in visible_widgets:
+            widget.grid_remove()
 
-        # We append to the new_widgets list, the widgets in order, using the index inside the sorted pair to retrieve the widget from the original list
-        for pair in sorted_pairs:
-            widget = self.widgets_list[pair[1]]
-            new_widget_list.append(widget)
-        
-        # We overwrite the widgets list with the new widgets list and than show them all
-        self.widgets_list = new_widget_list
+        # Show widgets in sorted order, maintaining current filters
+        for row_position, (amount_value, original_index) in enumerate(sorted_pairs):
+            widget = visible_widgets[original_index]
+            widget.grid(row=row_position, column=0, padx=32, pady=4, sticky="ew")
 
-        self.show_all()
+        # Reset scroll position to top
+        self.scroll_frame._parent_canvas.yview_moveto(0)
+        # Update summary with current visible data
+        self._notify_summary_changed()
 
      # Function called when the button date is pressed, order the transactions by amount
     def order_by_amount(self, state=[False]):
-        # Even if a bad practice this is a reference to the previous arguments everythime is called, is a way to change the ordering, ascending and descending based on the click by user
+        # Toggle sorting order (ascending/descending)
         state[0] = not state[0] 
 
-        # This method use the built-in sorting (that use the Timsort) the best way to order an array of date, the problem was to get this array of dates.
-        # Firstly we have an empty list and a list of pair
-        new_widget_list = []
+        # Create list to store only visible widgets with their amount values
+        visible_widgets = []
         amount_index_pair = []
 
-        # We append to the list of pair a pair conteining the index and date
+        # Collect only visible (mapped) widgets
         for i, widget in enumerate(self.widgets_list):
-            amount = widget.winfo_children()[1].cget("text").strip(self.currency_sign)
-            amount_index_pair.append((amount, i))
+            if widget.winfo_ismapped():  # Only process visible widgets
+                visible_widgets.append(widget)
+                # Get amount text, remove currency sign, convert to float
+                amount_text = widget.winfo_children()[1].cget("text")
+                amount_value = float(amount_text.removesuffix(self.currency_sign))
+                amount_index_pair.append((amount_value, len(visible_widgets) - 1))
 
-        # Thanks to sorted built in  function we order by date first element of the pairs, the index is ignored
-        sorted_pairs = sorted(amount_index_pair, reverse=state[0])
-        # sorted_pairs = sorted(date_widget_pairs, reverse=True)  # Descending
+        # Sort by amount (numeric sorting, not string sorting)
+        sorted_pairs = sorted(amount_index_pair, key=lambda x: x[0], reverse=state[0])
 
-        # Hide_all is responsable to hiding the current transactions
-        self.hide_all()
+        # Hide all currently visible widgets
+        for widget in visible_widgets:
+            widget.grid_remove()
 
-        # We append to the new_widgets list, the widgets in order, using the index inside the sorted pair to retrieve the widget from the original list
-        for pair in sorted_pairs:
-            widget = self.widgets_list[pair[1]]
-            new_widget_list.append(widget)
-        
-        # We overwrite the widgets list with the new widgets list and than show them all
-        self.widgets_list = new_widget_list
+        # Show widgets in sorted order, maintaining current filters
+        for row_position, (amount_value, original_index) in enumerate(sorted_pairs):
+            widget = visible_widgets[original_index]
+            widget.grid(row=row_position, column=0, padx=32, pady=4, sticky="ew")
 
-        self.show_all()
+        # Reset scroll position to top
+        self.scroll_frame._parent_canvas.yview_moveto(0)
+        # Update summary with current visible data
+        self._notify_summary_changed()
+
         
 
     # =============================================================================
