@@ -346,6 +346,7 @@ class VirtualTable(BaseView):
 
     # Edit button event to  open a confirmation button, a top level frame that let the user confirm of deny the deletion
     def __edit_button_event(self, idx):
+
         pass
 
     # =============================================================================
@@ -455,3 +456,19 @@ class VirtualTable(BaseView):
 
         self.show_all()
         
+
+    # =============================================================================
+    # Date Filtering
+    # =============================================================================
+    
+    # Gets the year dates from the data, this is used for the optionmenu in the summary sidebar
+    def get_dates(self):
+
+        # It create a set (so without duplicates) of the element in index 1 sliced. The element in index 1 of self.data is the date formatted in "2025-02-10", this is sliced to "2025" and than
+        # added to the set, giving something like this {'2025', '2024'}
+        dates ={sublist[1][0:4] for sublist in self.data}
+
+        # The sets is than sorted and converted in a list, because optionmenu accepts only list
+        sorted_dates = list(sorted(dates))
+
+        return sorted_dates

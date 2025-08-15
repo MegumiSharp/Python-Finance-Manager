@@ -158,12 +158,7 @@ class HomeView(BaseView):
         """
         # Main statistics container
         summary_content = ctk.CTkFrame(self.summary_frame)
-        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
-        summary_content.grid_columnconfigure(0, weight=1)
-        
-        # Main statistics container
-        summary_content = ctk.CTkFrame(self.summary_frame)
-        summary_content.grid(row=1, column=0, sticky="ew", padx=20, pady=10)
+        summary_content.grid(row=1, column=0, sticky="sew", padx=20, pady=10)
         summary_content.grid_columnconfigure(0, weight=1)
         
         # Transactions
@@ -238,7 +233,7 @@ class HomeView(BaseView):
         }
 
         # Filter controls section
-        self._create_filter_controls()
+        self._create_filters_tabs_view()
         
         # Configure layout weights for proper expansion
         self.summary_frame.grid_columnconfigure(0, weight=1)
@@ -267,19 +262,58 @@ class HomeView(BaseView):
                 text_color=COLOR_EXPENSE)
 
     
-    def _create_filter_controls(self):
-        """Create filter information panel with income filter button."""
-        filter_info_frame = ctk.CTkFrame(self.summary_frame)
-        filter_info_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=10)
+    def _create_filters_tabs_view(self):
+
+        # create tabview
+        tabview = ctk.CTkTabview(self.summary_frame)
+        tabview.grid(row=2, column=0, padx=20, pady=10, sticky="sew")
+        tabview.add("Filters")
+        tabview.add("Dates")
+        tabview.tab("Filters").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        tabview.tab("Dates").grid_columnconfigure(0, weight=1)
+
+
+
+        self._create_filter_controls(tabview.tab("Filters"))
+
+
+        filter_info_frame = ctk.CTkFrame(tabview.tab("Dates"))
+        filter_info_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
         filter_info_frame.grid_columnconfigure(0, weight=1)
         
         # Filter section title
         filter_title = ctk.CTkLabel(
             filter_info_frame,
-            text="Fast Filters",
+            text="Dates Filters",
             font=ctk.CTkFont(size=16, weight="bold")
         )
-        filter_title.grid(row=0, column=0, pady=(15, 5), padx=15, sticky="w")
+        filter_title.grid(row=0, column=0, pady=4, padx=15, sticky="w")
+
+        optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
+                                                        values=self.transactions_table.get_dates())
+        optionmenu_1.grid(row=1, column=0, padx=20)
+
+        
+        optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
+                                                        values=["All", "Jan", "Feb", "Mar", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"])
+        optionmenu_1.grid(row=2, column=0, padx=20, pady=(16,1))
+
+
+
+
+    def _create_filter_controls(self, frame_tab):
+        """Create filter information panel with income filter button."""
+        filter_info_frame = ctk.CTkFrame(frame_tab)
+        filter_info_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        filter_info_frame.grid_columnconfigure(0, weight=1)
+        
+        # Filter section title
+        filter_title = ctk.CTkLabel(
+            filter_info_frame,
+            text="Amount Filters",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        filter_title.grid(row=0, column=0, pady=4, padx=15, sticky="w")
         
         # Income filter button
         self.income_btn = ctk.CTkButton(
@@ -311,12 +345,6 @@ class HomeView(BaseView):
         self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
 
     
-
-
-
-
-
-
 
 
 
