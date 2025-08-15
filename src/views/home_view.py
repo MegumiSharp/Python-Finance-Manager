@@ -43,6 +43,8 @@ class HomeView(BaseView):
         self.setup_ui()
 
 
+
+
     # =============================================================================
     # UI SETUP AND LAYOUT
     # =============================================================================
@@ -70,17 +72,19 @@ class HomeView(BaseView):
         # Initialize components in correct order
         self.search_bar_frame()
         self.ordering_frame(self.main_content_frame)
-
+    
         self.add_transaction_frame(self.main_content_frame)
         self.setup_summary_panel()
         self.message_box()
-        self.transactions_table.order_by_date()           # Order the widgets by deafult by date and show all widges
 
+        self.transactions_table.show_all()
         # Order the table by flter_date_
         self.transactions_table.filter_dates(
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
+
+        self.transactions_table.order_by_date()
 
     # When closing the application change the data in user settings
     # This method is called and traceback from the very main
@@ -303,18 +307,18 @@ class HomeView(BaseView):
         date_var = ctk.StringVar(value= self.current_date_selection)
         month_var = ctk.StringVar(value= self.current_month_selection)
 
-        optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
+        self.optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=False,
                                                         values=self.transactions_table.get_dates(),
                                                         variable= date_var,
                                                         command = self.on_date_changed)
-        optionmenu_1.grid(row=1, column=0, padx=20)
+        self.optionmenu_1.grid(row=1, column=0, padx=20)
 
         
-        optionmenu_2 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
+        self.optionmenu_2 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=False,
                                                         values=["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                                                         variable= month_var,
                                                         command = self.on_month_changed)
-        optionmenu_2.grid(row=2, column=0, padx=20, pady=(16,1))
+        self.optionmenu_2.grid(row=2, column=0, padx=20, pady=(16,1))
 
 
     def on_date_changed(self, value):
@@ -332,6 +336,20 @@ class HomeView(BaseView):
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
+
+    def reset_data_filters(self):
+        print('hey')
+        self.current_date_selection = "All"
+        self.current_month_selection = "All"
+
+        self.transactions_table.filter_dates(
+            date_value=self.current_date_selection,
+            month_value=self.current_month_selection
+        )
+
+        self.optionmenu_1.set("All")
+        self.optionmenu_2.set("All")
+
 
 
     def _create_filter_controls(self, frame_tab):
@@ -353,7 +371,7 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Income",
             fg_color="#2A9221",
-            command=self.transactions_table.show_income,
+            command=lambda : self.transactions_table.show_income(self.current_date_selection, self.current_month_selection),
             font=ctk.CTkFont(size=14)
         )
         self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -363,7 +381,7 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Expenses",
             fg_color="#DB5745",
-            command=self.transactions_table.show_expenses,
+            command=lambda : self.transactions_table.show_expenses(self.current_date_selection, self.current_month_selection),
             font=ctk.CTkFont(size=14)
         )
         self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -372,12 +390,11 @@ class HomeView(BaseView):
         self.all = ctk.CTkButton(
             filter_info_frame,
             text="All",
-            command=self.transactions_table.show_all,
+            command=lambda: (self.reset_data_filters(), self.transactions_table.show_all()),
             font=ctk.CTkFont(size=14)
         )
         self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
 
-    
 
 
 

@@ -50,6 +50,7 @@ class DashboardController(BaseView):
         # Start with the HomeView
         self.switch_main_content_frame(HomeView)
 
+
     # Function to set up the UI sidebar of the DashboardController
     def setup_ui(self):
         self.logo_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "Expensia Logo.png")), size=(32, 32))

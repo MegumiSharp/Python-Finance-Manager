@@ -172,28 +172,34 @@ class VirtualTable(BaseView):
 
             
     # Unplace from the grid all the widget that are not income
-    def show_income(self):
+    def show_income(self, date, month):
+
+        self.filter_dates(date, month)
         # frame.winfo_children()[1].cget("text") === widget frame >> [ctklabel = date, ctklabel =amount ,ctklabel = tag, ctklabel = desc] >> [1]
         # position equal the amount >>cget("text") from the label, the text have the amount
         for frame in self.widgets_list:
-            label_ref = frame.winfo_children()[1].cget("text")
-            if float(label_ref.strip(self.currency_sign)) < 0:                     # We remove the currency sign and transform it into a float
-                frame.grid_remove()                                                # We remove it from the grid, but do not forget it, because we do not delete it from the list of widgets
-            else: 
-                frame.grid()                                                       # If the button is called after another button, some widgets that are income could be hided, this will show it
-        
+            if frame.winfo_ismapped():
+                label_ref = frame.winfo_children()[1].cget("text")
+                if float(label_ref.strip(self.currency_sign)) < 0:                     # We remove the currency sign and transform it into a float
+                    frame.grid_remove()                                                # We remove it from the grid, but do not forget it, because we do not delete it from the list of widgets
+                else: 
+                    frame.grid()                                                       # If the button is called after another button, some widgets that are income could be hided, this will show it
+            
         # The scroll frame hight differ from income, expenses and all, so this solve the problem positioning on the top 
         self.scroll_frame._parent_canvas.yview_moveto(0)
         self._notify_summary_changed()                       # Notify to change the summary values using the callback funnction and implementation
 
     # Same as show_income, unplace the grid all the widget that are not expenses
-    def show_expenses(self):
+    def show_expenses(self, date, month):
+        self.filter_dates(date, month)
+
         for frame in self.widgets_list:
-            label_ref = frame.winfo_children()[1].cget("text")
-            if float(label_ref.removesuffix(self.currency_sign)) > 0:
-                frame.grid_remove()
-            else: 
-                frame.grid()
+            if frame.winfo_ismapped():
+                label_ref = frame.winfo_children()[1].cget("text")
+                if float(label_ref.removesuffix(self.currency_sign)) > 0:
+                    frame.grid_remove()
+                else: 
+                    frame.grid()
 
         self.scroll_frame._parent_canvas.yview_moveto(0)
         self._notify_summary_changed()                       # Notify to change the summary values using the callback funnction and implementation
@@ -403,7 +409,7 @@ class VirtualTable(BaseView):
 
         # Collect only visible (mapped) widgets
         for i, widget in enumerate(self.widgets_list):
-            if widget.winfo_ismapped():  # Only process visible widgets
+            if widget.winfo_manager():  # Only process visible widgets
                 visible_widgets.append(widget)
                 # Get amount text, remove currency sign, convert to float
                 date_text = widget.winfo_children()[0].cget("text")
@@ -417,7 +423,7 @@ class VirtualTable(BaseView):
             widget.grid_remove()
 
         # Show widgets in sorted order, maintaining current filters
-        for row_position, (amount_value, original_index) in enumerate(sorted_pairs):
+        for row_position, (date_text, original_index) in enumerate(sorted_pairs):
             widget = visible_widgets[original_index]
             widget.grid(row=row_position, column=0, padx=32, pady=4, sticky="ew")
 
@@ -426,7 +432,7 @@ class VirtualTable(BaseView):
         # Update summary with current visible data
         self._notify_summary_changed()
 
-     # Function called when the button date is pressed, order the transactions by amount
+    # Function called when the button date is pressed, order the transactions by amount
     def order_by_amount(self, state=[False]):
         # Toggle sorting order (ascending/descending)
         state[0] = not state[0] 
