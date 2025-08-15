@@ -475,7 +475,7 @@ class VirtualTable(BaseView):
         return sorted_dates
     
     
-    def filter_date_month(self, date_value, month_value):
+    def filter_dates(self, date_value, month_value):
         months = {
             "Jan": "01",
             "Feb": "02",
@@ -500,7 +500,6 @@ class VirtualTable(BaseView):
         if date_value == "All" and month_value != "All":
             for frame in self.widgets_list:
                 label_ref = frame.winfo_children()[0].cget("text")[5:7]
-                print(months[month_value])
                 if label_ref == months[month_value]:
                     frame.grid()
                 else: 

@@ -5,6 +5,7 @@ from src.controllers.app_controller import AppController
 def main():
     try: 
         app = AppController()
+        app.protocol("WM_DELETE_WINDOW", app.on_closure)       # Ensure that a message box with closing confirmation appear
         app.mainloop()
     except Exception as e:
         print(f"Error running application: {e}")

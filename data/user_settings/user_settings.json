@@ -1,9 +1,11 @@
 {
     "is_first_time": "false",
-    "nickname": "Monica",
-    "currency_sign": "\u00a3",
+    "nickname": "Simone",
+    "currency_sign": "\u20ac",
     "theme": "Default",
-    "budget_rule_needs": "20",
-    "budget_rule_wants": "20",
-    "budget_rule_saving": "60"
+    "budget_rule_needs": "50",
+    "budget_rule_wants": "30",
+    "budget_rule_saving": "20",
+    "date_selection": "2025",
+    "month_selection": "All"
 }

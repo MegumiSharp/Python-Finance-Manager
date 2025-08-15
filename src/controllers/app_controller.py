@@ -3,6 +3,7 @@ import os
 import sys
 from tkinter import PhotoImage
 import customtkinter
+from tkinter import messagebox
 
 # Importing the views and models used in the application
 from src.views.setup_view import SetupView
@@ -83,4 +84,11 @@ class AppController(customtkinter.CTk):
             self._show_view(DashboardController)
         else:
             raise ValueError(f"Unknown frame name: {frame_name}")
-        
+    
+    # Close confirmation
+    def on_closure(self):
+        if messagebox.askokcancel("Quit", "Do you really want to quit?"):
+            self.views[DashboardController].on_closure()
+            
+
+            self.destroy()  # Actually closes the window

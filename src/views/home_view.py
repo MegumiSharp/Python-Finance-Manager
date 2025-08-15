@@ -4,7 +4,7 @@ import os
 
 # Local imports
 from config.settings import (ICONS_PATH,
-                             COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN,
+                             COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN, KEY_DATE_SELECTION, KEY_MONTH_SELECTION,
                              KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.virtual_table_view import VirtualTable
 from src.views.base_view import BaseView
@@ -28,8 +28,8 @@ class HomeView(BaseView):
         self.currency_sign = self.user.read_json_value(KEY_CURRENCY_SIGN)
         self.label_text = ctk.StringVar(value="Welcome to Expensia!")
 
-        self.current_date_selection = "All"
-        self.current_month_selection = "All"
+        self.current_date_selection = self.user.read_json_value(KEY_DATE_SELECTION)
+        self.current_month_selection = self.user.read_json_value(KEY_MONTH_SELECTION)
 
         # Configure the main layout structure with proper grid weights
         self.main_frame = ctk.CTkFrame(self, corner_radius=0)
@@ -76,9 +76,17 @@ class HomeView(BaseView):
         self.message_box()
         self.transactions_table.order_by_date()           # Order the widgets by deafult by date and show all widges
 
+        # Order the table by flter_date_
+        self.transactions_table.filter_dates(
+            date_value=self.current_date_selection,
+            month_value=self.current_month_selection
+        )
 
-
-
+    # When closing the application change the data in user settings
+    # This method is called and traceback from the very main
+    def on_closure(self):
+        self.user.change_json_value(KEY_DATE_SELECTION, self.current_date_selection)
+        self.user.change_json_value(KEY_MONTH_SELECTION, self.current_month_selection)
 
     def message_box(self):
 
@@ -292,14 +300,19 @@ class HomeView(BaseView):
         )
         filter_title.grid(row=0, column=0, pady=4, padx=15, sticky="w")
 
+        date_var = ctk.StringVar(value= self.current_date_selection)
+        month_var = ctk.StringVar(value= self.current_month_selection)
+
         optionmenu_1 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
                                                         values=self.transactions_table.get_dates(),
+                                                        variable= date_var,
                                                         command = self.on_date_changed)
         optionmenu_1.grid(row=1, column=0, padx=20)
 
         
         optionmenu_2 = ctk.CTkOptionMenu(tabview.tab("Dates"), dynamic_resizing=True,
                                                         values=["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                                                        variable= month_var,
                                                         command = self.on_month_changed)
         optionmenu_2.grid(row=2, column=0, padx=20, pady=(16,1))
 
@@ -307,7 +320,7 @@ class HomeView(BaseView):
     def on_date_changed(self, value):
         self.current_date_selection = value
 
-        self.transactions_table.filter_date_month(
+        self.transactions_table.filter_dates(
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
@@ -315,14 +328,10 @@ class HomeView(BaseView):
     def on_month_changed(self, value):
         self.current_month_selection = value
 
-        self.transactions_table.filter_date_month(
+        self.transactions_table.filter_dates(
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
-
-
-
-
 
 
     def _create_filter_controls(self, frame_tab):
