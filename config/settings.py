@@ -83,6 +83,7 @@ TRANSACTIONS_TABLE = "transactions"
 BUDGET_RULES_TABLE = "budget_rules"
 SETTINGS_TABLE = "user_settings"
 
+DB_ACTION_ADD = "add"
 DB_ACTION_EDIT = "edit"
 DB_ACTION_DELETE = "delete"
 

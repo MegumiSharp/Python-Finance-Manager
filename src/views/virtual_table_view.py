@@ -1,4 +1,4 @@
-from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DB_ACTION_DELETE, DB_ACTION_EDIT, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, INCORRECT_DATE, INCORRECT_YEAR, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DB_ACTION_ADD, DB_ACTION_DELETE, DB_ACTION_EDIT, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, INCORRECT_DATE, INCORRECT_YEAR, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
                             COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
@@ -60,7 +60,7 @@ class VirtualTable(BaseView):
 
         # Creation of all row widget, we do it for every data_row in self.data, self.data is a list of list, every list have all the info to transform in widget
         for i, data_row in enumerate(self.data):
-            self._create_row(data_row, i)
+            self.create_row(data_row)
 
     # When scrolling with the mouse the yview scroll down or up
     def _on_mousewheel(self, event):
@@ -70,7 +70,7 @@ class VirtualTable(BaseView):
         elif event.num == 5 or event.delta < 0:
             self.scroll_frame._parent_canvas.yview_scroll(1, "units")
 
-    def _create_row(self, data_row, data_index):
+    def create_row(self, data_row):
         # Because the data is formatted in [database_index, date, amount, tag, desc] data_row[2] is the amount positioned in the list
         if data_row[2] >= 0:
             color = COLOR_INCOME      # The amount is positive, is green
@@ -132,9 +132,6 @@ class VirtualTable(BaseView):
                 font=ctk.CTkFont(size=12),
                 command=lambda: self.__delete_button_event(self.widgets_list.index(row_frame))
             ),
-            'visible': False,
-            'data_row': data_index,
-            'database_real_index': data_row[0]
         }
 
         # Place all widgets with consistent spacing and proper sticky values
@@ -701,7 +698,7 @@ class VirtualTable(BaseView):
     # DATABASE OPERATIONS
     # =============================================================================
     
-    def save_db_modification(self, action, row_id, date=None, amount=None, tag=None, desc=None):
+    def save_db_modification(self, action, row_id = None, date=None, amount=None, tag=None, desc=None):
         """
         Queue database operations for batch processing.
         Improves performance by deferring actual database writes.
@@ -720,6 +717,14 @@ class VirtualTable(BaseView):
                 "tag" : tag,
                 "desc" : desc,
             })
+        elif action == DB_ACTION_ADD:
+            self.db_transactions.append({
+                "action": action,
+                "date": date,
+                "amount" : amount,
+                "tag" : tag,
+                "desc" : desc,
+            })
 
     def update_db(self):
         """
@@ -730,7 +735,9 @@ class VirtualTable(BaseView):
             if txn["action"] == DB_ACTION_DELETE:
                 self.database.remove_transaction(txn["db_idx"])
             elif txn["action"] == DB_ACTION_EDIT:
-                self.database.edit_transaction(txn["db_idx"], txn["date"], txn["amount"],txn["tag"],txn["desc"]  )
+                self.database.edit_transaction(txn["db_idx"], txn["date"], txn["amount"],txn["tag"],txn["desc"] )
+            elif txn["action"] == DB_ACTION_ADD:
+                self.database.add_transaction(txn["date"], txn["amount"],txn["tag"],txn["desc"])
 
         self.database.conn.commit()
         self.db_transactions.clear()

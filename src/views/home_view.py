@@ -3,7 +3,7 @@ from PIL import Image
 import os
 
 # Local imports
-from config.settings import (DB_ACTION_DELETE, DB_ACTION_EDIT, ICONS_PATH,
+from config.settings import (COLOR_DELETE_BTN, DB_ACTION_ADD, DB_ACTION_DELETE, DB_ACTION_EDIT, ICONS_PATH,
                              COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN, KEY_DATE_SELECTION, KEY_MONTH_SELECTION,
                              KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.virtual_table_view import VirtualTable
@@ -397,115 +397,6 @@ class HomeView(BaseView):
         self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # =============================================================================
-    # DATA OPERATIONS
-    # =============================================================================
-    
-    def on_transaction_deleted(self, transaction_id):
-        """
-        Handle transaction deletion from virtual table.
-        Updates both database and local data copies, then refreshes UI.
-        """
-        # Remove from database immediately
-        self.db.remove_transaction(transaction_id)
-        
-        # Update local data copies
-        self.original_data = [row for row in self.original_data if row[0] != transaction_id]
-        self.data = [row for row in self.data if row[0] != transaction_id]
-        
-        # Refresh UI
-        self.update_summary()
-        
-        print(f"Transaction {transaction_id} deleted from database")
-
-    # =============================================================================
-    # FILTERING AND SEARCHING
-    # =============================================================================
-    
-    def apply_filters(self):
-        """
-        Apply current search and date filters to original data.
-        Creates new filtered dataset without modifying original data.
-        """
-        # Start with complete dataset
-        filtered_data = self.original_data.copy()
-        
-        # Apply date-based filtering
-        if self.current_filter != "all":
-            filtered_data = self.filter_by_date_range(filtered_data, self.current_filter)
-
-        # Apply text-based search filtering
-        if self.current_search:
-            filtered_data = self._apply_search_filter(filtered_data)
-        
-        # Update displayed data and refresh components
-        self.data = filtered_data
-        self.virtual_table.update_data(self.data)
-        self.update_summary()
-
-    def _apply_search_filter(self, data):
-        """
-        Apply text search across all visible columns.
-        Case-insensitive search through date, amount, tag, and description.
-        """
-        query_lower = self.current_search.lower()
-        return [
-            row for row in data
-            if any(str(field).lower().find(query_lower) != -1 for field in row[1:])
-        ]
-
-    def filter_by_date_range(self, data, filter_type):
-        """
-        Filter transactions by date range (day, month, or year).
-        Uses datetime parsing to compare dates accurately.
-        """
-        now = datetime.now()
-        
-        if filter_type == "year":
-            target_year = now.year
-            return [
-                row for row in data
-                if datetime.strptime(row[1], "%Y-%m-%d").year == target_year
-            ]
-        elif filter_type == "month":
-            target_year, target_month = now.year, now.month
-            return [
-                row for row in data
-                if (datetime.strptime(row[1], "%Y-%m-%d").year == target_year and
-                    datetime.strptime(row[1], "%Y-%m-%d").month == target_month)
-            ]
-        elif filter_type == "day":
-            target_date = now.strftime("%Y-%m-%d")
-            return [
-                row for row in data
-                if row[1] == target_date
-            ]
-        else:  # "all" 
-            return data
-
     # =============================================================================
     # TRANSACTION FORM
     # =============================================================================
@@ -522,8 +413,37 @@ class HomeView(BaseView):
         add_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         
         
-        # Input fields with placeholders
-        self._create_transaction_inputs(add_frame)
+        # Date input
+        self.date_entry = ctk.CTkEntry(
+            add_frame,
+            placeholder_text="Date (YYYY-MM-DD)",
+            height=30
+        )
+        self.date_entry.grid(row=1, column=0, sticky="ew", padx=(10, 5), pady=5)
+        
+        # Amount input
+        self.amount_entry = ctk.CTkEntry(
+            add_frame,
+            placeholder_text="Amount",
+            height=30
+        )
+        self.amount_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
+        
+        # Category input
+        self.category_entry = ctk.CTkEntry(
+            add_frame,
+            placeholder_text="Category",
+            height=30
+        )
+        self.category_entry.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
+        
+        # Description input
+        self.description_entry = ctk.CTkEntry(
+            add_frame,
+            placeholder_text="Description",
+            height=30
+        )
+        self.description_entry.grid(row=1, column=3, sticky="ew", padx=(5, 10), pady=5)
         
         # Submit button
         self.add_btn = ctk.CTkButton(
@@ -534,39 +454,6 @@ class HomeView(BaseView):
         )
         self.add_btn.grid(row=2, column=0, columnspan=4, pady=(5, 10), padx=10, sticky="ew")
 
-    def _create_transaction_inputs(self, parent):
-        """Create input fields for transaction form with proper sizing."""
-        # Date input
-        self.date_entry = ctk.CTkEntry(
-            parent,
-            placeholder_text="Date (YYYY-MM-DD)",
-            height=30
-        )
-        self.date_entry.grid(row=1, column=0, sticky="ew", padx=(10, 5), pady=5)
-        
-        # Amount input
-        self.amount_entry = ctk.CTkEntry(
-            parent,
-            placeholder_text="Amount",
-            height=30
-        )
-        self.amount_entry.grid(row=1, column=1, sticky="ew", padx=5, pady=5)
-        
-        # Category input
-        self.category_entry = ctk.CTkEntry(
-            parent,
-            placeholder_text="Category",
-            height=30
-        )
-        self.category_entry.grid(row=1, column=2, sticky="ew", padx=5, pady=5)
-        
-        # Description input
-        self.description_entry = ctk.CTkEntry(
-            parent,
-            placeholder_text="Description",
-            height=30
-        )
-        self.description_entry.grid(row=1, column=3, sticky="ew", padx=(5, 10), pady=5)
 
     def add_transaction(self):
         """
@@ -582,31 +469,45 @@ class HomeView(BaseView):
             
             # Check for required fields
             if not all([date, str(amount), category, description]):
-                print("Please fill all fields")
+                self.change_message_home_view("Please fill all fields", COLOR_DELETE_BTN)
                 return
                 
             # Validate date format
             datetime.strptime(date, "%Y-%m-%d")
             
             # Add to database and get new ID
-            new_id = self.db.add_transaction(date, amount, category, description)
+            row_data = ["",date, amount, category, description]
             
-            # Update local data
-            new_transaction = [new_id, date, amount, category, description]
-            self.original_data.append(new_transaction)
+            self.transactions_table.create_row(row_data)
+
+            
+            self.transactions_table.filter_dates(
+                date_value=self.current_date_selection,
+                month_value=self.current_month_selection
+            )
+
+            self.transactions_table.order_by_date()
+            self.transactions_table.order_by_date()
+
+            
+            self.transactions_table.save_db_modification(action= DB_ACTION_ADD, 
+                                                         row_id= None,
+                                                         date = date, 
+                                                         amount = amount, 
+                                                         tag = category,
+                                                         desc = description)
+
             
             # Clear form inputs
             self._clear_transaction_form()
+            self.change_message_home_view(f"Successfull Transaction Added", COLOR_INCOME)
             
-            # Refresh display with current filters
-            self.apply_filters()
-            
-            print(f"Added transaction: {date}, ${amount}, {category}, {description}")
+
             
         except ValueError as e:
-            print(f"Invalid input: {e}")
+            self.change_message_home_view(f"Invalid input - {e} ", COLOR_DELETE_BTN)
         except Exception as e:
-            print(f"Error adding transaction: {e}")
+            self.change_message_home_view(f"Error adding transaction - {e}", COLOR_DELETE_BTN)
 
     def _clear_transaction_form(self):
         """Clear all input fields in the transaction form."""
@@ -693,49 +594,3 @@ class HomeView(BaseView):
         actions_label.grid(row=0, column=5, sticky="ew", padx=10, pady=8)
 
 
-
-    def _create_date_filter_buttons(self, parent):
-        """Create compact date filter buttons (D, M, Y, All)."""
-        filter_buttons = [
-            ("D", "day", 5),
-            ("M", "month", 6),
-            ("Y", "year", 7),
-            ("All", "all", 8)
-        ]
-        
-        for text, filter_type, col in filter_buttons:
-            btn = ctk.CTkButton(
-                parent,
-                text=text,
-                height=32,
-                width=32,
-                command=lambda f=filter_type: self.set_date_filter(f),
-                font=ctk.CTkFont(size=12 if text == "All" else 14, weight="bold")
-            )
-            btn.grid(row=0, column=col, padx=5, pady=8)
-            
-            # Store button reference for color updates
-            setattr(self, f"{filter_type}_btn", btn)
-
-    def set_date_filter(self, filter_type):
-        """
-        Set active date filter and update button visual states.
-        Changes button colors to indicate current active filter.
-        """
-        self.current_filter = filter_type
-        
-        # Update button colors
-        default_color = ctk.ThemeManager.theme["CTkButton"]["fg_color"]
-        active_color = "#4CAF50"
-        
-        # Reset all buttons to default color
-        for btn_type in ["day", "month", "year", "all"]:
-            btn = getattr(self, f"{btn_type}_btn")
-            btn.configure(fg_color=default_color)
-        
-        # Highlight active filter
-        active_btn = getattr(self, f"{filter_type}_btn")
-        active_btn.configure(fg_color=active_color)
-        
-        # Apply the new filter
-        self.apply_filters()
