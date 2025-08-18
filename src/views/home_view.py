@@ -3,7 +3,7 @@ from PIL import Image
 import os
 
 # Local imports
-from config.settings import (COLOR_DELETE_BTN, DB_ACTION_ADD, DB_ACTION_DELETE, DB_ACTION_EDIT, ICONS_PATH,
+from config.settings import (COLOR_DELETE_BTN, COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DB_ACTION_ADD, DB_ACTION_DELETE, DB_ACTION_EDIT, ICONS_PATH,
                              COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN, KEY_DATE_SELECTION, KEY_MONTH_SELECTION,
                              KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.virtual_table_view import VirtualTable
@@ -86,6 +86,23 @@ class HomeView(BaseView):
         )
 
         self.transactions_table.order_by_date()
+
+        save_button = ctk.CTkButton(
+                self.summary_frame,
+                text= "Save Changes",
+                width=32,
+                height=32,
+                fg_color=COLOR_EDIT_BTN,
+                hover_color=COLOR_EDIT_BTN_HOVER,
+                font=ctk.CTkFont(size=12),
+                command=self.save_btn_event)
+        save_button.grid(row = 3, column = 0)
+
+    def save_btn_event(self):
+        self.transactions_table.update_db()
+
+        self.change_message_home_view("Successfull changes applied", COLOR_INCOME)
+
 
     # When closing the application change the data in user settings
     # This method is called and traceback from the very main
@@ -288,8 +305,6 @@ class HomeView(BaseView):
         tabview.add("Dates")
         tabview.tab("Filters").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         tabview.tab("Dates").grid_columnconfigure(0, weight=1)
-
-
 
         self._create_filter_controls(tabview.tab("Filters"))
 

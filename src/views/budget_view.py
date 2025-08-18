@@ -8,6 +8,7 @@ class BudgetView(BaseView):
         super().__init__(parent)
         self.controller = controller
         self.user = user
+        self.database = database
         self.data = database.local_db
 
         self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
@@ -16,9 +17,7 @@ class BudgetView(BaseView):
         self.needs_percentage = int(user.read_json_value(KEY_BUDGET_NEEDS))
         self.wants_percentage = int(user.read_json_value(KEY_BUDGET_WANTS))
         self.savings_percentage = int(user.read_json_value(KEY_BUDGET_SAVING))
-        
-
-        
+            
         #self.budget_filter = "September 2025"
         self.budget_filter = datetime.now().strftime("%Y-%m")
         self.needs_spent = 0
@@ -182,6 +181,7 @@ class BudgetView(BaseView):
         self.calculator()
 
     def calculator(self):
+        self.data = self.database.local_db
 
         self.needs_spent = 0
         self.needs_budget = 0
@@ -240,6 +240,8 @@ class BudgetView(BaseView):
 
             if self.needs_spent > self.needs_budget:
                 self.needs_amount.configure(text_color=COLOR_EXPENSE)
+            else:
+                self.needs_amount.configure(text_color="#FFFFFF")
 
         if self.needs_bar and self.needs_budget > 0:
             progress = min(self.needs_spent / self.needs_budget, 1.0)
@@ -256,6 +258,8 @@ class BudgetView(BaseView):
 
             if self.wants_spent > self.wants_budget:
                 self.wants_amount.configure(text_color=COLOR_EXPENSE)
+            else:
+                self.needs_amount.configure(text_color="#FFFFFF")
 
 
 
@@ -272,6 +276,8 @@ class BudgetView(BaseView):
 
             if self.savings_current >= self.savings_budget:
                 self.savings_amount.configure(text_color=COLOR_INCOME)
+            else:
+                self.needs_amount.configure(text_color="#FFFFFF")
 
 
 

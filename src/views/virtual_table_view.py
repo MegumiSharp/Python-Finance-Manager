@@ -740,4 +740,5 @@ class VirtualTable(BaseView):
                 self.database.add_transaction(txn["date"], txn["amount"],txn["tag"],txn["desc"])
 
         self.database.conn.commit()
+        self.database.update_local()
         self.db_transactions.clear()
