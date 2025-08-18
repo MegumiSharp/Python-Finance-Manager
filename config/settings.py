@@ -78,15 +78,14 @@ AVAILABLE_CURRENCIES = ["€", "$", "£"]
 # ============================================================================
 # DATABASE SETTINGS
 # ============================================================================
-
-# SQLite database configuration
-DB_TIMEOUT = 30.0  # seconds
-DB_CHECK_SAME_THREAD = False
-
 # Table names
 TRANSACTIONS_TABLE = "transactions"
 BUDGET_RULES_TABLE = "budget_rules"
 SETTINGS_TABLE = "user_settings"
+
+DB_ACTION_EDIT = "edit"
+DB_ACTION_DELETE = "delete"
+
 
 # ============================================================================
 # UI SETTINGS

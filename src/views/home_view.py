@@ -3,7 +3,7 @@ from PIL import Image
 import os
 
 # Local imports
-from config.settings import (ICONS_PATH,
+from config.settings import (DB_ACTION_DELETE, DB_ACTION_EDIT, ICONS_PATH,
                              COLOR_BALANCE, COLOR_INCOME, COLOR_EXPENSE, KEY_CURRENCY_SIGN, KEY_DATE_SELECTION, KEY_MONTH_SELECTION,
                              KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.virtual_table_view import VirtualTable
@@ -23,6 +23,7 @@ class HomeView(BaseView):
         # Core dependencies
         self.controller = controller
         self.user = user
+        self.database = database
         self.data = database.local_db
 
         self.currency_sign = self.user.read_json_value(KEY_CURRENCY_SIGN)
@@ -64,7 +65,7 @@ class HomeView(BaseView):
         
         
         # Initialize the transaction table
-        self.transactions_table = VirtualTable(self.main_content_frame, self.controller, self.data, self.user)
+        self.transactions_table = VirtualTable(self.main_content_frame, self.controller, self.database, self.user)
         self.transactions_table.grid(row=2, column=0, sticky="nsew")
 
 
@@ -91,6 +92,7 @@ class HomeView(BaseView):
     def on_closure(self):
         self.user.change_json_value(KEY_DATE_SELECTION, self.current_date_selection)
         self.user.change_json_value(KEY_MONTH_SELECTION, self.current_month_selection)
+        self.transactions_table.update_db()
 
     def message_box(self):
 
@@ -412,38 +414,6 @@ class HomeView(BaseView):
 
 
 
-
-
-    # =============================================================================
-    # DATABASE OPERATIONS
-    # =============================================================================
-    
-    def save_db_modification(self, action, row_id, date=None, amount=None, tag=None, desc=None):
-        """
-        Queue database operations for batch processing.
-        Improves performance by deferring actual database writes.
-        """
-        if action == "delete":
-            self.db_transactions.append({
-                "action": action,
-                "params": row_id
-            })
-        else:
-            self.db_transactions.append({
-                "action": action,
-                "params": [date, amount, tag, desc]
-            })
-
-    def update_db(self):
-        """
-        Process all queued database operations and clear the queue.
-        Called when batch operations need to be committed.
-        """
-        for txn in self.db_transactions:
-            if txn["action"] == "delete":
-                self.db.remove_transaction(txn["params"])
-
-        self.db_transactions.clear()
 
 
 

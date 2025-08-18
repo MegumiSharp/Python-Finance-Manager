@@ -1,4 +1,4 @@
-from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, INCORRECT_DATE, INCORRECT_YEAR, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DB_ACTION_DELETE, DB_ACTION_EDIT, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, INCORRECT_DATE, INCORRECT_YEAR, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
                             COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
@@ -11,11 +11,14 @@ import os
 
 # A virtual scrollable table made out of widget created from the database local raw data
 class VirtualTable(BaseView):
-    def __init__(self, parent, controller, data, user):
+    def __init__(self, parent, controller, database, user):
         super().__init__(parent)
         self.controller = controller
-        self.data = data
+        self.database = database
+        self.data = database.local_db
         self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
+
+        self.db_transactions = []
 
         self.edit_image = ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, EDIT_ICON_FILE_NAME)))
         
@@ -335,6 +338,7 @@ class VirtualTable(BaseView):
         self.__remove_row(idx)
         frame.destroy()
         self._notify_summary_changed()                  # Notify to change the summary values using the callback funnction and implementation
+        self.save_db_modification(DB_ACTION_DELETE, self.data[idx][0])
 
     # Event when the user presse the cancel button or the close windows button, destroy the window
     def _cancel_event(self, frame):
@@ -471,7 +475,7 @@ class VirtualTable(BaseView):
         if user_amount == "":
             user_amount = self.current_amount.removesuffix(self.currency_sign)
         
-        user_amount = str(round(float(user_amount), 2))
+        user_amount = str(round(float(user_amount),2))
 
 
         self.widgets_list[idx].winfo_children()[0].configure(text = user_date)
@@ -483,6 +487,7 @@ class VirtualTable(BaseView):
         
 
         self._notify_summary_changed()                  # Notify to change the summary values using the callback funnction and implementation
+        self.save_db_modification(DB_ACTION_EDIT, self.data[idx][0], user_date, user_amount, user_tag, user_desc)
         frame.destroy()
 
     def update_row_colors(self, amount, tag, idx):
@@ -617,8 +622,6 @@ class VirtualTable(BaseView):
         # Update summary with current visible data
         self._notify_summary_changed()
 
-        
-
     # =============================================================================
     # Date Filtering
     # =============================================================================
@@ -694,3 +697,40 @@ class VirtualTable(BaseView):
         self.scroll_frame._parent_canvas.yview_moveto(0)
         self._notify_summary_changed()   
   
+    # =============================================================================
+    # DATABASE OPERATIONS
+    # =============================================================================
+    
+    def save_db_modification(self, action, row_id, date=None, amount=None, tag=None, desc=None):
+        """
+        Queue database operations for batch processing.
+        Improves performance by deferring actual database writes.
+        """
+        if action == DB_ACTION_DELETE:
+            self.db_transactions.append({
+                "action": action,
+                "db_idx": row_id
+            })
+        elif action == DB_ACTION_EDIT:
+            self.db_transactions.append({
+                "action": action,
+                "db_idx": row_id,
+                "date": date,
+                "amount" : amount,
+                "tag" : tag,
+                "desc" : desc,
+            })
+
+    def update_db(self):
+        """
+        Process all queued database operations and clear the queue.
+        Called when batch operations need to be committed.
+        """
+        for txn in self.db_transactions:
+            if txn["action"] == DB_ACTION_DELETE:
+                self.database.remove_transaction(txn["db_idx"])
+            elif txn["action"] == DB_ACTION_EDIT:
+                self.database.edit_transaction(txn["db_idx"], txn["date"], txn["amount"],txn["tag"],txn["desc"]  )
+
+        self.database.conn.commit()
+        self.db_transactions.clear()

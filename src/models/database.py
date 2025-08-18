@@ -70,6 +70,24 @@ class DatabaseManager:
         self.conn.commit()
         self.update_local()
 
+    def edit_transaction(self, idx, date=None, amount=None, tag=None, description=None):
+        if date is None:
+            date = norm_today()  # default dinamico per la data
+        if amount is None:
+            amount = 0
+        if tag is None:
+            tag = "None"
+        if description is None:
+            description = ""
+
+        # Sintassi corretta per UPDATE
+        self.cursor.execute(
+            "UPDATE transactions SET Date = ?, Amount = ?, Tag = ?, Description = ? WHERE ID = ?",
+            (date, amount, tag, description, idx)
+        )
+        self.conn.commit()
+        self.update_local()
+
     def remove_transaction(self, id : int):
         self.cursor.execute("DELETE FROM transactions WHERE ID = ?",(id,))
 
