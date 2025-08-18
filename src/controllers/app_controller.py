@@ -88,7 +88,8 @@ class AppController(customtkinter.CTk):
     # Close confirmation
     def on_closure(self):
         if messagebox.askokcancel("Quit", "Do you really want to quit?"):
-            self.views[DashboardController].on_closure()
-            
 
+            if DashboardController in self.views:
+                self.views[DashboardController].on_closure()
+            
             self.destroy()  # Actually closes the window

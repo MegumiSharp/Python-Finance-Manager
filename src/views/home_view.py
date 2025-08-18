@@ -338,7 +338,6 @@ class HomeView(BaseView):
         )
 
     def reset_data_filters(self):
-        print('hey')
         self.current_date_selection = "All"
         self.current_month_selection = "All"
 
