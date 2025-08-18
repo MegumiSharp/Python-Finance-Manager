@@ -215,6 +215,13 @@ KEY_SUM_INCOME = "income"
 KEY_SUM_EXPENSES= "expenses"
 KEY_SUM_BALANCE = "balance"
 
+# ============================================================================
+# Errors Handling
+# ====================================================================
+
+INCORRECT_DATE = "Incorrect Date format"
+INCORRECT_YEAR = "Incorrect year"
+
 
 # ============================================================================
 # END OF SETTINGS

@@ -17,7 +17,6 @@ class BudgetView(BaseView):
         self.salary = 0
         
         self.budget_filter = "September 2025"
-
         self.needs_spent = 0
         self.needs_budget = self.salary * self.needs_percentage / 100
         self.wants_spent = 0

@@ -1,8 +1,9 @@
-from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
+from config.settings import (COLOR_EDIT_BTN, COLOR_EDIT_BTN_HOVER, DELETE_ICON_FILE_NAME, EDIT_ICON_FILE_NAME, ICONS_PATH, INCORRECT_DATE, INCORRECT_YEAR, KEY_CURRENCY_SIGN, TAGS_DICTIONARY,
                             COLOR_CANCEL_BTN_HOVER, COLOR_CANCEL_BTN, COLOR_DATE_FIELD, COLOR_TAG_FIELD, COLOR_DESC_FIELD,
                             COLOR_DELETE_BTN, COLOR_DELETE_BTN_HOVER, COLOR_EXPENSE, COLOR_INCOME,
                             KEY_SUM_TRANSACTIONS, KEY_SUM_INCOME, KEY_SUM_EXPENSES, KEY_SUM_BALANCE)
 from src.views.base_view import BaseView
+from src.utils import helpers
 import customtkinter as ctk
 from PIL import Image
 import os
@@ -352,8 +353,157 @@ class VirtualTable(BaseView):
 
     # Edit button event to  open a confirmation button, a top level frame that let the user confirm of deny the deletion
     def __edit_button_event(self, idx):
+        # Checks if other edit button dialoge box exists, if they exist, they are destroyed
+        for widget in self.controller.winfo_children():
+            if isinstance(widget, ctk.CTkToplevel):
+                widget.destroy()
 
-        pass
+        # Retrieve all the text from the widget to show the user what is deleting it
+        self.current_date = self.widgets_list[idx].winfo_children()[0].cget("text")
+        self.current_amount = self.widgets_list[idx].winfo_children()[1].cget("text")
+        self.current_tag = self.widgets_list[idx].winfo_children()[2].cget("text")
+        self.current_desc = self.widgets_list[idx].winfo_children()[3].cget("text")
+
+        # Create a top level dialog box
+        top_level_dialog = ctk.CTkToplevel(self.controller)
+        top_level_dialog.title("Confirmation")
+        top_level_dialog.resizable(False, False)
+        top_level_dialog.grid_columnconfigure((0, 1), weight=1)
+        top_level_dialog.rowconfigure((0, 1, 2, 3, 4), weight=1)
+        top_level_dialog.attributes("-topmost", True)
+        top_level_dialog.transient(self.controller)
+        top_level_dialog.geometry("350x280")
+
+        # Main warning message
+        self.warning_label = ctk.CTkLabel(master=top_level_dialog,
+                                        width=330,
+                                        text="What do you want to Edit?:",
+                                        font=ctk.CTkFont(size=16, weight="bold"),
+                                        text_color=COLOR_DELETE_BTN,
+                                        fg_color="transparent")
+        self.warning_label.grid(row=0, column=0, columnspan=2, padx=10, pady=(20, 5), sticky="ew")
+        
+        # Date field
+        self.date_label = ctk.CTkEntry(master=top_level_dialog,
+                                    width=330,
+                                    placeholder_text=self.current_date,
+                                    font=ctk.CTkFont(size=12, weight="bold"))
+        self.date_label.grid(row=1, column=0, columnspan=2, padx=20, pady=2, sticky="w")
+        
+        # Amount field
+        self.amount_label = ctk.CTkEntry(master=top_level_dialog,
+                                        width=330,
+                                        placeholder_text=self.current_amount,
+                                        font=ctk.CTkFont(size=12, weight="bold"))
+        self.amount_label.grid(row=2, column=0, columnspan=2, padx=20, pady=2, sticky="w")
+        
+        # Tag field
+        self.tag_label = ctk.CTkEntry(master=top_level_dialog,
+                                    width=330,
+                                    placeholder_text=self.current_tag,
+                                    font=ctk.CTkFont(size=12, weight="bold"))
+        self.tag_label.grid(row=3, column=0, columnspan=2, padx=20, pady=2, sticky="w")
+        
+        # Description field
+        self.desc_label = ctk.CTkEntry(master=top_level_dialog,
+                                    width=330,
+                                    placeholder_text=self.current_desc,
+                                    font=ctk.CTkFont(size=12))
+        self.desc_label.grid(row=4, column=0, columnspan=2, padx=20, pady=(2, 15), sticky="ew")
+        
+        # Buttons
+        self.ok_button = ctk.CTkButton(master=top_level_dialog,
+                                    width=120,
+                                    height=35,
+                                    border_width=0,
+                                    text='Edit',
+                                    font=ctk.CTkFont(size=14, weight="bold"),
+                                    fg_color=COLOR_DELETE_BTN,
+                                    hover_color=COLOR_DELETE_BTN_HOVER,
+                                    command=lambda: self._confirm_edit(top_level_dialog, idx))
+        self.ok_button.grid(row=5, column=0, columnspan=1, padx=(20, 10), pady=(0, 20), sticky="ew")
+        
+        self.cancel_button = ctk.CTkButton(master=top_level_dialog,
+                                        width=120,
+                                        height=35,
+                                        border_width=0,
+                                        text='Cancel',
+                                        font=ctk.CTkFont(size=14),
+                                        fg_color=COLOR_CANCEL_BTN, 
+                                        hover_color=COLOR_CANCEL_BTN_HOVER,
+                                        command=lambda: self._cancel_event(top_level_dialog))
+        self.cancel_button.grid(row=5, column=1, columnspan=1, padx=(10, 20), pady=(0, 20), sticky="ew")
+
+
+    # Event the the user press the delete button inside the dialog box
+    def _confirm_edit(self, frame, idx):
+        user_date = self.date_label.get()
+        user_amount = self.amount_label.get()
+        user_tag = self.tag_label.get() 
+        user_desc = self.desc_label.get()
+
+        user_date_error = helpers.is_valid_date(user_date)
+        
+        if user_date == "" and  user_amount == "" and user_tag == "" and  user_desc == "":
+            self.warning_label.configure(text="Click cancel to exit edit mode")
+            return
+
+        if user_date != "" and user_date_error != True:
+            if user_date_error == INCORRECT_DATE:
+                self.warning_label.configure(text="The Date have incorrect format:")
+            elif user_date_error == INCORRECT_YEAR: 
+                self.warning_label.configure(text="The Year is incorrect:")
+            return
+
+        if not helpers.is_valid_number(user_amount) and user_amount != "":
+            self.warning_label.configure(text="Incorrect Amount, use . for decimal")
+            return
+            
+        if user_tag == "":
+            user_tag = self.current_tag
+
+        if user_desc == "":
+            user_desc = self.current_desc
+
+        if user_date == "":
+            user_date = self.current_date
+
+        if user_amount == "":
+            user_amount = self.current_amount.removesuffix(self.currency_sign)
+        
+        user_amount = str(round(float(user_amount), 2))
+
+
+        self.widgets_list[idx].winfo_children()[0].configure(text = user_date)
+        self.widgets_list[idx].winfo_children()[1].configure(text = (f"{user_amount}{self.currency_sign}"))
+        self.widgets_list[idx].winfo_children()[2].configure(text = user_tag)
+        self.widgets_list[idx].winfo_children()[3].configure(text = user_desc)
+
+        self.update_row_colors(user_amount, user_tag, idx)
+        
+
+        self._notify_summary_changed()                  # Notify to change the summary values using the callback funnction and implementation
+        frame.destroy()
+
+    def update_row_colors(self, amount, tag, idx):
+        # Because the data is formatted in [database_index, date, amount, tag, desc] data_row[2] is the amount positioned in the list
+        if float(amount.removesuffix(self.currency_sign)) >= 0:
+            color = COLOR_INCOME      # The amount is positive, is green
+        else:
+            color = COLOR_EXPENSE        # The amount is negative, is red
+
+        #Tags dictionary have key : color , every key is a tag
+        if tag in TAGS_DICTIONARY.keys():
+            tag_color = TAGS_DICTIONARY[tag]
+            is_bold = ctk.CTkFont(size=14, weight="bold")
+        else:
+            tag_color = "#FFFFFF"
+            is_bold = ctk.CTkFont(size=12)
+
+
+        self.widgets_list[idx].winfo_children()[1].configure(text_color = color)
+        self.widgets_list[idx].winfo_children()[2].configure(text_color= tag_color, font=is_bold,)
+
 
     # =============================================================================
     # Update summary

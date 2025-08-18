@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 import random
 
+from config.settings import INCORRECT_DATE, INCORRECT_YEAR
+
 def generate_random_date(start_date, days_range=365):
     return (start_date + timedelta(days=random.randint(0, days_range))).strftime('%Y-%m-%d')
 
@@ -23,7 +25,19 @@ def seed_200_transactions(database):
 def is_valid_date(date : str):
     try:
         date_str = date.strip()
-        datetime.strptime(date_str, "%d/%m/%Y")
+        parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+
+        if parsed_date.year > datetime.now().year:
+            return INCORRECT_YEAR
+        
+        return True
+    except ValueError:
+        return INCORRECT_DATE
+    
+
+def is_valid_number(value):
+    try:
+        float(value)
+        return True
     except ValueError:
         return False
-    
