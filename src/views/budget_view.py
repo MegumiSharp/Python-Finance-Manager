@@ -1,5 +1,6 @@
+from datetime import datetime
 import customtkinter as ctk
-from config.settings import COLOR_EXPENSE, KEY_BUDGET_NEEDS, KEY_BUDGET_SAVING, KEY_BUDGET_WANTS
+from config.settings import COLOR_EXPENSE, COLOR_INCOME, KEY_BUDGET_NEEDS, KEY_BUDGET_SAVING, KEY_BUDGET_WANTS, KEY_CURRENCY_SIGN
 from src.views.base_view import BaseView
 
 class BudgetView(BaseView):
@@ -9,22 +10,25 @@ class BudgetView(BaseView):
         self.user = user
         self.data = database.local_db
 
+        self.currency_sign = user.read_json_value(KEY_CURRENCY_SIGN)
+        
         # Placeholder variables
         self.needs_percentage = int(user.read_json_value(KEY_BUDGET_NEEDS))
         self.wants_percentage = int(user.read_json_value(KEY_BUDGET_WANTS))
         self.savings_percentage = int(user.read_json_value(KEY_BUDGET_SAVING))
         
-        self.salary = 0
+
         
-        self.budget_filter = "September 2025"
+        #self.budget_filter = "September 2025"
+        self.budget_filter = datetime.now().strftime("%Y-%m")
         self.needs_spent = 0
-        self.needs_budget = self.salary * self.needs_percentage / 100
+        self.needs_budget = 0
         self.wants_spent = 0
-        self.wants_budget = self.salary * self.wants_percentage / 100
+        self.wants_budget = 0
         self.savings_current = 0
-        self.savings_budget = self.salary * self.savings_percentage / 100
-        
+        self.savings_budget = 0
         self.total_savings = 0
+        self.salary = 0
 
         # Store references to UI elements for dynamic updates
         self.needs_label = None
@@ -73,19 +77,6 @@ class BudgetView(BaseView):
             text_color="#B0B0B0"
         )
         month_label.grid(row=0, column=1, sticky="w")
-
-        # Navigation arrow
-        nav_button = ctk.CTkButton(
-            header_frame,
-            text=">",
-            width=30,
-            height=30,
-            corner_radius=15,
-            fg_color="#404040",
-            hover_color="#505050",
-            font=ctk.CTkFont(size=16)
-        )
-        nav_button.grid(row=0, column=2, sticky="e")
 
         # Content frame
         content_frame = ctk.CTkFrame(self.main_frame, fg_color="#404040", corner_radius=10)
@@ -188,15 +179,24 @@ class BudgetView(BaseView):
             text_color="#FFC107"
         )
         self.total_label.grid(row=10, column=0, padx=20, pady=(10, 20))
-        self.calculator("2025-06")
+        self.calculator()
 
-    def calculator(self, date : str):
+    def calculator(self):
+
+        self.needs_spent = 0
+        self.needs_budget = 0
+        self.wants_spent = 0
+        self.wants_budget = 0
+        self.savings_current = 0
+        self.savings_budget = 0
+        self.total_savings = 0
+        self.salary = 0
 
         new_list = []
         for transaction in self.data:
             year_month = transaction[1][0:7]
 
-            if year_month == date:
+            if year_month == self.budget_filter:
                 new_list.append(transaction)
 
         
@@ -220,23 +220,23 @@ class BudgetView(BaseView):
         
         self.needs_spent = abs(self.needs_spent)
         self.wants_spent = abs(self.wants_spent)
-        self.savings_current = abs(self.savings_current)
+        self.savings_current = round((abs(self.savings_current)),2)
     
-        self.needs_budget = self.salary * self.needs_percentage / 100
-        self.wants_budget = self.salary * self.wants_percentage / 100
-        self.savings_budget = self.salary * self.savings_percentage / 100
+        self.needs_budget = round((self.salary * self.needs_percentage / 100),2)
+        self.wants_budget = round((self.salary * self.wants_percentage / 100),2)
+        self.savings_budget = round((self.salary * self.savings_percentage / 100),2)
 
         self.total_savings += self.savings_current
         
         if self.salary_label:
-            self.salary_label.configure(text=f"Salary: {self.salary}€")
+            self.salary_label.configure(text=f"Salary: {self.salary}{self.currency_sign}")
 
 
         if self.needs_label:
             self.needs_label.configure(text=f"Needs ({self.needs_percentage}%)")
 
         if self.needs_amount:
-            self.needs_amount.configure(text=f"{self.needs_spent}/{self.needs_budget}€")
+            self.needs_amount.configure(text=f"{self.needs_spent}/{self.needs_budget}{self.currency_sign}")
 
             if self.needs_spent > self.needs_budget:
                 self.needs_amount.configure(text_color=COLOR_EXPENSE)
@@ -252,7 +252,7 @@ class BudgetView(BaseView):
 
 
         if self.wants_amount:
-            self.wants_amount.configure(text=f"{self.wants_spent}/{self.wants_budget}€")
+            self.wants_amount.configure(text=f"{self.wants_spent}/{self.wants_budget}{self.currency_sign}")
 
             if self.wants_spent > self.wants_budget:
                 self.wants_amount.configure(text_color=COLOR_EXPENSE)
@@ -268,7 +268,10 @@ class BudgetView(BaseView):
 
 
         if self.savings_amount:
-            self.savings_amount.configure(text=f"{self.savings_current}/{self.savings_budget}€")
+            self.savings_amount.configure(text=f"{self.savings_current}/{self.savings_budget}{self.currency_sign}")
+
+            if self.savings_current >= self.savings_budget:
+                self.savings_amount.configure(text_color=COLOR_INCOME)
 
 
 
@@ -277,6 +280,6 @@ class BudgetView(BaseView):
             self.savings_bar.set(progress)
             
         if self.total_label:
-            self.total_label.configure(text=f"Total Savings This Month: {self.total_savings}€")
+            self.total_label.configure(text=f"Total Savings This Month: {self.total_savings}{self.currency_sign}")
 
 

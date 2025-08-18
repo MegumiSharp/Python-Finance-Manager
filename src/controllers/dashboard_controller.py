@@ -139,5 +139,8 @@ class DashboardController(BaseView):
             self.current_view = self.views[view_class]
             self.current_view.show()
 
+        if view_class == BudgetView:
+            self.views[BudgetView].calculator()
+
     def on_closure(self):
         self.views[HomeView].on_closure()

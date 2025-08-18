@@ -45,7 +45,6 @@ class DatabaseManager:
         for row in rows:
             print(" | ".join(str(cell) for cell in row))
 
-
     # Update the list with all database entries
     def update_local(self):
         self.local_db = []
@@ -94,16 +93,6 @@ class DatabaseManager:
         self.conn.commit()
         self.update_local()
         
-
-    def ord_trans_by_date(self):
-        pass
-
-    def ord_trans_by_tag(self):
-        pass
-
-    def ord_trans_by_expences(self):
-        pass
-    
     
     def print_trans(self):
         print(self.local_db)
