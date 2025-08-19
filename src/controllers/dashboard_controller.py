@@ -143,5 +143,8 @@ class DashboardController(BaseView):
         if view_class == BudgetView:
             self.views[BudgetView].update_data_and_recalculate()
 
+        if view_class == HomeView:
+            self.views[HomeView].change_message_home_view("Welcome to Expensia", "#FFFFFF")
+
     def on_closure(self):
         self.views[HomeView].on_closure()

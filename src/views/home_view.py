@@ -100,7 +100,6 @@ class HomeView(BaseView):
 
     def save_btn_event(self):
         self.transactions_table.update_db()
-
         self.change_message_home_view("Successfull changes applied", COLOR_INCOME)
 
 
@@ -345,6 +344,7 @@ class HomeView(BaseView):
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
+        self.change_message_home_view(f"Showing {self.current_date_selection} - {self.current_month_selection}", COLOR_INCOME)
 
     def on_month_changed(self, value):
         self.current_month_selection = value
@@ -353,6 +353,7 @@ class HomeView(BaseView):
             date_value=self.current_date_selection,
             month_value=self.current_month_selection
         )
+        self.change_message_home_view(f"Showing {self.current_date_selection} - {self.current_month_selection}", COLOR_INCOME)
 
     def reset_data_filters(self):
         self.current_date_selection = "All"
@@ -387,7 +388,8 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Income",
             fg_color="#2A9221",
-            command=lambda : self.transactions_table.show_income(self.current_date_selection, self.current_month_selection),
+            command=lambda : (self.transactions_table.show_income(self.current_date_selection, self.current_month_selection), 
+                              self.change_message_home_view("Current Filter: Show Income", COLOR_INCOME)),
             font=ctk.CTkFont(size=14)
         )
         self.income_btn.grid(row=1, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -397,7 +399,8 @@ class HomeView(BaseView):
             filter_info_frame,
             text="Expenses",
             fg_color="#DB5745",
-            command=lambda : self.transactions_table.show_expenses(self.current_date_selection, self.current_month_selection),
+            command=lambda : (self.transactions_table.show_expenses(self.current_date_selection, self.current_month_selection)
+                              ,self.change_message_home_view("Current Filter: Show Expenses", COLOR_INCOME)),
             font=ctk.CTkFont(size=14)
         )
         self.expenses_button.grid(row=2, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -406,7 +409,8 @@ class HomeView(BaseView):
         self.all = ctk.CTkButton(
             filter_info_frame,
             text="All",
-            command=lambda: (self.reset_data_filters(), self.transactions_table.show_all()),
+            command=lambda: (self.reset_data_filters(), self.transactions_table.show_all(),
+                             self.change_message_home_view("Current Filter: Show All", COLOR_INCOME)),
             font=ctk.CTkFont(size=14)
         )
         self.all.grid(row=3, column=0, pady=(0, 15), padx=15, sticky="ew")
@@ -558,7 +562,7 @@ class HomeView(BaseView):
         date_btn = ctk.CTkButton(
             header_frame,
             text="Date ↕",
-            command=self.transactions_table.order_by_date,
+            command=lambda : (self.transactions_table.order_by_date(), self.change_message_home_view("Current Filter: Date", COLOR_INCOME)),
             width=80,
             height=32,
             font=ctk.CTkFont(size=14, weight="bold")
@@ -569,7 +573,7 @@ class HomeView(BaseView):
         amount_btn = ctk.CTkButton(
             header_frame,
             text="Amount ↕",
-            command=self.transactions_table.order_by_amount,
+            command= lambda : (self.transactions_table.order_by_amount(), self.change_message_home_view("Current Filter: Amount", COLOR_INCOME)),
             width=80,
             height=32,
             font=ctk.CTkFont(size=14, weight="bold")
