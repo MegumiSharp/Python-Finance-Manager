@@ -1,11 +1,12 @@
 {
     "is_first_time": "false",
-    "nickname": "SImone",
+    "nickname": "Simone",
     "currency_sign": "\u20ac",
     "theme": "Default",
-    "budget_rule_needs": "90",
-    "budget_rule_wants": "9",
-    "budget_rule_saving": "1",
+    "budget_rule_needs": "50",
+    "budget_rule_wants": "30",
+    "budget_rule_saving": "20",
     "date_selection": "All",
-    "month_selection": "All"
+    "month_selection": "All",
+    "total_saving": "480.0"
 }

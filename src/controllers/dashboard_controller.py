@@ -139,8 +139,9 @@ class DashboardController(BaseView):
             self.current_view = self.views[view_class]
             self.current_view.show()
 
+        # When switching to BudgetView, update data and recalculate
         if view_class == BudgetView:
-            self.views[BudgetView].calculator()
+            self.views[BudgetView].update_data_and_recalculate()
 
     def on_closure(self):
         self.views[HomeView].on_closure()
