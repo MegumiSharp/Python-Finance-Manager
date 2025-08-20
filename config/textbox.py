@@ -46,3 +46,24 @@ Valid Input Examples:
 ERROR_VAL_RANGE_TEXT = "Values must be between 1 and 99"
 ERROR_VAL_SUM_INCORRECT_TEXT = "Values must add up to 100% \n (currently:"
 ERROR_VAL_WHOLE_TEXT = "Values must be whole numbers only"
+
+
+IMPORT_EXPORT_MESSAGE = (
+    "Here you can import or export the database. Below is the tutorial:\n\n"
+    "EXPORT:\n"
+    "- When pressing 'Export', a CSV file will be created in the 'export' folder.\n\n"
+    "IMPORT:\n"
+    "- To import a database, place the file named 'db_import.csv' inside the 'import' folder.\n"
+    "- The formatting of the file should always be:\n"
+    "  date,amount,tag,desc\n"
+    "  date,amount,tag,desc\n"
+    "  date,amount,tag,desc\n\n"
+    "RULES:\n"
+    "- The date must be in the format YYYY-MM-DD.\n"
+    "- The amount must not include any currency sign. Use '-' for negative values only.\n"
+    "- Each row in the CSV represents a row in the database.\n\n"
+    "BACKUP:\n"
+    "- The 'Backup' button creates a copy of the current database in the 'backup' folder.\n"
+    "- The 'Revert Backup' button restores the database from the backup.\n"
+    "- If there are any problems with CSV importing, you can use the 'Revert Backup' button."
+)

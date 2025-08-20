@@ -6,6 +6,7 @@ from config.settings import (ICONS_PATH)
 from src.views.base_view import BaseView
 from src.views.home_view import HomeView
 from src.views.budget_view import BudgetView
+from src.views.import_export_view import ImportExport
 from src.models.database import DatabaseManager 
 from src.utils.helpers import *
 
@@ -37,12 +38,14 @@ class DashboardController(BaseView):
         self.icons = {
             HomeView: ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "home_light.png")), size=(20, 20)),
             BudgetView: ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "chat_light.png")), size=(20, 20)),
+            ImportExport: ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "imp-exp.png")), size=(20, 20)),
         }
         
         # Create views after buttons are created
         self.views = {
             HomeView: HomeView(self.content_container, controller=self.controller, user=self.user, database=self.data),
             BudgetView: BudgetView(self.content_container, controller=self.controller, user=self.user, database=self.data),
+            ImportExport: ImportExport(self.content_container, controller=self.controller, user=self.user, database=self.data)
         }
 
         self.setup_ui()
@@ -84,6 +87,14 @@ class DashboardController(BaseView):
         self.budget_button = self.__create_button(frame =self.navigation_frame, text = "Budget", istance = BudgetView,)
         self.budget_button.grid(row=2, column=0, sticky="ew", padx=10, pady=5)
         self.buttons[BudgetView] = self.budget_button
+
+        # Import Export Button
+        self.import_export_btn = self.__create_button(frame =self.navigation_frame, text = "Import/Export", istance = ImportExport,)
+        self.import_export_btn.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
+        self.buttons[ImportExport] = self.import_export_btn
+
+
+
 
     # Function to create a generic button for the sidebar
     # It initializes the button with the provided frame, text, and instance type

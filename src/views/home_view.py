@@ -485,7 +485,7 @@ class HomeView(BaseView):
             amount = float(self.amount_entry.get())
             category = self.category_entry.get()
             description = self.description_entry.get()
-            
+
             # Check for required fields
             if not all([date, str(amount), category, description]):
                 self.change_message_home_view("Please fill all fields", COLOR_DELETE_BTN)
@@ -520,9 +520,6 @@ class HomeView(BaseView):
             # Clear form inputs
             self._clear_transaction_form()
             self.change_message_home_view(f"Successfull Transaction Added", COLOR_INCOME)
-            
-
-            
         except ValueError as e:
             self.change_message_home_view(f"Invalid input - {e} ", COLOR_DELETE_BTN)
         except Exception as e:
