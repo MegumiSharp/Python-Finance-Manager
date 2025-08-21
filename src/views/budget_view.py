@@ -184,7 +184,6 @@ class BudgetView(BaseView):
 
     def calculator(self):
         self.data = self.database.local_db
-
         # Reset all values
         self.needs_spent = 0
         self.needs_budget = 0

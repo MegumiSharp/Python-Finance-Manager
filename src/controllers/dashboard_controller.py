@@ -93,9 +93,6 @@ class DashboardController(BaseView):
         self.import_export_btn.grid(row=3, column=0, sticky="ew", padx=10, pady=5)
         self.buttons[ImportExport] = self.import_export_btn
 
-
-
-
     # Function to create a generic button for the sidebar
     # It initializes the button with the provided frame, text, and instance type
     def __create_button(self, frame, text, istance):

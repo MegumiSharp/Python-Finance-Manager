@@ -1,8 +1,11 @@
 import csv
 from datetime import datetime
+import os
+import shutil
 
+import sys
 from tkinter import messagebox
-from config.settings import EXPORT_FOLDER_PATH, INCORRECT_DATE
+from config.settings import BACKUP_FOLDER_PATH, DATABASE_PATH, EXPORT_FOLDER_PATH
 from config.textbox import IMPORT_EXPORT_MESSAGE
 from src.views.base_view import BaseView  
 import customtkinter as ctk
@@ -78,14 +81,35 @@ class ImportExport(BaseView):
         self.backup_current = ctk.CTkButton(backup_frame, text="Backup Current", command=self.backup_current_event)
         self.backup_current.grid(row=0, column=0, padx=20, pady=30, sticky="n")
 
-        self.restore_backup = ctk.CTkButton(backup_frame, text="Restore Backup", command= None)
+        self.restore_backup = ctk.CTkButton(backup_frame, text="Restore Backup", command= self.restore_backup_event)
         self.restore_backup.grid(row=0, column=1, padx=20, pady=30, sticky="n")
 
+    def restore_backup_event(self):
+        if not os.path.isfile(BACKUP_FOLDER_PATH):
+            messagebox.showinfo(f"File not founded", f"No file was founded in backup file")
+            return
+
+        if messagebox.askokcancel("Confirm", "Are you sure you want to overwrite current database with backup?"):
+            shutil.copy(BACKUP_FOLDER_PATH, DATABASE_PATH)
+            messagebox.showinfo(f"Backup restored", f"Backup was successfull restored")
+
+            #Reset application to show the changes
+            python = sys.executable
+            os.execv(python, [python] + sys.argv)
 
     def backup_current_event(self):
-        pass
+        try:
+            shutil.copy(DATABASE_PATH, BACKUP_FOLDER_PATH)
+            messagebox.showinfo(f"Backup of the database created", f"Backup successfull created in backup folder")
+        except:
+            raise ValueError("Error creating backup")
 
     def import_event(self):
+        
+        
+        #Reset application to show the changes
+        python = sys.executable
+        os.execv(python, [python] + sys.argv)
         pass
 
     def export_event(self):

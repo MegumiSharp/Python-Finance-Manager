@@ -68,7 +68,6 @@ class HomeView(BaseView):
         self.transactions_table = VirtualTable(self.main_content_frame, self.controller, self.database, self.user)
         self.transactions_table.grid(row=2, column=0, sticky="nsew")
 
-
         #self.message_box()
         # Initialize components in correct order
         self.search_bar_frame()
