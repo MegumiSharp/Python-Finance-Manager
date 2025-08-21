@@ -51,6 +51,12 @@ class DatabaseManager:
         self.cursor.execute('''SELECT * FROM transactions''')
         for t in self.cursor.fetchall():
             self.local_db.append([t[0], t[1], t[2], t[3], t[4]])
+
+    def update_db(self):
+        self.cursor.execute("DELETE FROM transactions")
+        for row in self.local_db:
+            self.add_transaction(date = row[0], amount = row[1], tag = row[2], description = row[3])
+
     
     def add_transaction(self, date = None, amount = None, tag = None, description = None):
         if date is None:

@@ -20,7 +20,7 @@ DATABASE_PATH = DATA_ROOT / "database" / "transactions.db"
 USER_SETTINGS_PATH = DATA_ROOT / "user_settings" / "user_settings.json"
 
 EXPORT_FOLDER_PATH = PROJECT_ROOT / "export" / "db_export.csv"
-IMPORT_FOLDER_PATH = PROJECT_ROOT / "IMPORT" / "db_import.csv"
+IMPORT_FOLDER_PATH = PROJECT_ROOT / "import" / "db_import.csv"
 
 BACKUP_FOLDER_PATH = PROJECT_ROOT / "backup" / "transactions_backup.db"
 

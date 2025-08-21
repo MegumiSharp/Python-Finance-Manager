@@ -5,7 +5,7 @@ import shutil
 
 import sys
 from tkinter import messagebox
-from config.settings import BACKUP_FOLDER_PATH, DATABASE_PATH, EXPORT_FOLDER_PATH
+from config.settings import BACKUP_FOLDER_PATH, DATABASE_PATH, EXPORT_FOLDER_PATH, IMPORT_FOLDER_PATH
 from config.textbox import IMPORT_EXPORT_MESSAGE
 from src.views.base_view import BaseView  
 import customtkinter as ctk
@@ -105,12 +105,32 @@ class ImportExport(BaseView):
             raise ValueError("Error creating backup")
 
     def import_event(self):
-        
-        
-        #Reset application to show the changes
-        python = sys.executable
-        os.execv(python, [python] + sys.argv)
-        pass
+        data =[]
+        try:  
+            with open(IMPORT_FOLDER_PATH, "r") as csv_file:
+                csv_reader = csv.reader(csv_file)
+
+                for index, line in enumerate(csv_reader):
+                    
+                    if helpers.is_valid_date(line[0]) != True or helpers.is_valid_number(str(line[1])) != True:
+                        messagebox.showinfo(f"Error during Import", f"Incorrect value in index {index+1}")
+                        break
+                    data.append(line)
+            
+            shutil.copy(DATABASE_PATH, BACKUP_FOLDER_PATH)
+            self.database.local_db = data
+            self.database.update_db()
+
+            messagebox.showinfo(f"Import Successfull", f"The data was imported from the folder, for every problem, a backup of the previous db was mase in backup folder")
+
+                    #Reset application to show the changes
+            python = sys.executable
+            os.execv(python, [python] + sys.argv)
+
+        except:
+            raise ValueError("Failure Import")
+
+
 
     def export_event(self):
         raw_data = self.database.local_db
