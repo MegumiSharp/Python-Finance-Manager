@@ -1,162 +1,135 @@
-
 <p align="center">
   <img src="assets/readme_images/banner.png" alt="Banner" />
 </p>
 
-# Expensia: A Personal Finance management appliction
+# Expensia: A Personal Finance Management Application
 
-## A small introduction to the project
-Created as a project to sharpen my skillset on a real work environment, i spent roughly 130 hours on the project, (counted with a time tracking application) most of the time was spent on refactoring and learn to use the gui of python tkinter and his exstension customtkinter. The refactoring was largly done to make a better looking code and use some design pattern to create a better overall project. 
+---
 
-This project helped me reawaken my rusty programmer skill, and teached me the importance to plan ahead an application like this, beacuse, no matter how simple an application could seem to be, if you do  not plan ahead a lot of problems could accour. For an in-depth path of development check here : [here](docs/development_path.md)
+## 📖 Project Overview
 
-Even if the application is functional, is far from perfect, and could benefit from more testing about the features and some feature added, however i decided to stop here, because i want to keep learning other technology and work on some other projects, however if some issues accour in the tab i will fix it.
+**Expensia** was created as a comprehensive project to enhance my development skills in a real-world environment. Over approximately **130 hours** of dedicated development time (tracked using time management tools), I focused extensively on refactoring and mastering Python's GUI frameworks, including Tkinter and its modern extension, CustomTkinter.
 
-Even if in relativly small part, for this project i used, sqlite3, json and csv files, and python as primary language, with customtkinter and tkinter library for the gui.
+The refactoring process was primarily undertaken to achieve cleaner, more maintainable code while implementing proven design patterns for an overall superior project architecture. This endeavor rekindled my programming passion and reinforced the critical importance of thorough planning in application development. Even seemingly simple applications can encounter significant challenges without proper forethought. 
 
+For a detailed development journey, please visit: **[Development Path Documentation](docs/development_path.md)**
 
+While the application is fully functional, there's always room for improvement through additional testing and feature enhancements. However, I've decided to conclude this phase to explore other technologies and embark on new projects. Rest assured, any critical issues will be promptly addressed.
 
-# What you can do with Expensia?
+### 🛠️ **Technology Stack**
+- **Primary Language**: Python
+- **Database**: SQLite3
+- **Data Formats**: JSON, CSV
+- **GUI Framework**: CustomTkinter & Tkinter
+
+---
+
+# ✨ What Can You Do with Expensia?
 
 <p align="center">
   <img src="assets/readme_images/animation 1.gif" alt="animation" />
-  <text> Live preview of the application<text>
+  <br>
+  <em>Live preview of the application in action</em>
 </p>
 
+Expensia is a robust personal finance management application built in Python that empowers you to track expenses efficiently while providing powerful filtering capabilities and intelligent budget management through customizable budgeting rules.
 
-Expensia is personal finance management application built in Python that helps you track expenses and giving you the power to filter this transactions and be able to see a budget rule, a way to handle where your moneys goes.
+## 🚀 Key Features
 
-## 🚀 Features
 
-- **Transaction Management**: Add, edit, and delete financial transactions with ease
-- **Advanced Filtering**: Filter data by year, date, amount, expense type, income, and month for precise data visualization
-- **SQLite Database**: All data is securely stored in a local SQLite database with automatic backup functionality
-- **CSV Import/Export**: Import transactions from CSV files to database (creates automatic backup of previous database) and export data to CSV format
-- **Fully Local**: All operations and data storage are completely local - no cloud dependency
-- **Budget Planning**: Comprehensive budget view with the 50/30/20 rule implementation:
-  - 50% for needs (essential expenses)
-  - 30% for wants (lifestyle expenses) 
-  - 20% for savings and debt repayment
-  - **Customizable percentages** to fit your personal financial strategy
-- **Data Backup**: Automatic database backup system to protect your financial data
-- **Desktop GUI**: User-friendly graphical interface designed for intuitive desktop experience
+- **Create, Edit & Delete**: Seamlessly manage your financial transactions with an intuitive interface
+- **Real-time Updates**: Instant reflection of changes across the application
+- **Multi-Parameter Filtering**: Filter data by year, date, amount, expense type, income, and month
+- **Precise Data Visualization**: Get exactly the insights you need with granular control
+- **SQLite Database**: Secure local storage with automatic backup functionality
+- **CSV Import/Export**: 
+  - Import transactions from CSV files with automatic database backup
+  - Export your data to CSV format for external analysis
+- **100% Local**: Complete data sovereignty with no cloud dependencies
+- **50/30/20 Rule Implementation**:
+  - **50%** for needs (essential expenses)
+  - **30%** for wants (lifestyle expenses) 
+  - **20%** for savings and debt repayment
+- **Fully Customizable**: Adjust percentages to match your personal financial strategy
+- **Visual Budget Tracking**: Clear overview of your spending patterns
+- **Backup System**: Protect your financial data with built-in backup mechanisms
+- **Local Storage**: Your data never leaves your device
+- **Modern Desktop GUI**: Intuitive interface designed for seamless desktop interaction
+- **Responsive Design**: Smooth performance across different screen sizes
+
+---
 
 ## 🛠️ Technologies Used
 
-- **Python**: Core programming language for application development
-- **SQLite3**: Lightweight, local database engine for secure data storage and management
-- **CSV Processing**: Built-in CSV module for seamless data import/export functionality
-- **CustomTkinter**: Modern, customizable GUI framework for enhanced user interface design
-- **Tkinter**: Native Python GUI toolkit providing foundational interface components
-- **JSON**: Configuration file format for theme management and customization settings
+| Technology | Purpose |
+|------------|---------|
+| **Python** | Core programming language for application development |
+| **SQLite3** | Lightweight, local database engine for secure data management |
+| **CSV Processing** | Built-in module for seamless data import/export functionality |
+| **CustomTkinter** | Modern, customizable GUI framework for enhanced user interface |
+| **Tkinter** | Native Python GUI toolkit providing foundational components |
+| **JSON** | Configuration file format for theme and customization settings |
 
+---
 
 ## 📊 Screenshots
 
-
 <p align="center">
-  <text> Welcome View when starting the application<text>
-  <img src="assets/readme_images/Welcome.png" />
-    <text> Budget View<text>
-  <img src="assets/readme_images/Budget View.png" />
-      <text> Edit Button<text>
-  <img src="assets/readme_images/edit.png" />
-        <text> Backup View<text>
-  <img src="assets/readme_images/Backup view.png" />
+  <strong>Welcome View - Application Startup</strong><br>
+  <img src="assets/readme_images/Welcome.png" alt="Welcome View" />
+  <br><br>
+  
+  <strong>Budget View - Financial Overview</strong><br>
+  <img src="assets/readme_images/Budget View.png" alt="Budget View" />
+  <br><br>
+  
+  <strong>Edit Functionality</strong><br>
+  <img src="assets/readme_images/edit.png" alt="Edit Button" />
+  <br><br>
+  
+  <strong>Backup Management</strong><br>
+  <img src="assets/readme_images/Backup view.png" alt="Backup View" />
 </p>
 
+---
 
+## 🚀 Installation Guide
 
-
-
-## Installation
+> **Note**: This application was developed and tested on WSL (Windows Subsystem for Linux) Ubuntu 22.04. While primarily designed for Linux environments, it should be compatible with Windows Python installations. Community contributions for broader platform support are welcome!
 
 ### Prerequisites
-- Python 3.7 or higher
-- pip (Python package installer)
 
+- **Python 3.7+** (recommended: Python 3.8 or higher)
+- **pip** (Python package installer)
 
-1. **Clone the repository**
+### 🐧 Linux Installation
+
+1. **Clone the Repository**
    ```bash
    git clone git@github.com:MegumiSharp/Python-Finance-Manager.git
    cd Python-Finance-Manager
    ```
 
-3. **Install dependencies**
+2. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Run the application**
+3. **Launch Expensia**
    ```bash
    python3 main.py
    ```
 
-### Alternative Installation (without virtual environment)
-If you prefer not to use a virtual environment:
-```bash
-pip install -r requirements.txt
-python main.py
-```
+---
 
-## Dependencies
+## 🙏 Acknowledgements
 
-This project uses the following main libraries:
-- **customtkinter** - Modern UI library for tkinter
-- **tkinter** - Built-in Python GUI library (included with Python)
-- [List other major dependencies here]
+We extend our gratitude to the following contributors and communities:
 
-## Troubleshooting
+- **Python Community** - For creating and maintaining this versatile programming ecosystem
+- **Tkinter Development Team** - For providing Python's foundational GUI library
+- **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)** - For modernizing Tkinter with beautiful, customizable components
+- **[a13xe/CTkThemesPack](https://github.com/a13xe/CTkThemesPack)** - For providing an exceptional collection of themes that enhance CustomTkinter applications
 
-### Common Issues
+---
 
-**CustomTkinter not found:**
-```bash
-pip install customtkinter --upgrade
-```
-
-**Python version compatibility:**
-- Ensure you're using Python 3.7+
-- Check your Python version: `python --version`
-
-**Virtual environment issues:**
-- Make sure the virtual environment is activated
-- Try recreating the virtual environment if problems persist
-
-### Platform-Specific Notes
-
-**Windows:**
-- Use `python` and `pip` commands
-- Activate venv with `venv\Scripts\activate`
-
-**macOS/Linux:**
-- Use `python3` and `pip3` if `python` points to Python 2
-- Activate venv with `source venv/bin/activate`
-
-## Development
-
-To contribute or modify the project:
-
-1. Fork the repository
-2. Create a virtual environment and install dependencies
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-
-
-
-
-and from customtkinter theme builder by...
-
-
-
-
-# Acknowledgements
-
-
-Thanks to the **Python** community for creating and maintaining such a versatile programming language.  Thanks to the original **Tkinter** developers and maintainers for providing the foundation of Python’s standard GUI library. Thanks to the creators of **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)** for modernizing Tkinter with beautiful, customizable widgets.  
-
-Thanks to **[a13xe/CTkThemesPack](https://github.com/a13xe/CTkThemesPack)** for providing an excellent collection of themes to enhance the look and feel of CustomTkinter applications.  
-
------------
