@@ -4,25 +4,53 @@
 
 # Expensia: A Personal Finance Management Application
 
----
 
 ## 📖 Project Overview
 
-**Expensia** was created as a comprehensive project to enhance my development skills in a real-world environment. Over approximately **130 hours** of dedicated development time (tracked using time management tools), I focused extensively on refactoring and mastering Python's GUI frameworks, including Tkinter and its modern extension, CustomTkinter.
+**Expensia** was created as a comprehensive project to enhance my development skills in a real-world environment. Over approximately **90 hours** of dedicated development time (tracked using time management tools), I focused extensively on refactoring and mastering Python's GUI frameworks, including Tkinter and its modern extension, CustomTkinter.
 
 The refactoring process was primarily undertaken to achieve cleaner, more maintainable code while implementing proven design patterns for an overall superior project architecture. This endeavor rekindled my programming passion and reinforced the critical importance of thorough planning in application development. Even seemingly simple applications can encounter significant challenges without proper forethought. 
 
-For a detailed development journey, please visit: **[Development Path Documentation](docs/development_path.md)**
+For a detailed development journey, please visit: **[Project Development Considerations](docs/development_path.md)**
 
 While the application is fully functional, there's always room for improvement through additional testing and feature enhancements. However, I've decided to conclude this phase to explore other technologies and embark on new projects. Rest assured, any critical issues will be promptly addressed.
 
-### 🛠️ **Technology Stack**
-- **Primary Language**: Python
-- **Database**: SQLite3
-- **Data Formats**: JSON, CSV
-- **GUI Framework**: CustomTkinter & Tkinter
+## 🛠️ Technologies Used
 
----
+| Technology | Purpose |
+|------------|---------|
+| **Python** | Core programming language for application development |
+| **SQLite3** | Lightweight, local database engine for secure data management |
+| **CSV Processing** | Built-in module for seamless data import/export functionality |
+| **CustomTkinter** | Modern, customizable GUI framework for enhanced user interface |
+| **Tkinter** | Native Python GUI toolkit providing foundational components |
+| **JSON** | Configuration file format for theme and customization settings |
+
+
+
+## 📚 Comprehensive Documentation: A Good Project Starts with Its Documentation
+
+While the application may not be perfect, I believe in thoroughly documenting every aspect of the development process. This documentation serves not only as a reference for the codebase but also chronicles the entire development journey, including challenges, design decisions, and key learnings that simulate a real-world development environment.
+
+The documentation is structured to provide insights into both technical implementation and the development methodology, reflecting practices you'd encounter in professional software development.
+
+#### 📖 **Documentation Structure**
+
+1. **[Source Code Documentation](docs/Application_Documentation/documentation.md)**  
+   *The foundation of the project* - Comprehensive explanation of all functions and methods, with detailed coverage of the more complex implementations and architectural decisions.
+
+2. **[Grid Layout Documentation](docs/Application_Documentation/the_grid_layour.md)**  
+   *Visual structure guide* - Detailed explanation of widget visualization and layout management using Tkinter and CustomTkinter's grid system for optimal user interface design.
+
+3. **[Design Pattern - Observer - Documentation](docs/Application_Documentation/observer_pattern.md)**  
+   *Architectural insights* - In-depth explanation of the Observer pattern implementation, serving as the primary communication mechanism between different application components.
+
+4. **[Project Development Considerations](docs/development_path.md)**  
+   *The journey chronicle* - Comprehensive coverage of development challenges, design choices, lessons learned, and insights on topics including AI assistance, refactoring strategies, and design principles.
+
+5. **[User Guide](docs/user_guide.md)**  
+   *Complete usage manual* - Step-by-step user guide covering every application feature and functionality, ensuring users can maximize their experience with Expensia.
+
 
 # ✨ What Can You Do with Expensia?
 
@@ -57,20 +85,8 @@ Expensia is a robust personal finance management application built in Python tha
 - **Modern Desktop GUI**: Intuitive interface designed for seamless desktop interaction
 - **Responsive Design**: Smooth performance across different screen sizes
 
----
 
-## 🛠️ Technologies Used
-
-| Technology | Purpose |
-|------------|---------|
-| **Python** | Core programming language for application development |
-| **SQLite3** | Lightweight, local database engine for secure data management |
-| **CSV Processing** | Built-in module for seamless data import/export functionality |
-| **CustomTkinter** | Modern, customizable GUI framework for enhanced user interface |
-| **Tkinter** | Native Python GUI toolkit providing foundational components |
-| **JSON** | Configuration file format for theme and customization settings |
-
----
+---------
 
 ## 📊 Screenshots
 
@@ -80,7 +96,7 @@ Expensia is a robust personal finance management application built in Python tha
   <br><br>
   
   <strong>Budget View - Financial Overview</strong><br>
-  <img src="assets/readme_images/Budget View.png" alt="Budget View" />
+  <img src="assets/readme_images/budget_view.png" alt="Budget View" />
   <br><br>
   
   <strong>Edit Functionality</strong><br>
@@ -120,7 +136,7 @@ Expensia is a robust personal finance management application built in Python tha
    python3 main.py
    ```
 
----
+
 
 ## 🙏 Acknowledgements
 
