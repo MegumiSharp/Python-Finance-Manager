@@ -55,14 +55,14 @@ class ImportExport(BaseView):
         content_frame.grid_columnconfigure(2, weight=1)
 
 
-        input_guide_textbox = ctk.CTkTextbox(content_frame)
+        input_guide_textbox = ctk.CTkTextbox(content_frame, height=410)
         input_guide_textbox.grid(row=0, column=0, columnspan=3, padx=30, pady=(30, 10), sticky="nsew")
         input_guide_textbox.insert("0.0", IMPORT_EXPORT_MESSAGE)
         input_guide_textbox.configure(state="disabled")
         
 
         import_export_frame = ctk.CTkFrame(content_frame, fg_color="transparent", corner_radius=10)
-        import_export_frame.grid(row=1, column=1, sticky="nsew", padx=20, pady=(0, 20))
+        import_export_frame.grid(row=2, column=1, sticky="nsew", padx=20, pady=(0, 20))
         import_export_frame.grid_columnconfigure(0, weight=1)
         import_export_frame.grid_columnconfigure(1, weight=1)
 
@@ -74,7 +74,7 @@ class ImportExport(BaseView):
 
 
         backup_frame = ctk.CTkFrame(content_frame, fg_color="transparent", corner_radius=10)
-        backup_frame.grid(row=2, column=1, sticky="nsew", padx=20, pady=(0, 20))
+        backup_frame.grid(row=3, column=1, sticky="nsew", padx=20, pady=(0, 20))
         backup_frame.grid_columnconfigure(0, weight=1)
         backup_frame.grid_columnconfigure(1, weight=1)
 

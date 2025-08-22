@@ -1,139 +1,162 @@
-# Personal Finance Tracker with AI Insights (Work in Progress)
 
-A comprehensive personal finance management application built in Python that helps you track expenses, visualize spending patterns, and get AI-powered insights about your financial habits.
+<p align="center">
+  <img src="assets/readme_images/banner.png" alt="Banner" />
+</p>
+
+# Expensia: A Personal Finance management appliction
+
+## A small introduction to the project
+Created as a project to sharpen my skillset on a real work environment, i spent roughly 130 hours on the project, (counted with a time tracking application) most of the time was spent on refactoring and learn to use the gui of python tkinter and his exstension customtkinter. The refactoring was largly done to make a better looking code and use some design pattern to create a better overall project. 
+
+This project helped me reawaken my rusty programmer skill, and teached me the importance to plan ahead an application like this, beacuse, no matter how simple an application could seem to be, if you do  not plan ahead a lot of problems could accour. For an in-depth path of development check here : [here](docs/development_path.md)
+
+Even if the application is functional, is far from perfect, and could benefit from more testing about the features and some feature added, however i decided to stop here, because i want to keep learning other technology and work on some other projects, however if some issues accour in the tab i will fix it.
+
+Even if in relativly small part, for this project i used, sqlite3, json and csv files, and python as primary language, with customtkinter and tkinter library for the gui.
+
+
+
+# What you can do with Expensia?
+
+<p align="center">
+  <img src="assets/readme_images/animation 1.gif" alt="animation" />
+  <text> Live preview of the application<text>
+</p>
+
+
+Expensia is personal finance management application built in Python that helps you track expenses and giving you the power to filter this transactions and be able to see a budget rule, a way to handle where your moneys goes.
 
 ## 🚀 Features
 
-### Current Features
-- Project Started
-
-### Planned Features
-- **Expense Management**: Add, edit, and delete transactions with ease
-- **Local Data Storage**: Secure SQLite database for all your financial data
-- **Category Organization**: Automatic and manual expense categorization
-- **Data Visualization**: Interactive charts showing spending trends and patterns
-- **Budget Tracking**: Set monthly budgets and track your progress
-- **Smart Analytics**: Get insights into your spending habits
-- **AI-Powered Categorization**: Automatic expense categorization using machine learning
-- **Predictive Analytics**: Forecast future expenses and savings opportunities
-- **Multi-Account Support**: Track multiple bank accounts and payment methods
-- **Recurring Transactions**: Templates for regular bills and income
-- **Export Capabilities**: CSV and PDF report generation
-- **Desktop GUI**: User-friendly graphical interface
+- **Transaction Management**: Add, edit, and delete financial transactions with ease
+- **Advanced Filtering**: Filter data by year, date, amount, expense type, income, and month for precise data visualization
+- **SQLite Database**: All data is securely stored in a local SQLite database with automatic backup functionality
+- **CSV Import/Export**: Import transactions from CSV files to database (creates automatic backup of previous database) and export data to CSV format
+- **Fully Local**: All operations and data storage are completely local - no cloud dependency
+- **Budget Planning**: Comprehensive budget view with the 50/30/20 rule implementation:
+  - 50% for needs (essential expenses)
+  - 30% for wants (lifestyle expenses) 
+  - 20% for savings and debt repayment
+  - **Customizable percentages** to fit your personal financial strategy
+- **Data Backup**: Automatic database backup system to protect your financial data
+- **Desktop GUI**: User-friendly graphical interface designed for intuitive desktop experience
 
 ## 🛠️ Technologies Used
 
-- **Python 3.8+**: Core programming language
-- **SQLite**: Local database for data persistence
-- **Pandas**: Data manipulation and analysis
-- **Matplotlib/Plotly**: Data visualization and charts
-- **Tkinter**: GUI framework (planned)
-- **Hugging Face Transformers**: AI-powered text classification (planned)
+- **Python**: Core programming language for application development
+- **SQLite3**: Lightweight, local database engine for secure data storage and management
+- **CSV Processing**: Built-in CSV module for seamless data import/export functionality
+- **CustomTkinter**: Modern, customizable GUI framework for enhanced user interface design
+- **Tkinter**: Native Python GUI toolkit providing foundational interface components
+- **JSON**: Configuration file format for theme management and customization settings
 
-
-
-### Basic Commands
-- **Add Expense**: Record a new transaction
-- **View Expenses**: Display transaction history
-- **Monthly Summary**: Get spending overview for specific months
-- **Category Analysis**: Breakdown expenses by category
-- **Budget Management**: Set and track monthly budgets
 
 ## 📊 Screenshots
 
-*Screenshots will be added as features are implemented*
 
-
-## 📝 Development Roadmap
-
-### Phase 1: Core Foundation ✅
-- [ ] Basic CLI interface
-- [ ] SQLite database setup
-- [ ] CRUD operations for transactions
-- [ ] Data validation and error handling
-
-### Phase 2: Data Analysis 🚧
-- [ ] Pandas integration for data manipulation
-- [ ] Basic reporting features
-- [ ] CSV import/export functionality
-
-### Phase 3: Visualization 📅
-- [ ] Matplotlib chart generation
-- [ ] Spending trend analysis
-- [ ] Category breakdown visualizations
-
-### Phase 4: AI Integration 📅
-- [ ] Manual categorization system
-- [ ] Keyword-based auto-categorization
-- [ ] Machine learning categorization
-- [ ] Spending pattern insights
-
-### Phase 5: GUI Development 📅
-- [ ] Tkinter desktop interface
-- [ ] User-friendly forms and displays
-- [ ] Interactive charts integration
+<p align="center">
+  <text> Welcome View when starting the application<text>
+  <img src="assets/readme_images/Welcome.png" />
+    <text> Budget View<text>
+  <img src="assets/readme_images/Budget View.png" />
+      <text> Edit Button<text>
+  <img src="assets/readme_images/edit.png" />
+        <text> Backup View<text>
+  <img src="assets/readme_images/Backup view.png" />
+</p>
 
 
 
-## 📦 Requirements
 
-- Python 3.10 o superiore
-- pip
-- `tkinter` (installabile via apt)
-- Supporto GUI (WSLg o X Server)
 
----
+## Installation
 
-## 🚀 Installazione
+### Prerequisites
+- Python 3.7 or higher
+- pip (Python package installer)
 
-### 1. Clona il repository
 
-```bash
-git clone https://github.com/tuo-username/nome-del-progetto.git
-cd nome-del-progetto
-```
-### Installa le dipendenze
+1. **Clone the repository**
+   ```bash
+   git clone git@github.com:MegumiSharp/Python-Finance-Manager.git
+   cd Python-Finance-Manager
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the application**
+   ```bash
+   python3 main.py
+   ```
+
+### Alternative Installation (without virtual environment)
+If you prefer not to use a virtual environment:
 ```bash
 pip install -r requirements.txt
-pip install customtkinter
-
-
-sudo apt update
-sudo apt install python3-tk
+python main.py
 ```
 
-Su windows 11
+## Dependencies
 
+This project uses the following main libraries:
+- **customtkinter** - Modern UI library for tkinter
+- **tkinter** - Built-in Python GUI library (included with Python)
+- [List other major dependencies here]
+
+## Troubleshooting
+
+### Common Issues
+
+**CustomTkinter not found:**
 ```bash
-python3 src/gui.py
+pip install customtkinter --upgrade
 ```
 
+**Python version compatibility:**
+- Ensure you're using Python 3.7+
+- Check your Python version: `python --version`
 
-## 🐛 Known Issues
+**Virtual environment issues:**
+- Make sure the virtual environment is activated
+- Try recreating the virtual environment if problems persist
 
-- None currently reported
+### Platform-Specific Notes
 
----
+**Windows:**
+- Use `python` and `pip` commands
+- Activate venv with `venv\Scripts\activate`
 
-themes are from https://github.com/a13xe/CTkThemesPack?tab=readme-ov-file
+**macOS/Linux:**
+- Use `python3` and `pip3` if `python` points to Python 2
+- Activate venv with `source venv/bin/activate`
+
+## Development
+
+To contribute or modify the project:
+
+1. Fork the repository
+2. Create a virtual environment and install dependencies
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+
+
+
+
 and from customtkinter theme builder by...
 
 
-## Scelte Progettuali
-
-Ho scelto di utilizzare SQLite come sistema di gestione dei dati per questo progetto perché offre una soluzione robusta, efficiente e scalabile, pur mantenendo una configurazione semplice e leggera. Rispetto a un approccio basato su file CSV, SQLite garantisce una maggiore integrità dei dati, permettendomi di definire tipi, vincoli e query complesse in modo sicuro e performante. Questo mi consente di ordinare, filtrare e gestire le transazioni in maniera molto più efficiente, evitando la necessità di implementare logiche manuali in Python per operazioni comuni. Inoltre, SQLite è facilmente integrabile nel progetto senza richiedere dipendenze esterne, mantenendo la portabilità e la facilità d’uso, ma con la solidità necessaria per supportare future espansioni come l’introduzione di più tabelle, categorie o statistiche.
 
 
-Dopo i primi 30 commit, e dopo aver creato di fatto la schermata di settaggi dell'utente, una schermata per la scelta del tema, e la home, si é deciso di fare refactoring.
-Per migliorare la scalabilità del programma, nonché la facilità di lettura e comprensione, si è deciso di effettuare un refactoring tempestivo del codice, concentrandosi sulla compartimentalizzazione e l’estrapolazione dei componenti che rendevano i file troppo lunghi. Un esempio emblematico di questo problema è il file app.py, che gestisce la GUI e rappresenta quindi la struttura portante dell’interfaccia grafica.
-
-A causa della natura di customtkinter (o di tkinter stesso), il file contiene un numero relativamente cospicuo di righe di codice pur includendo tre frame. Per migliorarne ulteriormente la leggibilità, i prossimi step del refactoring prevedono l’estrazione di questi frame in file separati, così da ottenere un codice — sebbene più dispersivo per via dell’aumento del numero di file — più pulito, semplice da leggere e coerente con la professionalità attesa da un applicativo proprietario.
+# Acknowledgements
 
 
-Determinate volte mi sono trovato a decidere se inserire dei commenti o meno, ma ho cercato di rendere il mio codice il piú comprensibile possibile, quindi molte volte ho optato per evitare di commentare funzioni comprensibili. Per quanto riguarda custom tkinter, piú di quello che ho scritto mi é stato impossibile farlo, le librerie grafiche ui di python da quello che ho visto 
-non sono ottimizzate e richiedono un enorme quantita di linee di codice per cose anche semplici in altri environment tipo web development. Per questo motivo, molto del lavoro sulla gui
-é stato un trial and error con un aiuto esterno da parte di cloude sonnet, il quale é stato essenziale visto la poca documentazione di custom tkinter rispetto al suo derivante.
+Thanks to the **Python** community for creating and maintaining such a versatile programming language.  Thanks to the original **Tkinter** developers and maintainers for providing the foundation of Python’s standard GUI library. Thanks to the creators of **[CustomTkinter](https://github.com/TomSchimansky/CustomTkinter)** for modernizing Tkinter with beautiful, customizable widgets.  
 
-Una scelta progettuale che probabilmente potrebbe risultare impopolare é su come ho gestito settings.py, un elenco di costanti che vengono utilizzate all'interno di tutto il programma e che permettono di modificare in qualsiasi momento l'andamento del programma comodamente da un solo file. Credo e spero che questo non sia motivo di diatribe, ma come ho gestito il default user settings, creando costanti sia per le chiavi che per i valori di default potrebbe sembrare al quanto strano. La motivazione dietro a questa scelta é semplicemente il voler evitare probelmi di typo nel codice, usando costanti che vengono riconosciute e segnalate subito. A fine progetto vorró fare dei test di velocitá per comprendere se questo abbia rallentato l'applicativo, ma per ora, credo sia un giusto compromesso per la leggibilitá e la comprensione del codice, obbitettivo che io ho deciso di mettere al primo posto.
+Thanks to **[a13xe/CTkThemesPack](https://github.com/a13xe/CTkThemesPack)** for providing an excellent collection of themes to enhance the look and feel of CustomTkinter applications.  
 
-Parliamoci chiaro, questo progetto a livello logico é al quanto semplice, é un applicativo CRUD (cREATE, READ, update and delete) e la parte piú difficile é concepire la resterizzazione della GUI, tuttavia il mio desiderio di mostrare la mia determinazione nell'imparare, comprendere ed applicare metodologie di lavoro serie e professionali, sia quello che contraddistingue questo progetto.  Molte delle scelte effettuate non erano necessarie a ficnhe il progetto fosse funzionante e facesse quello che deve fare, ma la fiamma di mostrare e presentare un progetto con una documentazione, struttura file, e scrittura del codice pulito mi ha spinto a creare il progetto come qui mostrato. Sono al corrente di non esserci riuscito in pieno, e magari di aver fatto tanti sbagli, ma essendo il mio primo progetto al di fuori dell'universitá, su argomenti che in uni non sono mai stati trattati, o trattati troppo superficialmente, be, mi rende orgoglioso di quello che ho fatto.
+-----------
