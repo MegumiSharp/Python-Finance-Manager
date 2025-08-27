@@ -15,6 +15,9 @@ For a detailed development journey, please visit: **[Project Development Conside
 
 While the application is fully functional, there's always room for improvement through additional testing and feature enhancements. However, I've decided to conclude this phase to explore other technologies and embark on new projects. Rest assured, any critical issues will be promptly addressed.
 
+
+> If you want to try the application with a good amount of transactions, because the application starts brand new, you should copy the file `examples/transactions.db` to the folder `data/database` and restart the application.
+
 ## 🛠️ Technologies Used
 
 | Technology | Purpose |
