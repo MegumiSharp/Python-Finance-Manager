@@ -1,13 +1,15 @@
 # Ignore all __pycache__ folders anywhere in the project
 **/__pycache__/
 
-# Ignore the transactions.db file (relative to root)
-transactions.db
+# Ignore the the transactions table because this is used for testing, the table is created at the start of the application
+data/database/transactions.db
 
-user_settings.json
+# Ignnore file settings, this should be create by the user when the application start
+data/user_settings/user_settings.json
 
+# Ignore Import and export csv files, this are used for testing and user should not download this with the clone of repository
+export/db_export.csv
+import/db_import.csv
 
-
-examples
-
-src/views/backup
+# Ignore the Backup file, because this should be only made by user
+backup/transactions_backup.db
