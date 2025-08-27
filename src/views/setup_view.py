@@ -1,20 +1,23 @@
-import customtkinter as ctk
-from PIL import Image
-import os
+# Import the necessary settins
 from config.settings import (KEY_IS_FIRST_TIME, KEY_NICKNAME, KEY_CURRENCY_SIGN,
                              KEY_BUDGET_NEEDS, KEY_BUDGET_WANTS, KEY_BUDGET_SAVING,
                              VALUE_FALSE, DEFAULT_NICKNAME,
                              BACKGROUND_PATH,
                              WELCOME_FRAME)       
 
+# Import the text for the setup view
 from config.textbox import (WELCOME_HEADER_TEXT, WELCOME_TEXT, 
                             BUDGET_RULE_INFO_TEXT, INPUT_GUIDE_TEXT, INPUT_GUIDELINE_TEXT,
-                            ERROR_VAL_RANGE_TEXT, ERROR_VAL_SUM_INCORRECT_TEXT, ERROR_VAL_WHOLE_TEXT)                                     # Import the text for the setup view
-from src.views.base_view import BaseView                                                                                                  # Import the BaseView class
+                            ERROR_VAL_RANGE_TEXT, ERROR_VAL_SUM_INCORRECT_TEXT, ERROR_VAL_WHOLE_TEXT)                                    
+
+# Import the necessary library and view for the setup
+from src.views.base_view import BaseView     
+import customtkinter as ctk
+from PIL import Image
+import os                                                                                            
 
 # This is the setup view, where the user can configure the application settings, like nickname, currency sign and budget rule percentages
 class SetupView(BaseView):
-    # This is the constructor of the SetupView class, it initializes the view and sets up the UI
     def __init__(self, parent, controller=None, user=None):
         super().__init__(parent, controller, user)
         self.controller = controller
@@ -170,7 +173,7 @@ class SetupView(BaseView):
         # Return True if no errors
         return error_text == ""
 
-    # Store the user addes settings in the file json and command the controller to switch frame to the Welcome view
+    # Store the user settings in the file json and command the controller to switch frame to the Welcome view
     def __continue_button_from_configuration_frame(self):
         nickname = self.nickname_entry.get()
         currency_sign = self.monetary_symbol_optionmenu.get()

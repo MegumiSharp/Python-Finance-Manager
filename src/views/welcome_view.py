@@ -1,9 +1,11 @@
-import customtkinter as ctk
-import os
-from PIL import Image
-from src.views.base_view import BaseView
-
+# Import the necessary costants and settings used in the application
 from config.settings import (MAX_WINDOW_WIDTH, MAX_WINDOW_HEIGHT, BACKGROUND_PATH, THEMES_PATH, THEMES_TYPE, BACKGROUND_PATH, BACKGROUND_FILE_NAME, KEY_NICKNAME, KEY_THEME, DASHBOARD_FRAME)
+
+# Importing the necessary libraries and view used in the application
+from src.views.base_view import BaseView
+import customtkinter as ctk
+from PIL import Image
+import os
 
 # This is the welcome view, where the user can choose a theme and continue to the application (Default view when the application is started)
 class WelcomeView(BaseView):

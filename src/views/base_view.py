@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import customtkinter as ctk
 
-'''Base class for all views in the application. It provides a common interface and basic functionality for all views'''       
+# Base class for all views in the application. It provides a common interface and basic functionality for all views    
 class BaseView(ctk.CTkFrame, ABC):
     def __init__(self, parent, controller=None, user=None):
         super().__init__(parent)
@@ -15,7 +15,7 @@ class BaseView(ctk.CTkFrame, ABC):
     @abstractmethod
     def setup_ui(self):
         pass
-
+    
     def show(self):
         self.pack(fill="both", expand=True)
 
