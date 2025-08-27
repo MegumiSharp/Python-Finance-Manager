@@ -39,7 +39,7 @@ The documentation is structured to provide insights into both technical implemen
 1. **[Source Code Documentation](docs/Application_Documentation/documentation.md)**  
    *The foundation of the project* - Comprehensive explanation of all functions and methods, with detailed coverage of the more complex implementations and architectural decisions.
 
-2. **[Grid Layout Documentation](docs/Application_Documentation/the_grid_layour.md)**  
+2. **[Grid Layout Documentation](docs/Application_Documentation/the_grid_layout.md)**  
    *Visual structure guide* - Detailed explanation of widget visualization and layout management using Tkinter and CustomTkinter's grid system for optimal user interface design.
 
 3. **[Design Pattern - Observer - Documentation](docs/Application_Documentation/observer_pattern.md)**  

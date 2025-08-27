@@ -131,8 +131,6 @@ This section provides crucial data management tools. **All operations require do
   <em>Preview of Import and Export View</em>
 </p>
 
-![alt text](image.png)
-
 ### Import Function
 
 Imports data from `import/db_import.csv`. The CSV format follows these rules:
