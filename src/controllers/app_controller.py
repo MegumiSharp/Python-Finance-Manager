@@ -1,16 +1,14 @@
 # Importing the necessary libraries
-import os
-import sys
 from tkinter import PhotoImage
-import customtkinter
 from tkinter import messagebox
+import customtkinter
+import os
 
 # Importing the views and models used in the application
 from src.views.setup_view import SetupView
 from src.views.welcome_view import WelcomeView
 from src.models.user_settings import UserSettings
 from src.controllers.dashboard_controller import DashboardController
-
 
 # Import the necessary costants and settings used in the application
 from config.settings import (WINDOW_WIDTH, WINDOW_HEIGHT, APP_NAME, DEFAULT_APPEARANCE_MODE, KEY_IS_FIRST_TIME, VALUE_TRUE, WELCOME_FRAME, DASHBOARD_FRAME, ICONS_PATH,TASKBAR_ICON_FILE_NAME)
@@ -33,9 +31,10 @@ class AppController(customtkinter.CTk):
         # The geometry of the window, it appear in the same position (working for monitor 1920x1080 , with 2 monitor)
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+300+150")
 
+        # Set the window name
         self.title(APP_NAME)
 
-        # Block the resizing of the window (allegedly)
+        # Block the resizing of the window (allegedly, in wsl doesn't work that well)
         self.grid_propagate(False)
         self.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.maxsize(0, 0)
@@ -46,7 +45,6 @@ class AppController(customtkinter.CTk):
 
     # Startup function to decide what frame to show to the user, if it is the first time, the setup frame is showed
     def __startup(self):
-        # Decide what frame to show to the user, if first time user show setup frame
         if self.user.read_json_value(KEY_IS_FIRST_TIME) == VALUE_TRUE:
             self._show_view(SetupView)
         else:
@@ -85,7 +83,7 @@ class AppController(customtkinter.CTk):
         else:
             raise ValueError(f"Unknown frame name: {frame_name}")
     
-    # Close confirmation
+    # On the closure of the application a confirm message box will appear, this will ensure to call DashboardController on_closure(), usefull to save some information in the database on the close of the application
     def on_closure(self):
         if messagebox.askokcancel("Quit", "Do you really want to quit?"):
 

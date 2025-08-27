@@ -9,7 +9,7 @@ def main():
         app.mainloop()
     except Exception as e:
         print(f"Error running application: {e}")
-        traceback.print_exc()
+        traceback.print
 
 # Make the script executed only when directily runned
 if __name__ == "__main__":
