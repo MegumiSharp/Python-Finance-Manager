@@ -1,7 +1,8 @@
+# Importing the necessary libraries and view used in the application
+from config.settings import COLOR_EXPENSE, KEY_BUDGET_NEEDS, KEY_BUDGET_SAVING, KEY_BUDGET_WANTS, KEY_CURRENCY_SIGN
+from src.views.base_view import BaseView
 from datetime import datetime
 import customtkinter as ctk
-from config.settings import COLOR_EXPENSE, COLOR_INCOME, KEY_BUDGET_NEEDS, KEY_BUDGET_SAVING, KEY_BUDGET_WANTS, KEY_CURRENCY_SIGN
-from src.views.base_view import BaseView
 
 class BudgetView(BaseView):
     def __init__(self, parent, controller=None, user=None, database=None):

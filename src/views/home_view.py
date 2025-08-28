@@ -16,7 +16,7 @@ class HomeView(BaseView):
     Main dashboard view containing transaction table, summary panel, and transaction controls.
     Implements filtering, sorting, and CRUD operations for financial transactions.
     """
-    
+
     def __init__(self, parent, controller=None, user=None, database=None):
         super().__init__(parent)
         
@@ -42,9 +42,6 @@ class HomeView(BaseView):
         self.main_frame.grid_columnconfigure(1, weight=0)  # Summary panel fixed width
 
         self.setup_ui()
-
-
-
 
     # =============================================================================
     # UI SETUP AND LAYOUT

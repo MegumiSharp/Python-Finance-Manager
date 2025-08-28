@@ -1,7 +1,4 @@
-import customtkinter as ctk
-from PIL import Image
-import os
-
+# Importing the necessary libraries and view used in the application
 from config.settings import (ICONS_PATH)
 from src.views.base_view import BaseView
 from src.views.home_view import HomeView
@@ -9,6 +6,9 @@ from src.views.budget_view import BudgetView
 from src.views.import_export_view import ImportExport
 from src.models.database import DatabaseManager 
 from src.utils.helpers import *
+import customtkinter as ctk
+from PIL import Image
+import os
 
 # A controller of the dashboard views, it contain the navigation sidebar and it create the views and control the switching between them
 class DashboardController(BaseView):
@@ -35,6 +35,7 @@ class DashboardController(BaseView):
         # Initialize button variables first
         self.buttons = {}
         
+        # Icons of the buttons
         self.icons = {
             HomeView: ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "home_light.png")), size=(20, 20)),
             BudgetView: ctk.CTkImage(Image.open(os.path.join(ICONS_PATH, "chat_light.png")), size=(20, 20)),
