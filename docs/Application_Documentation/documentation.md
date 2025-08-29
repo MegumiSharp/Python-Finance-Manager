@@ -418,7 +418,7 @@ The **HomeView** receives special treatment due to its complexity. As the most i
 
 ## **`budget_view.py`** - Budget Controller
 
-The Budget view handles displaying the screen for budget management and visualization. More details about this can be found in the [user guide](docs/user_guide.md). In the class constructor, we have several variables that are useful for budget management, some of which are taken from the user_settings.json file which is also updated based on various functions.
+The Budget view handles displaying the screen for budget management and visualization. More details about this can be found in the [User Guide](docs/user_guide.md). In the class constructor, we have several variables that are useful for budget management, some of which are taken from the user_settings.json file which is also updated based on various functions.
 
 The `BudgetView` module provides a graphical interface to display and monitor the user's monthly budget following the 50/30/20 rule (or custom percentages):
 - **Needs**: Essential expenses
