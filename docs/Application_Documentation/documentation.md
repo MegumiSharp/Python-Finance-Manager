@@ -576,14 +576,6 @@ Restores database from backup:
 - **Import Errors**: Creates backup before import to prevent data loss
 - **User Confirmation**: Requests confirmation for potentially destructive operations
 
-### Visual Interface
-
-- **Dark theme** consistent with application design
-- **Instructional text box** with detailed usage guidelines
-- **Centered button layout** for easy access to operations
-- **Clear labeling** for import, export, backup, and restore functions
-- **Responsive design** that adapts to different window sizes
-
 
 ## **`virtual_table.py`** - Virtual Table Controller
 
@@ -709,16 +701,6 @@ Calculates real-time statistics from visible transactions:
 - Updates local data cache
 - Clears transaction queue for performance
 
-### Visual Interface Features
-
-- **Dark theme** with consistent color scheme
-- **Responsive design** adapting to window size changes
-- **Color-coded** amounts (green for income, red for expenses)
-- **Tag highlighting** with custom colors and bold fonts
-- **Smooth scrolling** with mouse wheel support
-- **Modal dialogs** for edit and delete confirmations
-- **Real-time updates** of summaries and visual indicators
-- **Hover effects** on action buttons for better user experience
 
 ## **`home_view.py`** - Home View Controller
 
@@ -873,13 +855,5 @@ Manual save functionality:
 - **Currency formatting**: Uses user's preferred currency symbol
 - **Cross-session continuity**: Restores previous session state
 
-### Visual Interface
-
-- **Dark theme**: Consistent with application design
-- **Responsive layout**: Adapts to different window sizes
-- **Color coding**: Green for income, red for expenses, dynamic balance colors
-- **Status feedback**: Real-time messages for all user actions
-- **Professional appearance**: Clean, organized layout with proper spacing
-- **Accessibility**: Clear labels and logical tab order for keyboard navigation
 
 -------------
