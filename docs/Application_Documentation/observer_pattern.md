@@ -1,10 +1,6 @@
 # Observer Pattern Implementation Documentation
 
-
-## Overview
-
 This documentation describes the implementation of the **Observer Pattern** in the application. The pattern enables automatic UI updates when transaction data changes, creating a responsive and maintainable user interface.
-
 
 The `home_view` is responsible for showing the transactions table and updating the summary. However, a problem I encountered is that the summary resides inside `home_view`, while the transactions are inside a virtual table, which is an instance of the class used in `home_view`.
 This should be fine by passing a parameter of the summary labels to be changed inside the virtual table, but it wasn’t the best approach.
@@ -178,9 +174,5 @@ def on_summary_updated(self, summary_data):
             text_color=COLOR_EXPENSE)
 
 ```
-
-## Conclusion
-
-The Observer Pattern implementation provides a robust, maintainable solution for keeping UI components synchronized with data changes.  This pattern is particularly valuable in GUI applications where multiple UI components need to reflect the same underlying data state, ensuring consistency and reducing the likelihood of bugs related to stale or inconsistent UI states.
 
 -------------
